@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Monitoring", "ProcessingTime\NServiceBus.Monitoring.csproj", "{B1325985-F0CF-4EC6-81E2-C57C56380537}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Monitoring", "NServiceBus.Monitoring\NServiceBus.Monitoring.csproj", "{B1325985-F0CF-4EC6-81E2-C57C56380537}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Monitoring.Tests", "ProcessingTime.Tests\NServiceBus.Monitoring.Tests.csproj", "{A50D3C5D-1FA4-45D2-8488-4AD7BB18CDF0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Monitoring.Tests", "NServiceBus.Monitoring.Tests\NServiceBus.Monitoring.Tests.csproj", "{A50D3C5D-1FA4-45D2-8488-4AD7BB18CDF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,6 +1,7 @@
-﻿namespace ProcessingTime.Tests
+﻿namespace NServiceBus.Monitoring.Tests
 {
     using NUnit.Framework;
+    using ProcessingTime;
 
     [TestFixture]
     public class ComputeProcessingTimeTests

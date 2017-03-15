@@ -48,14 +48,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ComputeProcessingTimeTests.cs" />
+    <Compile Include="ProcessingTime\ComputeProcessingTimeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProcessingTime\NServiceBus.Monitoring.csproj">
-      <Project>{b1325985-f0cf-4ec6-81e2-c57c56380537}</Project>
+    <ProjectReference Include="..\NServiceBus.Monitoring\NServiceBus.Monitoring.csproj">
+      <Project>{B1325985-F0CF-4EC6-81E2-C57C56380537}</Project>
       <Name>NServiceBus.Monitoring</Name>
     </ProjectReference>
   </ItemGroup>
