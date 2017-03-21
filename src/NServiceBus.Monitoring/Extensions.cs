@@ -17,7 +17,7 @@ static class Extensions
         return false;
     }
 
-    public static bool TryGetMessageHandlerType(this ReceivePipelineCompleted completed, out string ProcessedMessageType)
+    public static bool TryGetMessageType(this ReceivePipelineCompleted completed, out string ProcessedMessageType)
     {
         var headers = completed.ProcessedMessage.Headers;
         string enclosedMessageType;

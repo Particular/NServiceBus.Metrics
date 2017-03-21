@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using Features;
     /// <summary>
-    /// Hooks into the NServiceBus pipeline and calculates Processing Time. 
+    /// Hooks into the NServiceBus pipeline and calculates Processing Time.
     /// This metric will be periodically sent to the Metrics Processing Component via a configured NServiceBus transport.
     /// </summary>
     public class ProcessingTimeMetric : Feature
@@ -20,7 +20,7 @@
         }
 
         /// <summary>
-        /// This enables reporting of the ProcessingTime metric. To disable this feature, call: endpointConfig.DisableFeature&lt;ProcessingTimeMetric&gt;() 
+        /// This enables reporting of the ProcessingTime metric. To disable this feature, call: endpointConfig.DisableFeature&lt;ProcessingTimeMetric&gt;()
         /// </summary>
         /// <param name="context">feature context</param>
         protected override void Setup(FeatureConfigurationContext context)
@@ -32,11 +32,11 @@
                 if (e.TryGetTimeSent(out timeSent))
                 {
                     string messageTypeProcessed;
-                    e.TryGetMessageHandlerType(out messageTypeProcessed);
+                    e.TryGetMessageType(out messageTypeProcessed);
                     reporter.Report(timeSent, messageTypeProcessed, e.StartedAt, e.CompletedAt);
                 }
                 return Task.FromResult(0);
-            });            
+            });
         }
 
         ReportProcessingTime reporter;

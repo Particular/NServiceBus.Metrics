@@ -9,10 +9,10 @@
         {
             var computedTimeElapsed = ProcessingTimeCalculator.Calculate(startedAt, completedAt);
 
-            var totalTimeInSeconds = Convert.ToInt32(computedTimeElapsed);
+            var processingTimeInMilliseconds = (long)computedTimeElapsed.TotalMilliseconds;
 
             //TODO - Report this info to Metrics.NET
-            Trace.WriteLine($"Total time to process {processedMessageType} is {totalTimeInSeconds}");
+            Trace.WriteLine($"Total time to process {processedMessageType} is {processingTimeInMilliseconds}");
         }
     }
 }
