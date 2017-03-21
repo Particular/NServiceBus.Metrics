@@ -7,8 +7,8 @@
     <ProjectGuid>{A50D3C5D-1FA4-45D2-8488-4AD7BB18CDF0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NServiceBus.Monitoring.Tests</RootNamespace>
-    <AssemblyName>NServiceBus.Monitoring.Tests</AssemblyName>
+    <RootNamespace>NServiceBus.Metrics.Tests</RootNamespace>
+    <AssemblyName>NServiceBus.Metrics.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -61,9 +61,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NServiceBus.Monitoring\NServiceBus.Monitoring.csproj">
-      <Project>{B1325985-F0CF-4EC6-81E2-C57C56380537}</Project>
-      <Name>NServiceBus.Monitoring</Name>
+    <ProjectReference Include="..\NServiceBus.Metrics\NServiceBus.Metrics.csproj">
+      <Project>{b1325985-f0cf-4ec6-81e2-c57c56380537}</Project>
+      <Name>NServiceBus.Metrics</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

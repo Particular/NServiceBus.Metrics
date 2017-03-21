@@ -7,8 +7,8 @@
     <ProjectGuid>{B1325985-F0CF-4EC6-81E2-C57C56380537}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NServiceBus.Monitoring</RootNamespace>
-    <AssemblyName>NServiceBus.Monitoring</AssemblyName>
+    <RootNamespace>NServiceBus.Metrics</RootNamespace>
+    <AssemblyName>NServiceBus.Metrics</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -22,7 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\binaries\NServiceBus.Monitoring.xml</DocumentationFile>
+    <DocumentationFile>..\..\binaries\NServiceBus.Metrics.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,7 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\binaries\NServiceBus.Monitoring.xml</DocumentationFile>
+    <DocumentationFile>..\..\binaries\NServiceBus.Metrics.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>

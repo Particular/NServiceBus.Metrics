@@ -1,8 +1,9 @@
-﻿namespace NServiceBus.Monitoring.ProcessingTime
+﻿using System;
+using System.Threading.Tasks;
+using NServiceBus.Features;
+
+namespace NServiceBus.Metrics.ProcessingTime
 {
-    using System;
-    using System.Threading.Tasks;
-    using Features;
     /// <summary>
     /// Hooks into the NServiceBus pipeline and calculates Processing Time.
     /// This metric will be periodically sent to the Metrics Processing Component via a configured NServiceBus transport.

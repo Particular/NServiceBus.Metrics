@@ -1,8 +1,8 @@
-﻿namespace NServiceBus.Monitoring.ProcessingTime
-{
-    using System;
-    using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
+namespace NServiceBus.Metrics.ProcessingTime
+{
     class ReportProcessingTime
     {
         public void Report(DateTime timeSent, string processedMessageType,  DateTime startedAt, DateTime completedAt)
