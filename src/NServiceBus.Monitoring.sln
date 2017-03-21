@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Monitoring", "N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Monitoring.Tests", "NServiceBus.Monitoring.Tests\NServiceBus.Monitoring.Tests.csproj", "{A50D3C5D-1FA4-45D2-8488-4AD7BB18CDF0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleEndpoint", "SampleEndpoint\SampleEndpoint.csproj", "{4CE80EDF-0287-42C0-949C-3457080A9BE8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A50D3C5D-1FA4-45D2-8488-4AD7BB18CDF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A50D3C5D-1FA4-45D2-8488-4AD7BB18CDF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A50D3C5D-1FA4-45D2-8488-4AD7BB18CDF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CE80EDF-0287-42C0-949C-3457080A9BE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CE80EDF-0287-42C0-949C-3457080A9BE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CE80EDF-0287-42C0-949C-3457080A9BE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CE80EDF-0287-42C0-949C-3457080A9BE8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
