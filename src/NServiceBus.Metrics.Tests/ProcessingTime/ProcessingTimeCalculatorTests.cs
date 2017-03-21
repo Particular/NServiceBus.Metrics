@@ -1,9 +1,9 @@
-﻿using System;
-using NUnit.Framework;
-using NServiceBus.Metrics.ProcessingTime;
-
-namespace NServiceBus.Metrics.Tests.ProcessingTime
+﻿namespace NServiceBus.Metrics.Tests.ProcessingTime
 {
+    using System;
+    using NUnit.Framework;
+    using Metrics.ProcessingTime;
+
     [TestFixture]
     public class ComputeProcessingTimeTests
     {
