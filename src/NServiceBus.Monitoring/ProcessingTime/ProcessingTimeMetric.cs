@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
     using Features;
     using Metrics;
-    using Metrics.MetricData;
 
     /// <summary>
     /// Hooks into the NServiceBus pipeline and calculates Processing Time.
