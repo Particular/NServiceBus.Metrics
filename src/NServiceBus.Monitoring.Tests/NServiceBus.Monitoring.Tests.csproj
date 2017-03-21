@@ -53,7 +53,6 @@
     <Compile Include="ProcessingTime\ProcessingTimeCalculatorTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="NServiceBus.snk" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

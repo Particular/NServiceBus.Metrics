@@ -2,6 +2,7 @@
 {
     using System;
     using System.Diagnostics;
+    using Metrics;
 
     class ReportProcessingTime
     {
@@ -13,6 +14,8 @@
 
             //TODO - Report this info to Metrics.NET
             Trace.WriteLine($"Total time to process {processedMessageType} is {processingTimeInMilliseconds}");
+
+            Metric.Counter("", Unit.Bytes);
         }
     }
 }
