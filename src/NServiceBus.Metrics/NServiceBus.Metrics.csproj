@@ -59,6 +59,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions.cs" />
+    <Compile Include="MetricsOptions.cs" />
+    <Compile Include="MetricsConfigurationExtensions.cs" />
     <Compile Include="ProcessingTime\ProcessingTimeMetric.cs" />
     <Compile Include="ProcessingTime\ProcessingTimeCalculator.cs" />
     <Compile Include="ProcessingTime\TraceReport.cs" />

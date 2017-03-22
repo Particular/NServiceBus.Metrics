@@ -1,25 +1,11 @@
 ﻿namespace NServiceBus.Metrics.ProcessingTime
 {
-    using System;
     using System.Threading.Tasks;
     using Features;
     using global::Metrics;
 
-    /// <summary>
-    /// Hooks into the NServiceBus pipeline and calculates Processing Time.
-    /// This metric will be periodically sent to the Metrics Processing Component via a configured NServiceBus transport.
-    /// </summary>
-    public class ProcessingTimeMetric : Feature
+    class MetricsFeature : Feature
     {
-        /// <summary>
-        /// Enables the ProcessingTimeMetric feature
-        /// </summary>
-        /// <returns></returns>
-        public ProcessingTimeMetric()
-        {
-            EnableByDefault();
-        }
-
         /// <summary>
         /// This enables reporting of the ProcessingTime metric. To disable this feature, call: endpointConfig.DisableFeature&lt;ProcessingTimeMetric&gt;()
         /// </summary>
@@ -27,12 +13,19 @@
         protected override void Setup(FeatureConfigurationContext context)
         {
             context.ThrowIfSendonly();
+
+            var metricsOptions = context.Settings.Get<MetricsOptions>();
+
             // TODO: Confirm context name
             MetricsContext metricsContext = new DefaultMetricsContext(context.Settings.EndpointName());
-            // TODO: Configure a proper Metrics.NET reporter
-            var metricsConfig = new MetricsConfig(metricsContext);
-            metricsConfig.WithReporting(reports => reports.WithReport(new TraceReport(), TimeSpan.FromSeconds(5)));
 
+            ConfigureMetrics(context, metricsContext);
+
+            context.RegisterStartupTask(builder => new MetricsReporting(metricsContext, metricsOptions));
+        }
+
+        static void ConfigureMetrics(FeatureConfigurationContext context, MetricsContext metricsContext)
+        {
             var messagesUnit = Unit.Custom("Messages");
 
             var processingTimeTimer = metricsContext.Timer("Processing Time", messagesUnit);
@@ -44,10 +37,44 @@
                 string messageTypeProcessed;
                 e.TryGetMessageType(out messageTypeProcessed);
 
-                processingTimeTimer.Record((long)processingTimeInMilliseconds, TimeUnit.Milliseconds, messageTypeProcessed);
+                processingTimeTimer.Record((long) processingTimeInMilliseconds, TimeUnit.Milliseconds, messageTypeProcessed);
 
                 return Task.FromResult(0);
             });
         }
+
+        class MetricsReporting : FeatureStartupTask
+        {
+            readonly MetricsOptions metricsOptions;
+            readonly MetricsConfig metricsConfig;
+
+            public MetricsReporting(MetricsContext metricsContext, MetricsOptions metricsOptions)
+            {
+                this.metricsOptions = metricsOptions;
+                metricsConfig = new MetricsConfig(metricsContext);
+            }
+
+            protected override Task OnStart(IMessageSession session)
+            {
+                metricsConfig.WithReporting(reports =>
+                {
+                    if (metricsOptions.EnableReportingToTrace)
+                    {
+                        var traceReporter = new TraceReport();
+                        var traceInterval = metricsOptions.TracingInterval ?? metricsOptions.DefaultInterval;
+                        reports.WithReport(traceReporter, traceInterval);
+                    }
+                });
+
+                return Task.FromResult(0);
+            }
+
+            protected override Task OnStop(IMessageSession session)
+            {
+                metricsConfig.Dispose();
+                return Task.FromResult(0);
+            }
+        }
+
     }
 }

@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using NServiceBus;
+    using NServiceBus.Metrics;
 
     class Program
     {
@@ -18,6 +19,9 @@
             var endpointConfig = new EndpointConfiguration(endpointName);
             endpointConfig.SendFailedMessagesTo("error");
             endpointConfig.UsePersistence<InMemoryPersistence>();
+
+            var metrics = endpointConfig.EnableMetrics();
+            metrics.EnableMetricTracing();
 
             var endpoint = await Endpoint.Start(endpointConfig);
 
