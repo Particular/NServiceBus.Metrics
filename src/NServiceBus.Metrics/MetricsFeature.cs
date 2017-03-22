@@ -66,12 +66,18 @@ class MetricsFeature : Feature
 
                 if (!string.IsNullOrWhiteSpace(metricsOptions.ServiceControlAddress))
                 {
-                    var messageDispatcher = builder.Build<IDispatchMessages>();
-                    var serviceControlReporter = new NServiceBusMetricReport(messageDispatcher, metricsOptions.ServiceControlAddress);
-                    var serviceControlInterval = metricsOptions.ServiceControlInterval ?? metricsOptions.DefaultInterval;
+                    if (metricsOptions.EnableReportingToTrace)
+                    {
+                        var traceReporter = new TraceReport();
+                        var traceInterval = metricsOptions.TracingInterval ?? metricsOptions.DefaultInterval ?? DefaultInterval;
+                        reports.WithReport(traceReporter, traceInterval);
+                    }
 
-                    reports.WithReport(serviceControlReporter, serviceControlInterval);
-                }
+                    if (!String.IsNullOrWhiteSpace(metricsOptions.ServiceControlAddress))
+                    {
+                        var messageDispatcher = builder.Build<IDispatchMessages>();
+                        var serviceControlReporter = new NServiceBusMetricReport(messageDispatcher, metricsOptions.ServiceControlAddress);
+                        var serviceControlInterval = metricsOptions.ServiceControlInterval ?? metricsOptions.DefaultInterval ?? DefaultInterval;
 
             });
 
@@ -85,4 +91,6 @@ class MetricsFeature : Feature
         }
     }
 
+        public static TimeSpan DefaultInterval = TimeSpan.FromSeconds(30);
+    }
 }

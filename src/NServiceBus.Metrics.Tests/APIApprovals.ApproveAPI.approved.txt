@@ -1,0 +1,17 @@
+﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute(@"NServiceBus.Metrics.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100D32BC524DCB1205998C155A4F36BF873587D3602822ECD7B49CD775B2E6A006EE6B9164AB2E3103A6A4D1310C6E5C26818A32FE86710141A2D1F02EB564381CD64C88131BCCA478CDB5072F06DB991DE33DAC1C82BAF40D9F61DD6B40300A4673B693B51CD10A8B9B7D8AB64450431FA422514D6DABCAF70DF785B1E4E6E8AAF")]
+[assembly: System.Runtime.InteropServices.ComVisibleAttribute(true)]
+[assembly: System.Runtime.Versioning.TargetFrameworkAttribute(".NETFramework,Version=v4.5.2", FrameworkDisplayName=".NET Framework 4.5.2")]
+namespace NServiceBus
+{
+    public class static MetricsConfigurationExtensions
+    {
+        public static NServiceBus.MetricsOptions EnableMetrics(this NServiceBus.EndpointConfiguration endpointConfiguration) { }
+    }
+    public class MetricsOptions
+    {
+        public MetricsOptions() { }
+        public void EnableMetricTracing(System.Nullable<System.TimeSpan> interval = null) { }
+        public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, System.Nullable<System.TimeSpan> interval = null) { }
+        public void SetDefaultInterval(System.TimeSpan interval) { }
+    }
+}

@@ -1,42 +1,93 @@
-﻿
-using System;
-using System.Collections;
-
-static class Guard
+﻿namespace NServiceBus.Metrics
 {
-    public static void AgainstNull(string argumentName, object value)
-    {
-        if (value == null)
-        {
-            throw new ArgumentNullException(argumentName);
-        }
-    }
+    using System;
+    using System.Collections;
+    using System.Linq;
+    using System.Reflection;
+    using JetBrains.Annotations;
 
-    public static void AgainstNullAndEmpty(string argumentName, string value)
+    static class Guard
     {
-        if (string.IsNullOrWhiteSpace(value))
+        // ReSharper disable UnusedParameter.Global
+        public static void TypeHasDefaultConstructor(Type type, [InvokerParameterName] string argumentName)
         {
-            throw new ArgumentNullException(argumentName);
+            if (type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .All(ctor => ctor.GetParameters().Length != 0))
+            {
+                var error = $"Type '{type.FullName}' must have a default constructor.";
+                throw new ArgumentException(error, argumentName);
+            }
         }
-    }
 
-    public static void AgainstNullAndEmpty(string argumentName, ICollection value)
-    {
-        if (value == null)
+        [ContractAnnotation("value: null => halt")]
+        public static void AgainstNull([InvokerParameterName] string argumentName, [NotNull] object value)
         {
-            throw new ArgumentNullException(argumentName);
+            if (value == null)
+            {
+                throw new ArgumentNullException(argumentName);
+            }
         }
-        if (value.Count == 0)
-        {
-            throw new ArgumentOutOfRangeException(argumentName);
-        }
-    }
 
-    public static void AgainstNegativeAndZero(string argumentName, TimeSpan? value)
-    {
-        if (value != null && value.Value <= TimeSpan.Zero)
+        [ContractAnnotation("value: null => halt")]
+        public static void AgainstNullAndEmpty([InvokerParameterName] string argumentName, [NotNull] string value)
         {
-            throw new ArgumentOutOfRangeException(argumentName);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentNullException(argumentName);
+            }
+        }
+
+        [ContractAnnotation("value: null => halt")]
+        public static void AgainstNullAndEmpty([InvokerParameterName] string argumentName, [NotNull, NoEnumeration] ICollection value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(argumentName);
+            }
+            if (value.Count == 0)
+            {
+                throw new ArgumentOutOfRangeException(argumentName);
+            }
+        }
+
+        public static void AgainstNegativeAndZero([InvokerParameterName] string argumentName, int value)
+        {
+            if (value <= 0)
+            {
+                throw new ArgumentOutOfRangeException(argumentName);
+            }
+        }
+
+        public static void AgainstNegative([InvokerParameterName] string argumentName, int value)
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(argumentName);
+            }
+        }
+
+        public static void AgainstNegativeAndZero([InvokerParameterName] string argumentName, TimeSpan value)
+        {
+            if (value <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(argumentName);
+            }
+        }
+
+        public static void AgainstNegative([InvokerParameterName] string argumentName, TimeSpan value)
+        {
+            if (value < TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(argumentName);
+            }
+        }
+
+        public static void AgainstNegative([InvokerParameterName] string argumentName, TimeSpan? optionalValue)
+        {
+            if (optionalValue.HasValue && optionalValue.Value < TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(argumentName);
+            }
         }
     }
 }
