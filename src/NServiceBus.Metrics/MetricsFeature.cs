@@ -3,13 +3,11 @@
     using System.Threading.Tasks;
     using Features;
     using global::Metrics;
+    using ObjectBuilder;
+    using Transport;
 
     class MetricsFeature : Feature
     {
-        /// <summary>
-        /// This enables reporting of the ProcessingTime metric. To disable this feature, call: endpointConfig.DisableFeature&lt;ProcessingTimeMetric&gt;()
-        /// </summary>
-        /// <param name="context">feature context</param>
         protected override void Setup(FeatureConfigurationContext context)
         {
             context.ThrowIfSendonly();
@@ -21,7 +19,7 @@
 
             ConfigureMetrics(context, metricsContext);
 
-            context.RegisterStartupTask(builder => new MetricsReporting(metricsContext, metricsOptions));
+            context.RegisterStartupTask(builder => new MetricsReporting(metricsContext, metricsOptions, builder));
         }
 
         static void ConfigureMetrics(FeatureConfigurationContext context, MetricsContext metricsContext)
@@ -46,11 +44,13 @@
         class MetricsReporting : FeatureStartupTask
         {
             readonly MetricsOptions metricsOptions;
+            readonly IBuilder builder;
             readonly MetricsConfig metricsConfig;
 
-            public MetricsReporting(MetricsContext metricsContext, MetricsOptions metricsOptions)
+            public MetricsReporting(MetricsContext metricsContext, MetricsOptions metricsOptions, IBuilder builder)
             {
                 this.metricsOptions = metricsOptions;
+                this.builder = builder;
                 metricsConfig = new MetricsConfig(metricsContext);
             }
 
@@ -64,6 +64,16 @@
                         var traceInterval = metricsOptions.TracingInterval ?? metricsOptions.DefaultInterval;
                         reports.WithReport(traceReporter, traceInterval);
                     }
+
+                    if (!string.IsNullOrWhiteSpace(metricsOptions.ServiceControlAddress))
+                    {
+                        var messageDispatcher = builder.Build<IDispatchMessages>();
+                        var serviceControlReporter = new NServiceBusMetricReport(messageDispatcher, metricsOptions.ServiceControlAddress);
+                        var serviceControlInterval = metricsOptions.ServiceControlInterval ?? metricsOptions.DefaultInterval;
+
+                        reports.WithReport(serviceControlReporter, serviceControlInterval);
+                    }
+
                 });
 
                 return Task.FromResult(0);

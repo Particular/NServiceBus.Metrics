@@ -63,6 +63,7 @@
     <Compile Include="MetricsConfigurationExtensions.cs" />
     <Compile Include="MetricsFeature.cs" />
     <Compile Include="ProcessingTime\ProcessingTimeCalculator.cs" />
+    <Compile Include="Reporters\NServiceBusMetricReport.cs" />
     <Compile Include="Reporters\TraceReport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
