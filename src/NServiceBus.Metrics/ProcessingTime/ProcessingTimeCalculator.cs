@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NServiceBus.Metrics.ProcessingTime
+namespace NServiceBus.Metrics
 {
     class ProcessingTimeCalculator
     {
