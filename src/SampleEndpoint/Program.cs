@@ -21,12 +21,12 @@
 
             var endpoint = await Endpoint.Start(endpointConfig);
 
-            Console.WriteLine($"{endpointName} started. Press [ESC] to close");
+            Console.WriteLine($"{endpointName} started.");
+            Console.WriteLine("Press [ESC] to close. Any other key to send a message");
 
-            while (Console.ReadKey().Key != ConsoleKey.Escape)
+            while (Console.ReadKey(true).Key != ConsoleKey.Escape)
             {
                 await endpoint.SendLocal(new SomeCommand());
-                await Task.Delay(100);
             }
 
             Console.WriteLine($"{endpointName} shutting down");
