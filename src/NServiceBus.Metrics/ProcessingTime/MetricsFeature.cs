@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Metrics.ProcessingTime
+﻿namespace NServiceBus.Metrics
 {
     using System.Threading.Tasks;
     using Features;

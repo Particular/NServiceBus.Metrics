@@ -2,7 +2,6 @@
 {
     using System;
     using NUnit.Framework;
-    using Metrics.ProcessingTime;
 
     [TestFixture]
     public class ComputeProcessingTimeTests

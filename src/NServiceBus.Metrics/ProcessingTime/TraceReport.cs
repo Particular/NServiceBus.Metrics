@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Metrics.ProcessingTime
+﻿namespace NServiceBus.Metrics
 {
     using System.Diagnostics;
     using global::Metrics.Reporters;

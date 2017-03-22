@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Metrics
+﻿namespace NServiceBus
 {
     using System;
 
