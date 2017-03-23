@@ -14,6 +14,7 @@
         /// <returns>An object containing configuration options for the Metrics feature</returns>
         public static MetricsOptions EnableMetrics(this EndpointConfiguration endpointConfiguration)
         {
+            Guard.AgainstNull(nameof(endpointConfiguration), endpointConfiguration);
             var metricsConfiguration = new MetricsOptions();
             endpointConfiguration.GetSettings().Set<MetricsOptions>(metricsConfiguration);
 

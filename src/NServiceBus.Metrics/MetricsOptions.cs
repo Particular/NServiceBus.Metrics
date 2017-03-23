@@ -15,6 +15,8 @@
         /// <remarks>If no interval is specified then the Default Interval is used</remarks>
         public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, TimeSpan? interval = null)
         {
+            Guard.AgainstNullAndEmpty(nameof(serviceControlMetricsAddress), serviceControlMetricsAddress);
+            Guard.AgainstNegativeAndZero(nameof(interval), interval);
             ServiceControlAddress = serviceControlMetricsAddress;
             ServiceControlInterval = interval;
         }
@@ -26,6 +28,7 @@
         /// <remarks>If no interval is specified then the Default Interval is used</remarks>
         public void EnableMetricTracing(TimeSpan? interval = null)
         {
+            Guard.AgainstNegativeAndZero(nameof(interval), interval);
             EnableReportingToTrace = true;
             TracingInterval = interval;
         }
@@ -36,6 +39,7 @@
         /// <param name="interval">The new default interval</param>
         public void SetDefaultInterval(TimeSpan interval)
         {
+            Guard.AgainstNegativeAndZero(nameof(interval), interval);
             DefaultInterval = interval;
         }
 
