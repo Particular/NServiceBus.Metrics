@@ -43,9 +43,9 @@
 
         class MetricsReporting : FeatureStartupTask
         {
-            readonly MetricsOptions metricsOptions;
-            readonly IBuilder builder;
-            readonly MetricsConfig metricsConfig;
+            MetricsOptions metricsOptions;
+            IBuilder builder;
+            MetricsConfig metricsConfig;
 
             public MetricsReporting(MetricsContext metricsContext, MetricsOptions metricsOptions, IBuilder builder)
             {
