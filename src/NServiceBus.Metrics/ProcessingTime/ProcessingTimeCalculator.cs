@@ -1,9 +1,6 @@
 ﻿using System;
 
-namespace NServiceBus.Metrics
+class ProcessingTimeCalculator
 {
-    class ProcessingTimeCalculator
-    {
-        public static TimeSpan Calculate(DateTime startedAt, DateTime completedAt) => completedAt - startedAt;
-    }
+    public static TimeSpan Calculate(DateTime startedAt, DateTime completedAt) => completedAt - startedAt;
 }

@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus
 {
     using Configuration.AdvanceExtensibility;
-    using Metrics;
 
     /// <summary>
     /// Extends Endpoint Configuration to provide Metric options
