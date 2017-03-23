@@ -1,43 +1,41 @@
 ﻿using System;
+using NServiceBus;
 using NServiceBus.Features;
 
-namespace NServiceBus.Metrics
+static class Extensions
 {
-    static class Extensions
+    public static bool TryGetTimeSent(this ReceivePipelineCompleted completed, out DateTime timeSent)
     {
-        public static bool TryGetTimeSent(this ReceivePipelineCompleted completed, out DateTime timeSent)
+        var headers = completed.ProcessedMessage.Headers;
+        string timeSentString;
+        if (headers.TryGetValue(Headers.TimeSent, out timeSentString))
         {
-            var headers = completed.ProcessedMessage.Headers;
-            string timeSentString;
-            if (headers.TryGetValue(Headers.TimeSent, out timeSentString))
-            {
-                timeSent = DateTimeExtensions.ToUtcDateTime(timeSentString);
-                return true;
-            }
-            timeSent = DateTime.MinValue;
-            return false;
+            timeSent = DateTimeExtensions.ToUtcDateTime(timeSentString);
+            return true;
         }
+        timeSent = DateTime.MinValue;
+        return false;
+    }
 
-        public static bool TryGetMessageType(this ReceivePipelineCompleted completed, out string ProcessedMessageType)
+    public static bool TryGetMessageType(this ReceivePipelineCompleted completed, out string ProcessedMessageType)
+    {
+        var headers = completed.ProcessedMessage.Headers;
+        string enclosedMessageType;
+        if (headers.TryGetValue(Headers.EnclosedMessageTypes, out enclosedMessageType))
         {
-            var headers = completed.ProcessedMessage.Headers;
-            string enclosedMessageType;
-            if (headers.TryGetValue(Headers.EnclosedMessageTypes, out enclosedMessageType))
-            {
-                ProcessedMessageType = enclosedMessageType;
-                return true;
-            }
-            ProcessedMessageType = "Undefined";
-            return false;
+            ProcessedMessageType = enclosedMessageType;
+            return true;
         }
+        ProcessedMessageType = "Undefined";
+        return false;
+    }
 
-        public static void ThrowIfSendonly(this FeatureConfigurationContext context)
+    public static void ThrowIfSendonly(this FeatureConfigurationContext context)
+    {
+        var isSendOnly = context.Settings.GetOrDefault<bool>("Endpoint.SendOnly");
+        if (isSendOnly)
         {
-            var isSendOnly = context.Settings.GetOrDefault<bool>("Endpoint.SendOnly");
-            if (isSendOnly)
-            {
-                throw new Exception("Windows performance counters are not supported on send only endpoints.");
-            }
+            throw new Exception("Windows performance counters are not supported on send only endpoints.");
         }
     }
 }

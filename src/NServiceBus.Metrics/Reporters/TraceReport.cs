@@ -1,13 +1,10 @@
-﻿namespace NServiceBus.Metrics
-{
-    using System.Diagnostics;
-    using global::Metrics.Reporters;
+﻿using System.Diagnostics;
+using Metrics.Reporters;
 
-    class TraceReport : HumanReadableReport
+class TraceReport : HumanReadableReport
+{
+    protected override void WriteLine(string line, params string[] args)
     {
-        protected override void WriteLine(string line, params string[] args)
-        {
-            Trace.WriteLine(string.Format(line, args));
-        }
+        Trace.WriteLine(string.Format(line, args));
     }
 }
