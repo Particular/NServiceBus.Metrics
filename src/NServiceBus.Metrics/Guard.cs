@@ -89,5 +89,13 @@
                 throw new ArgumentOutOfRangeException(argumentName);
             }
         }
+
+        public static void AgainstNegativeAndZero([InvokerParameterName] string argumentName, TimeSpan? optionalValue)
+        {
+            if (optionalValue.HasValue && optionalValue.Value <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(argumentName);
+            }
+        }
     }
 }

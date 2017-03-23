@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus
 {
     using Configuration.AdvanceExtensibility;
+    using Metrics;
 
     /// <summary>
     /// Extends Endpoint Configuration to provide Metric options
@@ -15,8 +16,10 @@
         public static MetricsOptions EnableMetrics(this EndpointConfiguration endpointConfiguration)
         {
 			Guard.AgainstNull(nameof(endpointConfiguration), endpointConfiguration);
+
             var options = endpointConfiguration.GetSettings().GetOrCreate<MetricsOptions>();
             endpointConfiguration.EnableFeature<MetricsFeature>();
+            return options;
         }
     }
 }
