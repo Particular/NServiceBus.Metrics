@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Metrics;
 using NServiceBus;
 using NServiceBus.Features;
@@ -34,7 +35,7 @@ class MetricsFeature : Feature
             string messageTypeProcessed;
             e.TryGetMessageType(out messageTypeProcessed);
 
-            processingTimeTimer.Record((long) processingTimeInMilliseconds, TimeUnit.Milliseconds, messageTypeProcessed);
+            processingTimeTimer.Record((long)processingTimeInMilliseconds, TimeUnit.Milliseconds, messageTypeProcessed);
 
             return Task.FromResult(0);
         });
@@ -60,7 +61,7 @@ class MetricsFeature : Feature
                 if (metricsOptions.EnableReportingToTrace)
                 {
                     var traceReporter = new TraceReport();
-                    var traceInterval = metricsOptions.TracingInterval ?? metricsOptions.DefaultInterval;
+                    var traceInterval = metricsOptions.TracingInterval ?? metricsOptions.DefaultInterval ?? DefaultInterval;
                     reports.WithReport(traceReporter, traceInterval);
                 }
 
@@ -68,13 +69,10 @@ class MetricsFeature : Feature
                 {
                     var messageDispatcher = builder.Build<IDispatchMessages>();
                     var serviceControlReporter = new NServiceBusMetricReport(messageDispatcher, metricsOptions.ServiceControlAddress);
-                    var serviceControlInterval = metricsOptions.ServiceControlInterval ?? metricsOptions.DefaultInterval;
-
+                    var serviceControlInterval = metricsOptions.ServiceControlInterval ?? metricsOptions.DefaultInterval ?? DefaultInterval;
                     reports.WithReport(serviceControlReporter, serviceControlInterval);
                 }
-
             });
-
             return Task.FromResult(0);
         }
 
@@ -85,4 +83,5 @@ class MetricsFeature : Feature
         }
     }
 
+    public static TimeSpan DefaultInterval = TimeSpan.FromSeconds(30);
 }

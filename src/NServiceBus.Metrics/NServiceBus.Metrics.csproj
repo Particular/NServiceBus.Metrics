@@ -62,15 +62,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions.cs" />
+    <Compile Include="Properties\Resharper.Annotations.g.cs" />
     <Compile Include="Guard.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="MetricsOptions.cs" />
     <Compile Include="MetricsConfigurationExtensions.cs" />
     <Compile Include="MetricsFeature.cs" />
     <Compile Include="ProcessingTime\ProcessingTimeCalculator.cs" />
+    <Compile Include="AsyncExtensions.cs" />
     <Compile Include="Reporters\NServiceBusMetricReport.cs" />
     <Compile Include="Reporters\TraceReport.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="InternalsVisibleTo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NServiceBus.snk" />

@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using Metrics;
 
     /// <summary>
     /// Provides configuration options for Metrics feature
@@ -17,6 +18,7 @@
         {
             Guard.AgainstNullAndEmpty(nameof(serviceControlMetricsAddress), serviceControlMetricsAddress);
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
+
             ServiceControlAddress = serviceControlMetricsAddress;
             ServiceControlInterval = interval;
         }
@@ -29,6 +31,7 @@
         public void EnableMetricTracing(TimeSpan? interval = null)
         {
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
+
             EnableReportingToTrace = true;
             TracingInterval = interval;
         }
@@ -40,6 +43,7 @@
         public void SetDefaultInterval(TimeSpan interval)
         {
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
+
             DefaultInterval = interval;
         }
 
@@ -47,6 +51,6 @@
         internal TimeSpan? ServiceControlInterval { get; private set; }
         internal bool EnableReportingToTrace { get; private set; }
         internal TimeSpan? TracingInterval { get; private set; }
-        internal TimeSpan DefaultInterval { get; private set; } = TimeSpan.FromSeconds(30);
+        internal TimeSpan? DefaultInterval { get; private set; }
     }
 }
