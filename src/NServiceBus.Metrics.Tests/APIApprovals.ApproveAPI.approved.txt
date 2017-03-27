@@ -10,6 +10,7 @@ namespace NServiceBus
     public class MetricsOptions
     {
         public MetricsOptions() { }
+        public void EnableLogTracing(System.Nullable<System.TimeSpan> interval = null) { }
         public void EnableMetricTracing(System.Nullable<System.TimeSpan> interval = null) { }
         public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, System.Nullable<System.TimeSpan> interval = null) { }
         public void SetDefaultInterval(System.TimeSpan interval) { }

@@ -56,23 +56,7 @@ class MetricsFeature : Feature
 
         protected override Task OnStart(IMessageSession session)
         {
-            metricsConfig.WithReporting(reports =>
-            {
-                if (metricsOptions.EnableReportingToTrace)
-                {
-                    var traceReporter = new TraceReport();
-                    var traceInterval = metricsOptions.TracingInterval ?? metricsOptions.DefaultInterval ?? DefaultInterval;
-                    reports.WithReport(traceReporter, traceInterval);
-                }
-
-                if (!string.IsNullOrWhiteSpace(metricsOptions.ServiceControlAddress))
-                {
-                    var messageDispatcher = builder.Build<IDispatchMessages>();
-                    var serviceControlReporter = new NServiceBusMetricReport(messageDispatcher, metricsOptions.ServiceControlAddress);
-                    var serviceControlInterval = metricsOptions.ServiceControlInterval ?? metricsOptions.DefaultInterval ?? DefaultInterval;
-                    reports.WithReport(serviceControlReporter, serviceControlInterval);
-                }
-            });
+            metricsOptions.SetUpReports(metricsConfig, builder);
             return Task.FromResult(0);
         }
 
@@ -82,6 +66,4 @@ class MetricsFeature : Feature
             return Task.FromResult(0);
         }
     }
-
-    public static TimeSpan DefaultInterval = TimeSpan.FromSeconds(30);
 }
