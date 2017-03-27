@@ -18,7 +18,7 @@ class Program
         endpointConfig.UsePersistence<InMemoryPersistence>();
 
         var metrics = endpointConfig.EnableMetrics();
-        metrics.EnableMetricTracing();
+        metrics.EnableLogTracing(TimeSpan.FromSeconds(10));
 
         var endpoint = await Endpoint.Start(endpointConfig)
             .ConfigureAwait(false);

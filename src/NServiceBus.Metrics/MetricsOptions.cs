@@ -1,7 +1,12 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using System.Collections.Generic;
+    using global::Metrics;
+    using global::Metrics.Reports;
     using Metrics;
+    using ObjectBuilder;
+    using Transport;
 
     /// <summary>
     /// Provides configuration options for Metrics feature
@@ -19,8 +24,10 @@
             Guard.AgainstNullAndEmpty(nameof(serviceControlMetricsAddress), serviceControlMetricsAddress);
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
 
-            ServiceControlAddress = serviceControlMetricsAddress;
-            ServiceControlInterval = interval;
+            reportInstallers.Add((builder, config) => config.WithReport(
+                new NServiceBusMetricReport(builder.Build<IDispatchMessages>(), serviceControlMetricsAddress),
+                interval ?? defaultInterval
+            ));
         }
 
         /// <summary>
@@ -32,8 +39,28 @@
         {
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
 
-            EnableReportingToTrace = true;
-            TracingInterval = interval;
+            reportInstallers.Add((builder, config) => config.WithReport(
+                new TraceReport(),
+                interval ?? defaultInterval
+            ));
+        }
+
+        /// <summary>
+        /// Enables sending metric data to the NServiceBus log
+        /// </summary>
+        /// <param name="interval">How often metric data is sent to the log</param>
+        /// <remarks>
+        /// If no interval is specified then the Default Interval is used.
+        /// Metrics data will be logged at the INFO log level
+        /// </remarks>
+        public void EnableLogTracing(TimeSpan? interval = null)
+        {
+            Guard.AgainstNegativeAndZero(nameof(interval), interval);
+
+            reportInstallers.Add((builder, config) => config.WithReport(
+                new MetricsLogReport(),
+                interval ?? defaultInterval
+            ));
         }
 
         /// <summary>
@@ -44,13 +71,15 @@
         {
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
 
-            DefaultInterval = interval;
+            defaultInterval = interval;
         }
 
-        internal string ServiceControlAddress { get; private set; }
-        internal TimeSpan? ServiceControlInterval { get; private set; }
-        internal bool EnableReportingToTrace { get; private set; }
-        internal TimeSpan? TracingInterval { get; private set; }
-        internal TimeSpan? DefaultInterval { get; private set; }
+        internal void SetUpReports(MetricsConfig config, IBuilder builder)
+        {
+            config.WithReporting(reportsConfig => reportInstallers.ForEach(installer => installer(builder, reportsConfig)));
+        }
+
+        TimeSpan defaultInterval = TimeSpan.FromSeconds(30);
+        List<Action<IBuilder, MetricsReports>> reportInstallers = new List<Action<IBuilder, MetricsReports>>();
     }
 }
