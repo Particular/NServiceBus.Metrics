@@ -1,10 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Metrics;
 using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.ObjectBuilder;
-using NServiceBus.Transport;
 
 class MetricsFeature : Feature
 {
