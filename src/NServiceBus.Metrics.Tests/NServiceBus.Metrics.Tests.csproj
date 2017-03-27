@@ -86,6 +86,7 @@
   <ItemGroup>
     <Compile Include="App_Packages\PublicApiGenerator.6.0.0\ApiGenerator.cs" />
     <Compile Include="APIApprovals.cs" />
+    <Compile Include="PayloadSizeTest.cs" />
     <Compile Include="ProcessingTime\ProcessingTimeCalculatorTests.cs" />
   </ItemGroup>
   <ItemGroup>
