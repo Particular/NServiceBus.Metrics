@@ -20,7 +20,8 @@
                 .WithEndpoint<Sender>()
                 .WithEndpoint<MonitoringSpy>()
                 .Done(c => c.Report != null)
-                .Run();
+                .Run()
+                .ConfigureAwait(false);
 
             Assert.IsNotNull(context.Report);
             Assert.AreEqual(Conventions.EndpointNamingConvention(typeof(Sender)), context.Report.Context);

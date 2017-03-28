@@ -34,7 +34,8 @@ class Program
 
         Console.WriteLine($"{endpointName} shutting down");
 
-        await endpoint.Stop().ConfigureAwait(false);
+        await endpoint.Stop()
+            .ConfigureAwait(false);
 
         Console.WriteLine($"{endpointName} stopped");
     }

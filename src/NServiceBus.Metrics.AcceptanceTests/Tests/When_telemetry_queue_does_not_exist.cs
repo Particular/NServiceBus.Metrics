@@ -18,7 +18,8 @@
             var context = await Scenario.Define<Context>()
                 .WithEndpoint<Sender>()
                 .Done(c => c.Logs.Any(l => l.Level == LogLevel.Error))
-                .Run();
+                .Run()
+                .ConfigureAwait(false);
 
             var logEntry = context.Logs.First(l => l.Level == LogLevel.Error);
             StringAssert.StartsWith("Error while sending metric data to", logEntry.Message);
