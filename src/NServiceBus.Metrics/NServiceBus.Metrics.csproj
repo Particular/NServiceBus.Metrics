@@ -62,6 +62,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CriticalTime\CriticalTimeMetricBuilder.cs" />
     <Compile Include="IMetricBuilder.cs" />
     <Compile Include="Performance\PerformanceStatisticsMetricBuilder.cs" />
     <Compile Include="Performance\ReceivePerformanceDiagnosticsBehavior.cs" />
