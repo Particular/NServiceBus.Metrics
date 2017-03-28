@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using global::Metrics;
     using global::Metrics.Reports;
-    using Metrics;
     using ObjectBuilder;
     using Transport;
 
