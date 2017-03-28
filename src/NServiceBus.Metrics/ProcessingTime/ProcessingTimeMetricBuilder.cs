@@ -14,7 +14,7 @@ class ProcessingTimeMetricBuilder : IMetricBuilder
             var processingTimeInMilliseconds = ProcessingTimeCalculator.Calculate(e.StartedAt, e.CompletedAt).TotalMilliseconds;
 
             string messageTypeProcessed;
-            Extensions.TryGetMessageType(e, out messageTypeProcessed);
+            e.TryGetMessageType(out messageTypeProcessed);
 
             processingTimeTimer.Record((long)processingTimeInMilliseconds, TimeUnit.Milliseconds, messageTypeProcessed);
 
