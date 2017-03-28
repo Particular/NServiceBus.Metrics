@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Metrics;
 using NServiceBus;
 using NServiceBus.Features;
@@ -24,20 +27,37 @@ class MetricsFeature : Feature
     {
         var messagesUnit = Unit.Custom("Messages");
 
-        var processingTimeTimer = metricsContext.Timer("Processing Time", messagesUnit);
+        ActivateAndInvoke<IMetricBuilder>(
+            context.Settings.GetAvailableTypes(),
+            builder => builder.WireUp(context, metricsContext, messagesUnit)
+        );
+    }
 
-        context.Pipeline.OnReceivePipelineCompleted(e =>
+    static void ForAllTypes<T>(IEnumerable<Type> types, Action<Type> action) where T : class
+    {
+        // ReSharper disable HeapView.SlowDelegateCreation
+        foreach (var type in types.Where(t => typeof(T).IsAssignableFrom(t) && !(t.IsAbstract || t.IsInterface)))
         {
-            var processingTimeInMilliseconds = ProcessingTimeCalculator.Calculate(e.StartedAt, e.CompletedAt).TotalMilliseconds;
+            action(type);
+        }
+        // ReSharper restore HeapView.SlowDelegateCreation
+    }
 
-            string messageTypeProcessed;
-            e.TryGetMessageType(out messageTypeProcessed);
+    static void ActivateAndInvoke<T>(IList<Type> types, Action<T> action) where T : class
+    {
+        ForAllTypes<T>(types, t =>
+        {
+            if (!HasDefaultConstructor(t))
+            {
+                throw new Exception($"Unable to create the type '{t.Name}'. Types implementing '{typeof(T).Name}' must have a public parameterless (default) constructor.");
+            }
 
-            processingTimeTimer.Record((long)processingTimeInMilliseconds, TimeUnit.Milliseconds, messageTypeProcessed);
-
-            return Task.FromResult(0);
+            var instanceToInvoke = (T)Activator.CreateInstance(t);
+            action(instanceToInvoke);
         });
     }
+
+    static bool HasDefaultConstructor(Type type) => type.GetConstructor(Type.EmptyTypes) != null;
 
     class MetricsReporting : FeatureStartupTask
     {
