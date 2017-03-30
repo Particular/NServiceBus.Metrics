@@ -67,7 +67,6 @@
     <Compile Include="Performance\PerformanceStatisticsMetricBuilder.cs" />
     <Compile Include="Performance\ReceivePerformanceDiagnosticsBehavior.cs" />
     <Compile Include="ProcessingTime\ProcessingTimeMetricBuilder.cs" />
-    <Compile Include="Properties\Resharper.Annotations.g.cs" />
     <Compile Include="Guard.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="MetricsOptions.cs" />
