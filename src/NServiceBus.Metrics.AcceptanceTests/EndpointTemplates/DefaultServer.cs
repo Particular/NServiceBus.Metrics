@@ -44,11 +44,13 @@
             recoverability.Immediate(immediate => immediate.NumberOfRetries(0));
             configuration.SendFailedMessagesTo("error");
 
-            await configuration.DefineTransport(settings, endpointConfiguration).ConfigureAwait(false);
+            await configuration.DefineTransport(settings, endpointConfiguration)
+                .ConfigureAwait(false);
 
             configuration.RegisterComponentsAndInheritanceHierarchy(runDescriptor);
 
-            await configuration.DefinePersistence(settings, endpointConfiguration).ConfigureAwait(false);
+            await configuration.DefinePersistence(settings, endpointConfiguration)
+                .ConfigureAwait(false);
 
             configuration.GetSettings().SetDefault("ScaleOut.UseSingleBrokerQueue", true);
             configurationBuilderCustomization(configuration);

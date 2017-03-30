@@ -34,7 +34,8 @@
 
         static async Task ConfigureTestExecution(IConfigureEndpointTestExecution configurer, EndpointConfiguration config, RunSettings settings, string endpointName, PublisherMetadata publisherMetadata)
         {
-            await configurer.Configure(endpointName, config, settings, publisherMetadata).ConfigureAwait(false);
+            await configurer.Configure(endpointName, config, settings, publisherMetadata)
+                .ConfigureAwait(false);
 
             ActiveTestExecutionConfigurer cleaners;
             var cleanerKey = "ConfigureTestExecution." + endpointName;

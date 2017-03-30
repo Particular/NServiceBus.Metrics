@@ -45,7 +45,8 @@ class NServiceBusMetricReport : MetricsReport
 
         try
         {
-            await dispatcher.Dispatch(new TransportOperations(operation), transportTransaction, new ContextBag());
+            await dispatcher.Dispatch(new TransportOperations(operation), transportTransaction, new ContextBag())
+                .ConfigureAwait(false);
         }
         catch (Exception exception)
         {
