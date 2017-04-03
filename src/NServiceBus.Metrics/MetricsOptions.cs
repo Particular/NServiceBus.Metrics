@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using global::Metrics;
     using global::Metrics.Reports;
+    using Logging;
     using ObjectBuilder;
     using Transport;
 
@@ -48,16 +49,17 @@
         /// Enables sending metric data to the NServiceBus log
         /// </summary>
         /// <param name="interval">How often metric data is sent to the log</param>
+        /// <param name="logLevel">Level at which log entries should be written. Default is DEBUG.</param>
         /// <remarks>
         /// If no interval is specified then the Default Interval is used.
         /// Metrics data will be logged at the INFO log level
         /// </remarks>
-        public void EnableLogTracing(TimeSpan? interval = null)
+        public void EnableLogTracing(TimeSpan? interval = null, LogLevel? logLevel = null)
         {
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
 
             reportInstallers.Add((builder, config) => config.WithReport(
-                new MetricsLogReport(),
+                new MetricsLogReport(logLevel ?? LogLevel.Debug),
                 interval ?? defaultInterval
             ));
         }
