@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using NServiceBus;
+using NServiceBus.Logging;
 
 class Program
 {
@@ -16,9 +17,9 @@ class Program
         var endpointConfig = new EndpointConfiguration(endpointName);
         endpointConfig.SendFailedMessagesTo("error");
         endpointConfig.UsePersistence<InMemoryPersistence>();
-
+        
         var metrics = endpointConfig.EnableMetrics();
-        metrics.EnableLogTracing(TimeSpan.FromSeconds(10));
+        metrics.EnableLogTracing(TimeSpan.FromSeconds(10), LogLevel.Info); // LogLevel.Debug is the default. Overriding to INFO just for the sample.
 
         var endpoint = await Endpoint.Start(endpointConfig)
             .ConfigureAwait(false);
