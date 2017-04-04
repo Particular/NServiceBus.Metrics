@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using global::Metrics;
     using global::Metrics.Reports;
     using Logging;
@@ -18,6 +19,7 @@
         /// </summary>
         /// <param name="serviceControlMetricsAddress">The transport address of the ServiceControl instance</param>
         /// <param name="interval">How frequently metric data is sent to ServiceControl</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, TimeSpan interval)
         {
             Guard.AgainstNullAndEmpty(nameof(serviceControlMetricsAddress), serviceControlMetricsAddress);
