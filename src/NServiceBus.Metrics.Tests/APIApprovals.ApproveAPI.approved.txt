@@ -12,6 +12,7 @@ namespace NServiceBus
         public MetricsOptions() { }
         public void EnableLogTracing(System.TimeSpan interval, NServiceBus.Logging.LogLevel logLevel = 0) { }
         public void EnableMetricTracing(System.TimeSpan interval) { }
+        [System.ObsoleteAttribute("Not for public use.")]
         public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, System.TimeSpan interval) { }
     }
 }
