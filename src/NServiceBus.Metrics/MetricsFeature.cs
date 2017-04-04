@@ -13,10 +13,11 @@ class MetricsFeature : Feature
     {
         context.ThrowIfSendonly();
 
-        var metricsOptions = context.Settings.Get<MetricsOptions>();
+        var settings = context.Settings;
+        var metricsOptions = settings.Get<MetricsOptions>();
 
-        // TODO: Confirm context name
-        MetricsContext metricsContext = new DefaultMetricsContext(context.Settings.EndpointName());
+        var hostId = settings.Get<Guid>("NServiceBus.HostInformation.HostId");
+        MetricsContext metricsContext = new DefaultMetricsContext($"{settings.EndpointName()}@{hostId}");
 
         ConfigureMetrics(context, metricsContext);
 

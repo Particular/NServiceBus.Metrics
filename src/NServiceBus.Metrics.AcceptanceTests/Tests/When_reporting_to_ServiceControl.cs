@@ -12,6 +12,7 @@
     public class When_reporting_to_ServiceControl : NServiceBusAcceptanceTest
     {
         static string MonitoringSpyAddress => Conventions.EndpointNamingConvention(typeof(MonitoringSpy));
+        static Guid HostId = Guid.NewGuid();
 
         [Test]
         public async Task Should_send_reports_to_configured_queue()
@@ -24,7 +25,7 @@
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(context.Report);
-            Assert.AreEqual(Conventions.EndpointNamingConvention(typeof(Sender)), context.Report.Context);
+            Assert.AreEqual($"{Conventions.EndpointNamingConvention(typeof(Sender))}@{HostId}", context.Report.Context);
         }
 
         class Context : ScenarioContext
@@ -38,6 +39,7 @@
             {
                 EndpointSetup<DefaultServer>(c =>
                 {
+                    c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
                     c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(1));
                 });
             }
