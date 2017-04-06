@@ -16,13 +16,13 @@ using NServiceBus.Transport;
 
 class NServiceBusMetricReport : MetricsReport
 {
-    string destination;
+    UnicastAddressTag destination;
     IDispatchMessages dispatcher;
 
     public NServiceBusMetricReport(IDispatchMessages dispatcher, string destination)
     {
         this.dispatcher = dispatcher;
-        this.destination = destination;
+        this.destination = new UnicastAddressTag(destination);
     }
 
     public void RunReport(MetricsData metricsData, Func<HealthStatus> healthStatus, CancellationToken token)
@@ -33,15 +33,10 @@ class NServiceBusMetricReport : MetricsReport
 
     async Task RunReportAsync(MetricsData metricsData)
     {
-        var serialized = JsonBuilderV2.BuildJson(metricsData);
-        var body = Encoding.UTF8.GetBytes(serialized);
-
-        var headers = new Dictionary<string, string>
-        {
-            [Headers.EnclosedMessageTypes] = "Metrics.Json.JsonMetricsContext, Metrics"
-        };
+        var stringBody = $@"{{""Data"" : {JsonBuilderV2.BuildJson(metricsData)}}}";
+        var body = Encoding.UTF8.GetBytes(stringBody);
         var message = new OutgoingMessage(Guid.NewGuid().ToString(), headers, body);
-        var operation = new TransportOperation(message, new UnicastAddressTag(destination));
+        var operation = new TransportOperation(message, destination);
 
         try
         {
@@ -56,4 +51,11 @@ class NServiceBusMetricReport : MetricsReport
 
     static ILog log = LogManager.GetLogger<NServiceBusMetricReport>();
     TransportTransaction transportTransaction = new TransportTransaction();
+
+    static Dictionary<string, string> headers = new Dictionary<string, string>
+    {
+        { Headers.EnclosedMessageTypes, "NServiceBus.Metrics.MetricReport" }, // without assembly name to allow ducktyping
+        { Headers.ContentType, ContentTypes.Json },
+        { Headers.MessageIntent, MessageIntentEnum.Send.ToString() }
+    };
 }

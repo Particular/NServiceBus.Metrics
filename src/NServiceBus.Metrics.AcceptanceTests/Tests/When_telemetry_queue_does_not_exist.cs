@@ -4,7 +4,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using AcceptanceTesting;
-    using global::Metrics.Json;
     using Logging;
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
@@ -27,7 +26,6 @@
 
         class Context : ScenarioContext
         {
-            public JsonMetricsContext Report { get; set; }
         }
 
         class Sender : EndpointConfigurationBuilder

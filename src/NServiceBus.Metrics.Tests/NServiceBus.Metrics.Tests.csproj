@@ -35,7 +35,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>Test.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ApprovalTests, Version=3.0.0.0, Culture=neutral, PublicKeyToken=11bd7d124fc62e0f, processorArchitecture=MSIL">
@@ -89,8 +89,8 @@
     <Compile Include="ProcessingTime\ProcessingTimeCalculatorTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="key.snk" />
     <None Include="packages.config" />
+    <None Include="Test.snk" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NServiceBus.Metrics\NServiceBus.Metrics.csproj">
