@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using global::Metrics;
     using global::Metrics.Reports;
     using Logging;
@@ -55,6 +56,22 @@
 
             reportInstallers.Add((builder, config) => config.WithReport(
                 new MetricsLogReport(logLevel),
+                interval
+            ));
+        }
+
+        /// <summary>
+        /// Enables custom report, allowing to consume data by any func.
+        /// </summary>
+        /// <param name="func">A function that will be called with a raw JSON.</param>
+        /// <param name="interval">How often metric data is sent to the log</param>
+        public void EnableCustomReport(Func<string, Task> func, TimeSpan interval)
+        {
+            Guard.AgainstNull(nameof(func), func);
+            Guard.AgainstNegativeAndZero(nameof(interval), interval);
+
+            reportInstallers.Add((builder, config) => config.WithReport(
+                new CustomReport(func),
                 interval
             ));
         }
