@@ -56,6 +56,5 @@ class NServiceBusMetricReport : MetricsReport
     {
         { Headers.EnclosedMessageTypes, "NServiceBus.Metrics.MetricReport" }, // without assembly name to allow ducktyping
         { Headers.ContentType, ContentTypes.Json },
-        { Headers.MessageIntent, MessageIntentEnum.Send.ToString() }
     };
 }
