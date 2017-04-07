@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using AcceptanceTesting.Customization;
-    using global::Metrics.Json;
+    using global::Newtonsoft.Json.Linq;
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
@@ -25,12 +25,12 @@
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(context.Report);
-            Assert.AreEqual($"{Conventions.EndpointNamingConvention(typeof(Sender))}@{HostId}", context.Report.Context);
+            Assert.AreEqual($"{Conventions.EndpointNamingConvention(typeof(Sender))}@{HostId}", context.Report["Context"].Value<string>());
         }
 
         class Context : ScenarioContext
         {
-            public JsonMetricsContext Report { get; set; }
+            public JObject Report { get; set; }
         }
 
         class Sender : EndpointConfigurationBuilder
@@ -53,21 +53,31 @@
                 {
                     c.UseSerialization<NewtonsoftSerializer>();
                     c.LimitMessageProcessingConcurrencyTo(1);
-                    c.Conventions().DefiningMessagesAs(t => t.FullName == "Metrics.Json.JsonMetricsContext");
-                });
+                }).IncludeType<MetricReport>();
             }
 
-            public class MetricHandler : IHandleMessages<JsonMetricsContext>
+            public class MetricHandler : IHandleMessages<MetricReport>
             {
                 public Context TestContext { get; set; }
 
-                public Task Handle(JsonMetricsContext message, IMessageHandlerContext context)
+                public Task Handle(MetricReport message, IMessageHandlerContext context)
                 {
-                    TestContext.Report = message;
+                    TestContext.Report = message.Data;
+
 
                     return Task.FromResult(0);
                 }
             }
         }
+    }
+}
+
+namespace NServiceBus.Metrics
+{
+    using global::Newtonsoft.Json.Linq;
+
+    public class MetricReport : IMessage
+    {
+        public JObject Data { get; set; }
     }
 }

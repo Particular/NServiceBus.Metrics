@@ -35,7 +35,7 @@ static class Extensions
         var isSendOnly = context.Settings.GetOrDefault<bool>("Endpoint.SendOnly");
         if (isSendOnly)
         {
-            throw new Exception("Windows performance counters are not supported on send only endpoints.");
+            throw new Exception("Metrics are not supported on send only endpoints.");
         }
     }
 }
