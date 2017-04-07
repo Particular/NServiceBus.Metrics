@@ -3,10 +3,11 @@
     using System;
     using System.Threading.Tasks;
     using AcceptanceTesting;
+    using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
 
-    public class When_reporting_to_custom_function
+    public class When_reporting_to_custom_function : NServiceBusAcceptanceTest
     {
         static Guid HostId = Guid.NewGuid();
 
