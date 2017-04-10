@@ -5,6 +5,7 @@ namespace NServiceBus
 {
     public class static MetricsConfigurationExtensions
     {
+        public static NServiceBus.MetricsOptions EnableMetrics(this NServiceBus.Settings.SettingsHolder settings) { }
         public static NServiceBus.MetricsOptions EnableMetrics(this NServiceBus.EndpointConfiguration endpointConfiguration) { }
     }
     public class MetricsOptions
