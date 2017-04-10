@@ -75,6 +75,7 @@
     <Compile Include="ProcessingTime\ProcessingTimeCalculator.cs" />
     <Compile Include="AsyncExtensions.cs" />
     <Compile Include="Reporters\MetricsLogReport.cs" />
+    <Compile Include="Reporters\CustomReport.cs" />
     <Compile Include="Reporters\NServiceBusMetricReport.cs" />
     <Compile Include="Reporters\TraceReport.cs" />
     <Compile Include="AssemblyInfo.cs" />
