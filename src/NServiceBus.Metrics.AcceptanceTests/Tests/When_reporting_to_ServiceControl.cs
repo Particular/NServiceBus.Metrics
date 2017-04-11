@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Metrics.AcceptanceTests
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using AcceptanceTesting.Customization;
@@ -25,12 +26,20 @@
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(context.Report);
-            Assert.AreEqual($"{Conventions.EndpointNamingConvention(typeof(Sender))}@{HostId}", context.Report["Context"].Value<string>());
+
+            var metricsContext = context.Report["Context"].Value<string>();
+            Assert.AreEqual($"{Conventions.EndpointNamingConvention(typeof(Sender))}", metricsContext);
+            Assert.AreEqual(metricsContext, context.Headers[Headers.OriginatingEndpoint]);
+            Assert.AreEqual(HostId.ToString("N"), context.Headers[Headers.OriginatingHostId]);
+            Assert.AreEqual("NServiceBus.Metrics.MetricReport", context.Headers[Headers.EnclosedMessageTypes]);
+            Assert.AreEqual(ContentTypes.Json, context.Headers[Headers.ContentType]);
         }
 
         class Context : ScenarioContext
         {
             public JObject Report { get; set; }
+
+            public IReadOnlyDictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
         }
 
         class Sender : EndpointConfigurationBuilder
@@ -40,7 +49,9 @@
                 EndpointSetup<DefaultServer>(c =>
                 {
                     c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
+#pragma warning disable 618
                     c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(1));
+#pragma warning restore 618
                 });
             }
         }
@@ -63,7 +74,7 @@
                 public Task Handle(MetricReport message, IMessageHandlerContext context)
                 {
                     TestContext.Report = message.Data;
-
+                    TestContext.Headers = context.MessageHeaders;
 
                     return Task.FromResult(0);
                 }

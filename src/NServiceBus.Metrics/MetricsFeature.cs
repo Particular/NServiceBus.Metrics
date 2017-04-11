@@ -16,8 +16,8 @@ class MetricsFeature : Feature
         var settings = context.Settings;
         var metricsOptions = settings.Get<MetricsOptions>();
 
-        var hostId = settings.Get<Guid>("NServiceBus.HostInformation.HostId");
-        MetricsContext metricsContext = new DefaultMetricsContext($"{settings.EndpointName()}@{hostId}");
+        // the context is used as originating endpoint in the headers
+        MetricsContext metricsContext = new DefaultMetricsContext($"{settings.EndpointName()}");
 
         ConfigureMetrics(context, metricsContext);
 

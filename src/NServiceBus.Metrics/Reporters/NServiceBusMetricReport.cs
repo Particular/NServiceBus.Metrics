@@ -9,20 +9,24 @@ using Metrics.MetricData;
 using Metrics.Reporters;
 using NServiceBus;
 using NServiceBus.Extensibility;
+using NServiceBus.Hosting;
 using NServiceBus.Logging;
 using NServiceBus.Metrics;
 using NServiceBus.Routing;
+using NServiceBus.Support;
 using NServiceBus.Transport;
 
 class NServiceBusMetricReport : MetricsReport
 {
-    UnicastAddressTag destination;
-    IDispatchMessages dispatcher;
-
-    public NServiceBusMetricReport(IDispatchMessages dispatcher, string destination)
+    public NServiceBusMetricReport(IDispatchMessages dispatcher, string destination, HostInformation hostInformation)
     {
         this.dispatcher = dispatcher;
         this.destination = new UnicastAddressTag(destination);
+
+        headers[Headers.OriginatingMachine] = RuntimeEnvironment.MachineName;
+        headers[Headers.OriginatingHostId] = hostInformation.HostId.ToString("N");
+        headers[Headers.EnclosedMessageTypes] = "NServiceBus.Metrics.MetricReport"; // without assembly name to allow ducktyping
+        headers[Headers.ContentType] = ContentTypes.Json;
     }
 
     public void RunReport(MetricsData metricsData, Func<HealthStatus> healthStatus, CancellationToken token)
@@ -35,6 +39,8 @@ class NServiceBusMetricReport : MetricsReport
     {
         var stringBody = $@"{{""Data"" : {JsonBuilderV2.BuildJson(metricsData)}}}";
         var body = Encoding.UTF8.GetBytes(stringBody);
+
+        headers[Headers.OriginatingEndpoint] = metricsData.Context; // assumption that it will be always the endpoint name
         var message = new OutgoingMessage(Guid.NewGuid().ToString(), headers, body);
         var operation = new TransportOperation(message, destination);
 
@@ -49,12 +55,11 @@ class NServiceBusMetricReport : MetricsReport
         }
     }
 
-    static ILog log = LogManager.GetLogger<NServiceBusMetricReport>();
+    UnicastAddressTag destination;
+    IDispatchMessages dispatcher;
     TransportTransaction transportTransaction = new TransportTransaction();
 
-    static Dictionary<string, string> headers = new Dictionary<string, string>
-    {
-        { Headers.EnclosedMessageTypes, "NServiceBus.Metrics.MetricReport" }, // without assembly name to allow ducktyping
-        { Headers.ContentType, ContentTypes.Json },
-    };
+    Dictionary<string, string> headers = new Dictionary<string, string>();
+
+    static ILog log = LogManager.GetLogger<NServiceBusMetricReport>();
 }

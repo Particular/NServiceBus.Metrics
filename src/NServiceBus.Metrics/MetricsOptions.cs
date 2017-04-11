@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using global::Metrics;
     using global::Metrics.Reports;
+    using Hosting;
     using Logging;
     using ObjectBuilder;
     using Transport;
@@ -26,7 +27,7 @@
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
 
             reportInstallers.Add((builder, config) => config.WithReport(
-                new NServiceBusMetricReport(builder.Build<IDispatchMessages>(), serviceControlMetricsAddress),
+                new NServiceBusMetricReport(builder.Build<IDispatchMessages>(), serviceControlMetricsAddress, builder.Build<HostInformation>()),
                 interval
             ));
         }
