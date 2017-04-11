@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Metrics;
 using NServiceBus;
 using NServiceBus.Features;
+using NServiceBus.Metrics;
 using NServiceBus.ObjectBuilder;
 
 class MetricsFeature : Feature
@@ -24,7 +25,7 @@ class MetricsFeature : Feature
 
     static void ConfigureMetrics(FeatureConfigurationContext context, MetricsContext metricsContext)
     {
-        var builders = Builders.Create();
+        var builders = AllMetrics.Create();
 
         foreach (var builder in builders)
         {
