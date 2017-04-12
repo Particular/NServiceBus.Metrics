@@ -3,12 +3,19 @@ using NServiceBus.Features;
 
 class PerformanceStatisticsMetricBuilder : IMetricBuilder
 {
-    public void WireUp(FeatureConfigurationContext featureConfigurationContext, MetricsContext metricsContext, Unit messagesUnit)
-    {
-        var messagesPulledFromQueueMeter = metricsContext.Meter("# of messages pulled from the input queue / sec", messagesUnit);
-        var failureRateMeter = metricsContext.Meter("# of message failures / sec", messagesUnit);
-        var successRateMeter = metricsContext.Meter("# of messages successfully processed / sec", messagesUnit);
+    Meter messagesPulledFromQueueMeter;
+    Meter failureRateMeter;
+    Meter successRateMeter;
 
+    public void Define(MetricsContext metricsContext)
+    {
+        messagesPulledFromQueueMeter = metricsContext.Meter("# of messages pulled from the input queue / sec", Unit.Custom("Messages"));
+        failureRateMeter = metricsContext.Meter("# of message failures / sec", Unit.Custom("Messages"));
+        successRateMeter = metricsContext.Meter("# of messages successfully processed / sec", Unit.Custom("Messages"));
+    }
+
+    public void WireUp(FeatureConfigurationContext featureConfigurationContext)
+    {
         var performanceDiagnosticsBehavior = new ReceivePerformanceDiagnosticsBehavior(
             messagesPulledFromQueueMeter,
             failureRateMeter,

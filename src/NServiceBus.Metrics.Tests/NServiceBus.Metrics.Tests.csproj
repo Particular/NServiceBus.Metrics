@@ -87,6 +87,7 @@
     <Compile Include="App_Packages\PublicApiGenerator.6.0.0\ApiGenerator.cs" />
     <Compile Include="APIApprovals.cs" />
     <Compile Include="ProcessingTime\ProcessingTimeCalculatorTests.cs" />
+    <Compile Include="StandardTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

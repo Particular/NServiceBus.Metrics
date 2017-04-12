@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="CriticalTime\CriticalTimeMetricBuilder.cs" />
     <Compile Include="IMetricBuilder.cs" />
+    <Compile Include="AllMetrics.cs" />
     <Compile Include="Performance\PerformanceStatisticsMetricBuilder.cs" />
     <Compile Include="Performance\ReceivePerformanceDiagnosticsBehavior.cs" />
     <Compile Include="ProcessingTime\ProcessingTimeMetricBuilder.cs" />

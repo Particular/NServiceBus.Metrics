@@ -6,10 +6,15 @@ using NServiceBus.Features;
 
 class CriticalTimeMetricBuilder : IMetricBuilder
 {
-    public void WireUp(FeatureConfigurationContext featureConfigurationContext, MetricsContext metricsContext, Unit messagesUnit)
-    {
-        var criticalTimeTimer = metricsContext.Timer("Critical Time", messagesUnit);
+    Timer criticalTimeTimer;
 
+    public void Define(MetricsContext metricsContext)
+    {
+        criticalTimeTimer = metricsContext.Timer("Critical Time", Unit.Custom("Messages"));
+    }
+
+    public void WireUp(FeatureConfigurationContext featureConfigurationContext)
+    {
         featureConfigurationContext.Pipeline.OnReceivePipelineCompleted(e =>
         {
             DateTime timeSent;

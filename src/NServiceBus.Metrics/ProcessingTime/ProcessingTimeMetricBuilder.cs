@@ -5,10 +5,15 @@ using NServiceBus.Features;
 
 class ProcessingTimeMetricBuilder : IMetricBuilder
 {
-    public void WireUp(FeatureConfigurationContext featureConfigurationContext, MetricsContext metricsContext, Unit messagesUnit)
-    {
-        var processingTimeTimer = metricsContext.Timer("Processing Time", messagesUnit);
+    Timer processingTimeTimer;
 
+    public void Define(MetricsContext metricsContext)
+    {
+        processingTimeTimer = metricsContext.Timer("Processing Time", Unit.Custom("Messages"));
+    }
+
+    public void WireUp(FeatureConfigurationContext featureConfigurationContext)
+    {
         featureConfigurationContext.Pipeline.OnReceivePipelineCompleted(e =>
         {
             var processingTimeInMilliseconds = ProcessingTimeCalculator.Calculate(e.StartedAt, e.CompletedAt).TotalMilliseconds;
