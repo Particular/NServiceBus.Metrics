@@ -21,6 +21,6 @@ class ProcessingTimeMetricBuilder : MetricBuilder
         });
     }
 
-    [Timer("Processing Time", "Messages")]
+    [Timer("Processing Time", "Messages", "The time it took to successfully process a message.")]
     Timer processingTimeTimer = default(Timer);
 }
