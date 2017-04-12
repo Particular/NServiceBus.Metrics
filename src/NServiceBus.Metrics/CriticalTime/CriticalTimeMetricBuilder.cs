@@ -23,6 +23,6 @@ class CriticalTimeMetricBuilder : MetricBuilder
         });
     }
 
-    [Timer("Critical Time", "Messages")]
+    [Timer("Critical Time", "Messages", "Age of the oldest message in the queue.")]
     Timer criticalTimeTimer = default(Timer);
 }

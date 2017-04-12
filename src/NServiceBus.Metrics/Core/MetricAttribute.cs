@@ -12,10 +12,11 @@ namespace NServiceBus.Metrics
         /// <summary>
         /// Creates new metric attribute.
         /// </summary>
-        protected MetricAttribute(string name, string unit, string[] tags = null)
+        protected MetricAttribute(string name, string unit, string description, string[] tags = null)
         {
             Name = name;
             Unit = unit;
+            Description = description;
             Tags = tags;
         }
 
@@ -28,6 +29,11 @@ namespace NServiceBus.Metrics
         /// Unit of measure
         /// </summary>
         public string Unit { get; }
+
+        /// <summary>
+        /// Description.
+        /// </summary>
+        public string Description { get; }
 
         /// <summary>
         /// Optional tags

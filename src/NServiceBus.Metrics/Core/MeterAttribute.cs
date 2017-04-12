@@ -10,7 +10,7 @@ namespace NServiceBus.Metrics
         /// <summary>
         /// Defines a meter
         /// </summary>
-        public MeterAttribute(string name, string unit, string[] tags = null) : base(name, unit, tags)
+        public MeterAttribute(string name, string unit, string description, string[] tags = null) : base(name, unit, description, tags)
         {
         }
 

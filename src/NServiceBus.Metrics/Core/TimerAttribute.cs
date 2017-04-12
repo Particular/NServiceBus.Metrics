@@ -10,7 +10,7 @@ namespace NServiceBus.Metrics
         /// <summary>
         /// Defines a timer.
         /// </summary>
-        public TimerAttribute(string name, string unit, string[] tags = null) : base(name, unit, tags)
+        public TimerAttribute(string name, string unit, string description, string[] tags = null) : base(name, unit, description, tags)
         {
         }
 
