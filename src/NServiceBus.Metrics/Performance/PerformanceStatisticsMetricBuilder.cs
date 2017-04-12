@@ -1,14 +1,11 @@
 using Metrics;
 using NServiceBus.Features;
+using NServiceBus.Metrics;
 
-class PerformanceStatisticsMetricBuilder : IMetricBuilder
+class PerformanceStatisticsMetricBuilder : MetricBuilder
 {
-    public void WireUp(FeatureConfigurationContext featureConfigurationContext, MetricsContext metricsContext, Unit messagesUnit)
+    public override void WireUp(FeatureConfigurationContext featureConfigurationContext)
     {
-        var messagesPulledFromQueueMeter = metricsContext.Meter("# of messages pulled from the input queue / sec", messagesUnit);
-        var failureRateMeter = metricsContext.Meter("# of message failures / sec", messagesUnit);
-        var successRateMeter = metricsContext.Meter("# of messages successfully processed / sec", messagesUnit);
-
         var performanceDiagnosticsBehavior = new ReceivePerformanceDiagnosticsBehavior(
             messagesPulledFromQueueMeter,
             failureRateMeter,
@@ -21,4 +18,13 @@ class PerformanceStatisticsMetricBuilder : IMetricBuilder
             "Provides various performance counters for receive statistics"
         );
     }
+
+    [Meter("# of messages pulled from the input queue / sec", "Messages")]
+    Meter messagesPulledFromQueueMeter = default(Meter);
+
+    [Meter("# of message failures / sec", "Messages")]
+    Meter failureRateMeter = default(Meter);
+
+    [Meter("# of messages successfully processed / sec", "Messages")]
+    Meter successRateMeter = default(Meter);
 }

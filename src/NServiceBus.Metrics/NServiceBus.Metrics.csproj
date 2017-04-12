@@ -62,8 +62,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\FeatureConfigurationContextExtensions.cs" />
+    <Compile Include="Core\MetricAttribute.cs" />
+    <Compile Include="Core\TimerAttribute.cs" />
     <Compile Include="CriticalTime\CriticalTimeMetricBuilder.cs" />
-    <Compile Include="IMetricBuilder.cs" />
+    <Compile Include="Core\MeterAttribute.cs" />
+    <Compile Include="Core\MetricBuilder.cs" />
+    <Compile Include="Core\MetricsRegistry.cs" />
     <Compile Include="Performance\PerformanceStatisticsMetricBuilder.cs" />
     <Compile Include="Performance\ReceivePerformanceDiagnosticsBehavior.cs" />
     <Compile Include="ProcessingTime\ProcessingTimeMetricBuilder.cs" />
@@ -80,6 +85,7 @@
     <Compile Include="Reporters\TraceReport.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="InternalsVisibleTo.cs" />
+    <Compile Include="StandardMetricsFeature.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NServiceBus.snk" />

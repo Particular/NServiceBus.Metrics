@@ -2,13 +2,12 @@ using System.Threading.Tasks;
 using Metrics;
 using NServiceBus;
 using NServiceBus.Features;
+using NServiceBus.Metrics;
 
-class ProcessingTimeMetricBuilder : IMetricBuilder
+class ProcessingTimeMetricBuilder : MetricBuilder
 {
-    public void WireUp(FeatureConfigurationContext featureConfigurationContext, MetricsContext metricsContext, Unit messagesUnit)
+    public override void WireUp(FeatureConfigurationContext featureConfigurationContext)
     {
-        var processingTimeTimer = metricsContext.Timer("Processing Time", messagesUnit);
-
         featureConfigurationContext.Pipeline.OnReceivePipelineCompleted(e =>
         {
             var processingTimeInMilliseconds = ProcessingTimeCalculator.Calculate(e.StartedAt, e.CompletedAt).TotalMilliseconds;
@@ -16,9 +15,12 @@ class ProcessingTimeMetricBuilder : IMetricBuilder
             string messageTypeProcessed;
             e.TryGetMessageType(out messageTypeProcessed);
 
-            processingTimeTimer.Record((long)processingTimeInMilliseconds, TimeUnit.Milliseconds, messageTypeProcessed);
+            processingTimeTimer.Record((long) processingTimeInMilliseconds, TimeUnit.Milliseconds);
 
             return Task.FromResult(0);
         });
     }
+
+    [Timer("Processing Time", "Messages")]
+    Timer processingTimeTimer = default(Timer);
 }

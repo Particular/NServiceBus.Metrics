@@ -2,7 +2,7 @@
 
 static class Guard
 {
-    // ReSharper disable UnusedParameter.Global
+// ReSharper disable UnusedParameter.Global
     public static void AgainstNull(string argumentName, object value)
     {
         if (value == null)
