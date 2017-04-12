@@ -3,13 +3,12 @@ using System.Threading.Tasks;
 using Metrics;
 using NServiceBus;
 using NServiceBus.Features;
+using NServiceBus.Metrics;
 
-class CriticalTimeMetricBuilder : IMetricBuilder
+class CriticalTimeMetricBuilder : MetricBuilder
 {
-    public void WireUp(FeatureConfigurationContext featureConfigurationContext, MetricsContext metricsContext, Unit messagesUnit)
+    public override void WireUp(FeatureConfigurationContext featureConfigurationContext)
     {
-        var criticalTimeTimer = metricsContext.Timer("Critical Time", messagesUnit);
-
         featureConfigurationContext.Pipeline.OnReceivePipelineCompleted(e =>
         {
             DateTime timeSent;
@@ -17,10 +16,13 @@ class CriticalTimeMetricBuilder : IMetricBuilder
             {
                 var endToEndTime = e.CompletedAt - timeSent;
 
-                criticalTimeTimer.Record((long)endToEndTime.TotalMilliseconds, TimeUnit.Milliseconds);
+                criticalTimeTimer.Record((long) endToEndTime.TotalMilliseconds, TimeUnit.Milliseconds);
             }
 
             return Task.FromResult(0);
         });
     }
+
+    [Timer("Critical Time", "Messages")]
+    Timer criticalTimeTimer = default(Timer);
 }
