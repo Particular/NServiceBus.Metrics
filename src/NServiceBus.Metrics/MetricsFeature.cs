@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Metrics;
 using NServiceBus;
 using NServiceBus.Features;
@@ -36,10 +35,6 @@ class MetricsFeature : Feature
 
     class MetricsReporting : FeatureStartupTask
     {
-        MetricsOptions metricsOptions;
-        IBuilder builder;
-        MetricsConfig metricsConfig;
-
         public MetricsReporting(MetricsContext metricsContext, MetricsOptions metricsOptions, IBuilder builder)
         {
             this.metricsOptions = metricsOptions;
@@ -58,5 +53,9 @@ class MetricsFeature : Feature
             metricsConfig.Dispose();
             return Task.FromResult(0);
         }
+
+        MetricsOptions metricsOptions;
+        IBuilder builder;
+        MetricsConfig metricsConfig;
     }
 }
