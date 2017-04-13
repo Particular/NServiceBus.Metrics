@@ -47,7 +47,7 @@ namespace NServiceBus.Metrics
         /// </summary>
         public override object DefineMetric(MetricsContext context)
         {
-            return context.Meter(Name, Unit, TimeUnit.Seconds, Tags);
+            return context.Meter(Name, Unit, TimeUnit.Seconds, Tags ?? default(MetricTags));
         }
     }
 }

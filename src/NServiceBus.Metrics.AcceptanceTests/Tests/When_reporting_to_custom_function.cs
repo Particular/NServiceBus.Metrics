@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using AcceptanceTesting;
-    using AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
@@ -20,7 +19,7 @@
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(context.Data);
-            Assert.That(context.Data, Contains.Substring($"{Conventions.EndpointNamingConvention(typeof(Reporter))}"));
+            PayloadAssert.ContainsMeters(context.Data);
         }
 
         class Context : ScenarioContext
@@ -34,13 +33,14 @@
             {
                 EndpointSetup<DefaultServer>((c, r) =>
                 {
-                    var context = (Context)r.ScenarioContext;
+                    var context = (Context) r.ScenarioContext;
 
-                    c.EnableMetrics().EnableCustomReport(payload =>
-                    {
-                        context.Data = payload;
-                        return Task.FromResult(0);
-                    }, TimeSpan.FromMilliseconds(5));
+                    c.EnableMetrics()
+                        .EnableCustomReport(payload =>
+                        {
+                            context.Data = payload;
+                            return Task.FromResult(0);
+                        }, TimeSpan.FromMilliseconds(5));
                 });
             }
         }

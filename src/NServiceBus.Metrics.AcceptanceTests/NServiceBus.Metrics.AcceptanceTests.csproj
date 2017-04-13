@@ -72,6 +72,7 @@
     <Compile Include="ConfigureEndpointInMemoryPersistence.cs" />
     <Compile Include="ConfigureEndpointMsmqTransport.cs" />
     <Compile Include="ConventionEnforcementTests.cs" />
+    <Compile Include="PayloadAssert.cs" />
     <Compile Include="Tests\When_reporting_to_custom_function.cs" />
     <Compile Include="Tests\When_telemetry_queue_does_not_exist.cs" />
     <Compile Include="Tests\When_reporting_to_ServiceControl.cs" />

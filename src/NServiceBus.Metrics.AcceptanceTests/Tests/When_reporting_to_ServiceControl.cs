@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using AcceptanceTesting.Customization;
+    using global::Newtonsoft.Json;
     using global::Newtonsoft.Json.Linq;
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
@@ -29,6 +30,7 @@
 
             var metricsContext = context.Report["Context"].Value<string>();
             Assert.AreEqual($"{Conventions.EndpointNamingConvention(typeof(Sender))}", metricsContext);
+            PayloadAssert.ContainsMeters(context.Report.ToString(Formatting.None));
             Assert.AreEqual(metricsContext, context.Headers[Headers.OriginatingEndpoint]);
             Assert.AreEqual(HostId.ToString("N"), context.Headers[Headers.OriginatingHostId]);
             Assert.AreEqual("NServiceBus.Metrics.MetricReport", context.Headers[Headers.EnclosedMessageTypes]);
