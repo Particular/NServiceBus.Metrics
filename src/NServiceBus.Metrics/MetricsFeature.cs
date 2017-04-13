@@ -16,6 +16,10 @@ class MetricsFeature : Feature
     {
         context.ThrowIfSendonly();
 
+        context.RegisterMetricBuilder(new CriticalTimeMetricBuilder());
+        context.RegisterMetricBuilder(new PerformanceStatisticsMetricBuilder());
+        context.RegisterMetricBuilder(new ProcessingTimeMetricBuilder());
+
         var settings = context.Settings;
         var metricsOptions = settings.Get<MetricsOptions>();
 

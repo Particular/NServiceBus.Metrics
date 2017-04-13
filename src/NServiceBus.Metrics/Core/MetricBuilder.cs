@@ -28,7 +28,7 @@ namespace NServiceBus.Metrics
             foreach (var fieldWithAttribute in fieldsWithAttribute)
             {
                 var metricFacade = fieldWithAttribute.metricAttribute.DefineMetric(metricsContext);
-                if (metricFacade.GetType() != fieldWithAttribute.field.FieldType)
+                if (metricFacade.GetType().IsAssignableFrom(fieldWithAttribute.field.FieldType))
                 {
                     throw new InvalidOperationException("A metric attribute must match the type of the metric field: " + fieldWithAttribute.field.Name);
                 }
