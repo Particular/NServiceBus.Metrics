@@ -18,9 +18,9 @@ public static class PayloadAssert
 
     static List<string> meters = new List<string>
     {
-        "# of message failures / sec",
-        "# of messages pulled from the input queue / sec",
-        "# of messages successfully processed / sec",
+        "# of msgs failures / sec",
+        "# of msgs pulled from the input queue / sec",
+        "# of msgs successfully processed / sec",
         "Critical Time",
         "Processing Time"
     };
