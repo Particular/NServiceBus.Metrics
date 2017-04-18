@@ -19,12 +19,12 @@ class PerformanceStatisticsMetricBuilder : MetricBuilder
         );
     }
 
-    [Meter("# of messages pulled from the input queue / sec", "Messages", "The current number of messages pulled from the input queue by the transport per second.")]
+    [Meter("# of msgs pulled from the input queue / sec", "Messages", "The current number of messages pulled from the input queue by the transport per second.")]
     Meter messagesPulledFromQueueMeter = default(Meter);
 
-    [Meter("# of message failures / sec", "Messages", "The current number of failed processed messages by the transport per second.")]
+    [Meter("# of msgs failures / sec", "Messages", "The current number of failed processed messages by the transport per second.")]
     Meter failureRateMeter = default(Meter);
 
-    [Meter("# of messages successfully processed / sec", "Messages", "The current number of messages processed successfully by the transport per second.")]
+    [Meter("# of msgs successfully processed / sec", "Messages", "The current number of messages processed successfully by the transport per second.")]
     Meter successRateMeter = default(Meter);
 }
