@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>NServiceBus.Metrics</id>
+    <version>$version$</version>
+    <title>NServiceBus.Metrics</title>
+    <authors>$authors$</authors>
+    <owners>$owners$</owners>
+    <licenseUrl>$licenseUrl$</licenseUrl>
+    <projectUrl>$projectUrl$</projectUrl>
+    <requireLicenseAcceptance>$requireLicenseAcceptance$</requireLicenseAcceptance>
+    <iconUrl>$iconUrl$</iconUrl>
+    <description>Hooks into the NServiceBus pipeline and computes metrics like Processing Time and reports it.</description>
+    <tags>$tags$</tags>
+    <dependencies>
+      <dependency id="NServiceBus" version="[6.2.0, 7.0.0)" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\..\binaries\NServiceBus.Metrics.???" target="lib\net452" />
+  </files>
+</package>
