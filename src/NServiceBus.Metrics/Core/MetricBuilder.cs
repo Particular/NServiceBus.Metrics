@@ -14,7 +14,7 @@ namespace NServiceBus.Metrics
         /// <summary>
         /// Defines the metric facades.
         /// </summary>
-        public void Define(MetricsContext metricsContext)
+        public virtual void Define(MetricsContext metricsContext)
         {
             var fieldsWithAttribute = from field in GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                 let metricAttribute = field.GetCustomAttribute<MetricAttribute>()
