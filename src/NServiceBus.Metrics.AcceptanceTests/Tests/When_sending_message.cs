@@ -14,27 +14,54 @@ namespace NServiceBus.Metrics.AcceptanceTests
 
     public class When_sending_message : NServiceBusAcceptanceTest
     {
-        static string ReceiverAddress => Conventions.EndpointNamingConvention(typeof(Receiver));
+        static string ReceiverAddress1 => Conventions.EndpointNamingConvention(typeof(Receiver1));
+        static string ReceiverAddress2 => Conventions.EndpointNamingConvention(typeof(Receiver2));
+
         static Guid HostId = Guid.NewGuid();
 
         [Test]
         public async Task Should_enhance_it_with_queue_length_properties()
         {
             var context = await Scenario.Define<Context>()
-                .WithEndpoint<Sender>(c => c.When(async session =>
+                .WithEndpoint<Sender>(c => c.When(async s =>
                 {
-                    var sendOptions = new SendOptions();
-                    sendOptions.SetDestination(ReceiverAddress);
+                    var to1 = new SendOptions();
+                    to1.SetDestination(ReceiverAddress1);
+                    await s.Send(new TestMessage(), to1);
+                    await s.Send(new TestMessage(), to1);
 
-                    await session.Send(new TestMessage(), sendOptions);
-                    await session.Send(new TestMessage(), sendOptions);
+                    var to2 = new SendOptions();
+                    to2.SetDestination(ReceiverAddress2);
+                    await s.Send(new TestMessage(), to2);
+                    await s.Send(new TestMessage(), to2);
+
                 }))
-                .WithEndpoint<Receiver>()
-                .Done(c => c.Headers.Count == 2)
+                .WithEndpoint<Receiver1>()
+                .WithEndpoint<Receiver2>()
+                .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2)
                 .Run()
                 .ConfigureAwait(false);
 
-            var headers = context.Headers.ToArray();
+            var sessionIds = new [] { AssertHeaders(context.Headers1), AssertHeaders(context.Headers2)};
+
+            // assert data
+            var data = JObject.Parse(context.Data);
+            var counters = (JArray)data["Counters"];
+            var counterTokens = counters.Where(c => c.Value<string>("Name").StartsWith("QueueLengthSend_"));
+
+            foreach (var counter in counterTokens)
+            {
+                var name = counter.Value<string>("Name");
+                var counterNameBasedSessionId = Guid.Parse(name.Substring(name.LastIndexOf("_") + 1));
+
+                CollectionAssert.Contains(sessionIds, counterNameBasedSessionId);
+                Assert.AreEqual(2, counter.Value<int>("Count"));
+            }
+        }
+
+        static Guid AssertHeaders(IProducerConsumerCollection<IReadOnlyDictionary<string, string>> oneReceiverHeaders)
+        {
+            var headers = oneReceiverHeaders.ToArray();
 
             Guid sessionId1, sessionId2;
             long sequence1, sequence2;
@@ -45,17 +72,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
             Assert.AreEqual(sessionId1, sessionId2);
             Assert.AreEqual(1, sequence1);
             Assert.AreEqual(2, sequence2);
-
-            // assert data
-            var data = JObject.Parse(context.Data);
-            var counters = (JArray)data["Counters"];
-            var counter = counters.Single(c => c.Value<string>("Name").StartsWith("QueueLengthSend_"));
-
-            var name = counter.Value<string>("Name");
-            var counterNameBasedSessionId = Guid.Parse(name.Substring(name.LastIndexOf("_") + 1));
-
-            Assert.AreEqual(sessionId1, counterNameBasedSessionId);
-            Assert.AreEqual(2, counter.Value<int>("Count"));
+            return sessionId1;
         }
 
         static void Parse(IReadOnlyDictionary<string, string> headers, out Guid sessionId, out long sequence)
@@ -68,7 +85,8 @@ namespace NServiceBus.Metrics.AcceptanceTests
 
         class Context : ScenarioContext
         {
-            public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers { get; set; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
+            public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers1 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
+            public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers2 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
             public string Data { get; set; }
         }
 
@@ -90,9 +108,9 @@ namespace NServiceBus.Metrics.AcceptanceTests
             }
         }
 
-        class Receiver : EndpointConfigurationBuilder
+        class Receiver1 : EndpointConfigurationBuilder
         {
-            public Receiver()
+            public Receiver1()
             {
                 EndpointSetup<DefaultServer>(c => c.LimitMessageProcessingConcurrencyTo(1));
             }
@@ -103,7 +121,27 @@ namespace NServiceBus.Metrics.AcceptanceTests
 
                 public Task Handle(TestMessage message, IMessageHandlerContext context)
                 {
-                    TestContext.Headers.Enqueue(context.MessageHeaders);
+                    TestContext.Headers1.Enqueue(context.MessageHeaders);
+
+                    return Task.FromResult(0);
+                }
+            }
+        }
+
+        class Receiver2 : EndpointConfigurationBuilder
+        {
+            public Receiver2()
+            {
+                EndpointSetup<DefaultServer>(c => c.LimitMessageProcessingConcurrencyTo(1));
+            }
+
+            public class TestMessageHandler : IHandleMessages<TestMessage>
+            {
+                public Context TestContext { get; set; }
+
+                public Task Handle(TestMessage message, IMessageHandlerContext context)
+                {
+                    TestContext.Headers2.Enqueue(context.MessageHeaders);
 
                     return Task.FromResult(0);
                 }
