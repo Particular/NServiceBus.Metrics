@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Features;
     using global::Metrics;
+    using global::Metrics.Core;
     using Pipeline;
     using Routing;
 
@@ -12,7 +13,7 @@
     {
         MetricsContext metricsContext;
 
-        ConcurrentDictionary<string, Counter> sendingCounters = new ConcurrentDictionary<string, Counter>();
+        ConcurrentDictionary<string, Tuple<Guid, CounterImplementation>> sendingCounters = new ConcurrentDictionary<string, Tuple<Guid, CounterImplementation>>();
         
         public override void Define(MetricsContext metricsContext)
         {
@@ -26,17 +27,22 @@
             featureConfigurationContext.Pipeline.Register(queuLengthSendBehavior, "QueuLengthSendBehavior");
         }
 
-        void RegisterSend(string destination)
+        Tuple<Guid, long> RegisterSend(string destination)
         {
-            // wire up the pipline and register sends
             var counter = sendingCounters.GetOrAdd(destination, CreateSendCounter);
+            
+            counter.Item2.Increment();
 
-            counter.Increment();
+            return Tuple.Create(counter.Item1, counter.Item2.Value.Count);
         }
 
-        Counter CreateSendCounter(string destination)
+        Tuple<Guid, CounterImplementation> CreateSendCounter(string destination)
         {
-            return metricsContext.Counter("QueueLengthSend_" + destination + "_" + Guid.NewGuid(), Unit.Custom("Sequence"));
+            var sessionId = Guid.NewGuid();
+
+            var counter = (CounterImplementation) metricsContext.Counter("QueueLengthSend_" + destination + "_" + sessionId, Unit.Custom("Sequence"));
+
+            return Tuple.Create(sessionId, counter);
         }
 
         class HookupBehavior : IBehavior<IDispatchContext, IDispatchContext>
@@ -58,7 +64,9 @@
 
                     if (unicastAddressTag != null)
                     {
-                        queueLengthMetricBuilder.RegisterSend(unicastAddressTag.Destination);
+                        var sessionIdWithCounter = queueLengthMetricBuilder.RegisterSend(unicastAddressTag.Destination);
+
+                        transportOperation.Message.Headers["NServiceBus.Metrics.QueueLength"] = sessionIdWithCounter.Item1 + "_" + sessionIdWithCounter.Item2;
                     }
                 }
 

@@ -88,6 +88,7 @@
     <Compile Include="NServiceBusAcceptanceTest.cs" />
     <Compile Include="ScenarioDescriptors\EnvironmentHelper.cs" />
     <Compile Include="ScenarioDescriptors\TypeScanner.cs" />
+    <Compile Include="Tests\When_whatever.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
