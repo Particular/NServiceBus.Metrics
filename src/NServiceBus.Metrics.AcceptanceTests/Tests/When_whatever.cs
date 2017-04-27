@@ -56,7 +56,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
         {
             public Receiver()
             {
-                EndpointSetup<DefaultServer>().IncludeType<TestMessage>();
+                EndpointSetup<DefaultServer>();
             }
 
             public class TestMessageHandler : IHandleMessages<TestMessage>

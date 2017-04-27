@@ -49,8 +49,6 @@
         {
             readonly QueueLengthMetricBuilder queueLengthMetricBuilder;
 
-            static readonly Task compledTask = Task.FromResult(0);
-
             public HookupBehavior(QueueLengthMetricBuilder queueLengthMetricBuilder)
             {
                 this.queueLengthMetricBuilder = queueLengthMetricBuilder;
@@ -70,7 +68,7 @@
                     }
                 }
 
-                return compledTask;
+                return next(context);
             }
         }
     }
