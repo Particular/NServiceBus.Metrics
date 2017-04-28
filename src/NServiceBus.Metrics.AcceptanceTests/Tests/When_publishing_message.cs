@@ -7,11 +7,16 @@ namespace NServiceBus.Metrics.AcceptanceTests
     using System.Threading;
     using System.Threading.Tasks;
     using AcceptanceTesting;
+    using Extensibility;
     using Features;
     using global::Newtonsoft.Json.Linq;
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
+    using ObjectBuilder;
+    using Pipeline;
+    using Routing;
+    using Transport;
 
     public class When_publishing_message : NServiceBusAcceptanceTest
     {
@@ -95,7 +100,6 @@ namespace NServiceBus.Metrics.AcceptanceTests
                     var context = (Context)r.ScenarioContext;
 
                     c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
-
                     c.OnEndpointSubscribed<Context>((s, ctx) =>
                     {
                         if (s.SubscriberReturnAddress.Contains("Subscriber"))
@@ -103,6 +107,9 @@ namespace NServiceBus.Metrics.AcceptanceTests
                             Interlocked.Increment(ref ctx.SubscriptionCount);
                         }
                     });
+
+                    c.Pipeline.Register(new PreQueueLengthStep());
+                    c.Pipeline.Register(new PostQueueLengthStep());
 
                     c.EnableMetrics().EnableCustomReport(payload =>
                     {
@@ -149,7 +156,6 @@ namespace NServiceBus.Metrics.AcceptanceTests
                 public Task Handle(TestEventMessage2 message, IMessageHandlerContext context)
                 {
                     TestContext.Headers2.Enqueue(context.MessageHeaders);
-
                     return Task.FromResult(0);
                 }
             }
@@ -161,6 +167,56 @@ namespace NServiceBus.Metrics.AcceptanceTests
 
         public class TestEventMessage2 : IEvent
         {
+        }
+
+        class PreQueueLengthStep : RegisterStep
+        {
+            public PreQueueLengthStep()
+                : base("PreQueueLengthStep", typeof(Behavior), "Registers behavior replacing context")
+            {
+                InsertBefore("QueueLengthBehavior");
+            }
+
+            class Behavior : IBehavior<IDispatchContext,IDispatchContext>
+            {
+                public Task Invoke(IDispatchContext context, Func<IDispatchContext, Task> next)
+                {
+                    return next(new MultiDispatchContext(context));
+                }
+            }
+        }
+
+        class PostQueueLengthStep : RegisterStep
+        {
+            public PostQueueLengthStep()
+                : base("PostQueueLengthStep", typeof(Behavior), "Registers behavior restoring context")
+            {
+                InsertAfter("QueueLengthBehavior");
+            }
+
+            class Behavior : IBehavior<IDispatchContext, IDispatchContext>
+            {
+                public Task Invoke(IDispatchContext context, Func<IDispatchContext, Task> next)
+                {
+                    return next(((MultiDispatchContext) context).Original);
+                }
+            }
+        }
+
+        class MultiDispatchContext : IDispatchContext
+        {
+            public MultiDispatchContext(IDispatchContext original)
+            {
+                Extensions = original.Extensions;
+                Builder = original.Builder;
+                Operations = original.Operations.Select(t => new TransportOperation(t.Message, new MulticastAddressTag(Type.GetType(t.Message.Headers[Headers.EnclosedMessageTypes])), t.RequiredDispatchConsistency, t.DeliveryConstraints)).ToArray();
+                Original = original;
+            }
+
+            public IDispatchContext Original { get; }
+            public ContextBag Extensions { get; }
+            public IBuilder Builder { get; }
+            public IEnumerable<TransportOperation> Operations { get; }
         }
     }
 }

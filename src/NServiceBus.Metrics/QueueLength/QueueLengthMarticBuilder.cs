@@ -22,7 +22,7 @@
 
         public override void WireUp(FeatureConfigurationContext featureConfigurationContext)
         {
-            var queuLengthSendBehavior = new HookupBehavior(this);
+            var queuLengthSendBehavior = new QueueLengthBehavior(this);
 
             featureConfigurationContext.Pipeline.Register(queuLengthSendBehavior, "QueuLengthSendBehavior");
         }
@@ -45,11 +45,11 @@
             return Tuple.Create(sessionId, counter);
         }
 
-        class HookupBehavior : IBehavior<IDispatchContext, IDispatchContext>
+        class QueueLengthBehavior : IBehavior<IDispatchContext, IDispatchContext>
         {
             readonly QueueLengthMetricBuilder queueLengthMetricBuilder;
 
-            public HookupBehavior(QueueLengthMetricBuilder queueLengthMetricBuilder)
+            public QueueLengthBehavior(QueueLengthMetricBuilder queueLengthMetricBuilder)
             {
                 this.queueLengthMetricBuilder = queueLengthMetricBuilder;
             }
