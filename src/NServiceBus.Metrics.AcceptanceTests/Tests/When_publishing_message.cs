@@ -4,9 +4,10 @@ namespace NServiceBus.Metrics.AcceptanceTests
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using AcceptanceTesting;
-    using AcceptanceTesting.Customization;
+    using Features;
     using global::Newtonsoft.Json.Linq;
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
@@ -20,33 +21,37 @@ namespace NServiceBus.Metrics.AcceptanceTests
         public async Task Should_enhance_it_with_queue_length_properties()
         {
             var context = await Scenario.Define<Context>()
-                .WithEndpoint<Publisher>(c => c.When(async s =>
+                .WithEndpoint<Publisher>(c => c.When(ctx => ctx.SubscriptionCount == 2, async s =>
+                  {
+                      await s.Publish(new TestEventMessage1());
+                      await s.Publish(new TestEventMessage1());
+                      await s.Publish(new TestEventMessage2());
+                      await s.Publish(new TestEventMessage2());
+                  }))
+                .WithEndpoint<Subscriber>(b => b.When(async (session, c) =>
                 {
-                    await s.Publish(new TestEventMessage1());
-                    await s.Publish(new TestEventMessage1());
-                    await s.Publish(new TestEventMessage2());
-                    await s.Publish(new TestEventMessage2());
+                    await session.Subscribe<TestEventMessage1>();
+                    await session.Subscribe<TestEventMessage2>();
                 }))
-                .WithEndpoint<Subscriber>()
                 .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2)
                 .Run()
                 .ConfigureAwait(false);
 
-            //var sessionIds = new [] { AssertHeaders(context.Headers1), AssertHeaders(context.Headers2)};
+            var sessionIds = new[] { AssertHeaders(context.Headers1), AssertHeaders(context.Headers2) };
 
-            //// assert data
-            //var data = JObject.Parse(context.Data);
-            //var counters = (JArray)data["Counters"];
-            //var counterTokens = counters.Where(c => c.Value<string>("Name").StartsWith("QueueLengthSend_"));
+            // assert data
+            var data = JObject.Parse(context.Data);
+            var counters = (JArray)data["Counters"];
+            var counterTokens = counters.Where(c => c.Value<string>("Name").StartsWith("QueueLengthSend_"));
 
-            //foreach (var counter in counterTokens)
-            //{
-            //    var name = counter.Value<string>("Name");
-            //    var counterNameBasedSessionId = Guid.Parse(name.Substring(name.LastIndexOf("_") + 1));
+            foreach (var counter in counterTokens)
+            {
+                var name = counter.Value<string>("Name");
+                var counterNameBasedSessionId = Guid.Parse(name.Substring(name.LastIndexOf("_") + 1));
 
-            //    CollectionAssert.Contains(sessionIds, counterNameBasedSessionId);
-            //    Assert.AreEqual(2, counter.Value<int>("Count"));
-            //}
+                CollectionAssert.Contains(sessionIds, counterNameBasedSessionId);
+                Assert.AreEqual(2, counter.Value<int>("Count"));
+            }
         }
 
         static Guid AssertHeaders(IProducerConsumerCollection<IReadOnlyDictionary<string, string>> oneReceiverHeaders)
@@ -75,6 +80,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
 
         class Context : ScenarioContext
         {
+            public volatile int SubscriptionCount;
             public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers1 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
             public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers2 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
             public string Data { get; set; }
@@ -89,6 +95,15 @@ namespace NServiceBus.Metrics.AcceptanceTests
                     var context = (Context)r.ScenarioContext;
 
                     c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
+
+                    c.OnEndpointSubscribed<Context>((s, ctx) =>
+                    {
+                        if (s.SubscriberReturnAddress.Contains("Subscriber"))
+                        {
+                            Interlocked.Increment(ref ctx.SubscriptionCount);
+                        }
+                    });
+
                     c.EnableMetrics().EnableCustomReport(payload =>
                     {
                         context.Data = payload;
@@ -102,7 +117,17 @@ namespace NServiceBus.Metrics.AcceptanceTests
         {
             public Subscriber()
             {
-                EndpointSetup<DefaultServer>(c => c.LimitMessageProcessingConcurrencyTo(1));
+                EndpointSetup<DefaultServer>(c =>
+                {
+                    c.LimitMessageProcessingConcurrencyTo(1);
+                    c.DisableFeature<AutoSubscribe>();
+
+                    var routing = c.UseTransport<MsmqTransport>()
+                        .Routing();
+                    var publisher = AcceptanceTesting.Customization.Conventions.EndpointNamingConvention(typeof(Publisher));
+                    routing.RegisterPublisher(typeof(TestEventMessage1), publisher);
+                    routing.RegisterPublisher(typeof(TestEventMessage2), publisher);
+                });
             }
 
             public class TestEventMessage1Handler : IHandleMessages<TestEventMessage1>
