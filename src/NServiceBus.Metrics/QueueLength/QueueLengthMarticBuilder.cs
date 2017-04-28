@@ -60,10 +60,24 @@
                 {
                     var unicastAddressTag = transportOperation.AddressTag as UnicastAddressTag;
 
+                    Tuple<Guid, long> sessionIdWithCounter = null;
+
                     if (unicastAddressTag != null)
                     {
-                        var sessionIdWithCounter = queueLengthMetricBuilder.RegisterSend(unicastAddressTag.Destination);
+                        sessionIdWithCounter = queueLengthMetricBuilder.RegisterSend(unicastAddressTag.Destination);
+                    }
+                    else
+                    {
+                        var multicastAddressTag = transportOperation.AddressTag as MulticastAddressTag;
 
+                        if (multicastAddressTag != null)
+                        {
+                            sessionIdWithCounter = queueLengthMetricBuilder.RegisterSend(multicastAddressTag.MessageType.FullName);
+                        }
+                    }
+
+                    if (sessionIdWithCounter != null)
+                    {
                         transportOperation.Message.Headers["NServiceBus.Metrics.QueueLength"] = sessionIdWithCounter.Item1 + "_" + sessionIdWithCounter.Item2;
                     }
                 }
