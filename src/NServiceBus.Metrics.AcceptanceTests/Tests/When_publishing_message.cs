@@ -174,7 +174,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
             public PreQueueLengthStep()
                 : base("PreQueueLengthStep", typeof(Behavior), "Registers behavior replacing context")
             {
-                InsertBefore("QueueLengthBehavior");
+                InsertBefore("DispatchQueueLengthBehavior");
             }
 
             class Behavior : IBehavior<IDispatchContext,IDispatchContext>
@@ -191,7 +191,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
             public PostQueueLengthStep()
                 : base("PostQueueLengthStep", typeof(Behavior), "Registers behavior restoring context")
             {
-                InsertAfter("QueueLengthBehavior");
+                InsertAfter("DispatchQueueLengthBehavior");
             }
 
             class Behavior : IBehavior<IDispatchContext, IDispatchContext>
