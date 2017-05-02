@@ -12,7 +12,7 @@
 
     class QueueLengthMetricBuilder : MetricBuilder
     {
-        internal const string HeaderName = "NServiceBus.Metrics.QueueLength";
+        const string HeaderName = "NServiceBus.Metrics.QueueLength";
 
         const char SeparatorValue = '_';
         static readonly string Separator = SeparatorValue.ToString();
@@ -26,7 +26,7 @@
 
         public override void Define(MetricsContext metricsContext)
         {
-            this.metricsContext = metricsContext;          
+            this.metricsContext = metricsContext;
         }
 
         public override void WireUp(FeatureConfigurationContext featureConfigurationContext)
@@ -43,7 +43,7 @@
         Tuple<Guid, long> RegisterSend(string destination)
         {
             var counter = sendingCounters.GetOrAdd(destination, CreateSendCounter);
-            
+
             counter.Item2.Increment();
 
             return Tuple.Create(counter.Item1, counter.Item2.Value.Count);
@@ -52,7 +52,7 @@
         Tuple<Guid, CounterImplementation> CreateSendCounter(string destination)
         {
             var sessionId = Guid.NewGuid();
-            var counter = (CounterImplementation) metricsContext.Counter("QueueLengthSend"+ Separator + destination + Separator + sessionId, Unit);
+            var counter = (CounterImplementation)metricsContext.Counter("QueueLengthSend" + Separator + destination + Separator + sessionId, Unit);
             return Tuple.Create(sessionId, counter);
         }
 
