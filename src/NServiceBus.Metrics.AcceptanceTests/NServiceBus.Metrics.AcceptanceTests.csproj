@@ -73,6 +73,7 @@
     <Compile Include="ConfigureEndpointMsmqTransport.cs" />
     <Compile Include="ConventionEnforcementTests.cs" />
     <Compile Include="PayloadAssert.cs" />
+    <Compile Include="Tests\TagExtensions.cs" />
     <Compile Include="Tests\SubscriptionBehaviorExtensions.cs" />
     <Compile Include="Tests\When_receiving_message.cs" />
     <Compile Include="Tests\When_reporting_to_custom_function.cs" />

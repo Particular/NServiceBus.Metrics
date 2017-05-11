@@ -11,9 +11,10 @@
 
     public class When_receiving_message : NServiceBusAcceptanceTest
     {
-        const string Header = "NServiceBus.Metrics.QueueLength";
-        const int SequenceValue = 42;
-        static readonly string sessionId = Guid.NewGuid().ToString();
+        const string KeyHeader = "NServiceBus.Metrics.QueueLength.Key";
+        const string ValueHeader = "NServiceBus.Metrics.QueueLength.Value";
+        const string SequenceValue = "42";
+        static readonly string SequenceKey = Guid.NewGuid().ToString();
 
         [Test]
         public async Task Should_report_sequence_for_session()
@@ -24,21 +25,22 @@
                     var options = new SendOptions();
                     options.RouteToThisEndpoint();
 
-                    options.SetHeader(Header, sessionId + "_" + SequenceValue);
+                    options.SetHeader(KeyHeader, SequenceKey);
+                    options.SetHeader(ValueHeader, SequenceValue);
                     await s.Send(new TestMessage(), options);
                 }))
                 .Done(c => c.Handled && c.Data != null)
                 .Run()
                 .ConfigureAwait(false);
 
-            // assert data
             var data = JObject.Parse(context.Data);
             var gauges = (JArray)data["Gauges"];
-            var gauge = gauges.Single(c => c.Value<string>("Name").StartsWith("QueueLengthReceive_"));
+            var gauge = gauges.Single(c => c.Value<string>("Name").StartsWith("Received sequence for"));
+            var tags = gauge["Tags"].ToObject<string[]>();
 
-            var name = gauge.Value<string>("Name");
-            Assert.True(name.EndsWith(sessionId), $"Gauge name should end with '{sessionId}' but was '{name}'");
-            Assert.AreEqual(SequenceValue.ToString(), gauge.Value<string>("Value"));
+            Assert.AreEqual("queue-length.received", tags.GetTagValue("type"));
+            Assert.AreEqual(SequenceKey, tags.GetTagValue("key"));
+            Assert.AreEqual(SequenceValue, gauge.Value<string>("Value"));
         }
 
         class Context : ScenarioContext
