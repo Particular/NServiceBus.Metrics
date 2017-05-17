@@ -111,9 +111,9 @@
                 return next(context);
             }
 
-            string BuildKey(string destintion)
+            string BuildKey(string destination)
             {
-                return $"{destintion}-{session}".ToLowerInvariant();
+                return $"{destination}-{session}".ToLowerInvariant();
             }
         }
 

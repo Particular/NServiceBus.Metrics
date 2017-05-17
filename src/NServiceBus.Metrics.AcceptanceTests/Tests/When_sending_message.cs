@@ -62,13 +62,16 @@ namespace NServiceBus.Metrics.AcceptanceTests
 
         static string AssertHeaders(IProducerConsumerCollection<IReadOnlyDictionary<string, string>> oneReceiverHeaders)
         {
+            const string keyHeader = "NServiceBus.Metrics.QueueLength.Key";
+            const string valueHeader = "NServiceBus.Metrics.QueueLength.Value";
+
             var headers = oneReceiverHeaders.ToArray();
 
-            var sessionKey1 = headers[0]["NServiceBus.Metrics.QueueLength.Key"];
-            var sessionKey2 = headers[1]["NServiceBus.Metrics.QueueLength.Key"];
+            var sessionKey1 = headers[0][keyHeader];
+            var sessionKey2 = headers[1][keyHeader];
 
-            var sequence1 = long.Parse(headers[0]["NServiceBus.Metrics.QueueLength.Value"]);
-            var sequence2 = long.Parse(headers[1]["NServiceBus.Metrics.QueueLength.Value"]);
+            var sequence1 = long.Parse(headers[0][valueHeader]);
+            var sequence2 = long.Parse(headers[1][valueHeader]);
 
             Assert.AreEqual(sessionKey1, sessionKey2);
             Assert.AreEqual(1, sequence1);
