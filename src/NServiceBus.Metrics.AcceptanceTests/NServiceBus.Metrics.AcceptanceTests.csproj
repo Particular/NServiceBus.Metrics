@@ -73,7 +73,11 @@
     <Compile Include="ConfigureEndpointMsmqTransport.cs" />
     <Compile Include="ConventionEnforcementTests.cs" />
     <Compile Include="PayloadAssert.cs" />
+    <Compile Include="Tests\TagExtensions.cs" />
+    <Compile Include="Tests\SubscriptionBehaviorExtensions.cs" />
+    <Compile Include="Tests\When_receiving_message.cs" />
     <Compile Include="Tests\When_reporting_to_custom_function.cs" />
+    <Compile Include="Tests\When_publishing_message.cs" />
     <Compile Include="Tests\When_telemetry_queue_does_not_exist.cs" />
     <Compile Include="Tests\When_reporting_to_ServiceControl.cs" />
     <Compile Include="DeterministicGuid.cs" />
@@ -88,6 +92,7 @@
     <Compile Include="NServiceBusAcceptanceTest.cs" />
     <Compile Include="ScenarioDescriptors\EnvironmentHelper.cs" />
     <Compile Include="ScenarioDescriptors\TypeScanner.cs" />
+    <Compile Include="Tests\When_sending_message.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
