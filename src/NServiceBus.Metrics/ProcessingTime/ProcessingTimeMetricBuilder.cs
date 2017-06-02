@@ -25,8 +25,6 @@ class ProcessingTimeMetricBuilder : MetricBuilder
         {
             var processingTimeInMilliseconds = ProcessingTimeCalculator.Calculate(e.StartedAt, e.CompletedAt).TotalMilliseconds;
 
-            Console.WriteLine($"ProcTime : {e.StartedAt} to {e.CompletedAt} = {processingTimeInMilliseconds}");
-
             string messageTypeProcessed;
             e.TryGetMessageType(out messageTypeProcessed);
 
