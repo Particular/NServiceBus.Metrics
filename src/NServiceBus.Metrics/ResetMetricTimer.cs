@@ -42,5 +42,6 @@ class ResetMetricTimer
 
     TimeSpan estimatedMaximumProcessingDuration = TimeSpan.FromSeconds(2);
     DateTime lastMessageProcessedTime;
+    // ReSharper disable once NotAccessedField.Local
     System.Threading.Timer timer; // We need this member or GC will dispose timer immediately.
 }
