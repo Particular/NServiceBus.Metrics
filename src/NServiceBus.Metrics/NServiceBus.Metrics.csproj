@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="Core\FeatureConfigurationContextExtensions.cs" />
     <Compile Include="Core\MetricAttribute.cs" />
+    <Compile Include="Core\Snapshotting.cs" />
     <Compile Include="Core\TimerAttribute.cs" />
     <Compile Include="CriticalTime\CriticalTimeMetricBuilder.cs" />
     <Compile Include="Core\MeterAttribute.cs" />

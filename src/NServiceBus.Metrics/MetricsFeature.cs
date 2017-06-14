@@ -1,7 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Metrics;
+using Metrics.Reporters;
 using NServiceBus;
 using NServiceBus.Features;
+using NServiceBus.Logging;
 using NServiceBus.Metrics;
 using NServiceBus.Metrics.QueueLength;
 using NServiceBus.ObjectBuilder;
@@ -32,8 +38,9 @@ class MetricsFeature : Feature
 
         ConfigureMetrics(context, metricsContext);
 
-        context.RegisterStartupTask(builder => new MetricsReporting(metricsContext, metricsOptions, builder));
+        context.RegisterStartupTask(builder => new MetricsReporting(metricsOptions.ReportBuilders, metricsContext, builder, metricsOptions.ReportingInterval));
     }
+
 
     static void ConfigureMetrics(FeatureConfigurationContext context, MetricsContext metricsContext)
     {
@@ -48,27 +55,62 @@ class MetricsFeature : Feature
 
     class MetricsReporting : FeatureStartupTask
     {
-        public MetricsReporting(MetricsContext metricsContext, MetricsOptions metricsOptions, IBuilder builder)
+        public MetricsReporting(List<Func<IBuilder, MetricsReport>> reportBulders, MetricsContext metricContext, IBuilder builder, TimeSpan reportingInterval)
         {
-            this.metricsOptions = metricsOptions;
+            this.reportBulders = reportBulders;
+            this.metricContext = metricContext;
             this.builder = builder;
-            metricsConfig = new MetricsConfig(metricsContext);
+            this.reportingInterval = reportingInterval;
+
+            stopping = new CancellationTokenSource();
         }
 
         protected override Task OnStart(IMessageSession session)
         {
-            metricsOptions.SetUpReports(metricsConfig, builder);
+            var reports = reportBulders.Select(rb => rb(builder)).ToArray();
+
+            ReportInIntervals(reports).IgnoreContinuation();
+
             return Task.FromResult(0);
+        }
+
+        async Task ReportInIntervals(MetricsReport[] reports)
+        {
+            while (!stopping.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    await Task.Delay(reportingInterval).ConfigureAwait(false);
+
+                    var metricsData = metricContext.DataProvider.CurrentMetricsData;
+                    var dataSnapshot = metricsData.ResetMetrics();
+
+                    foreach (var report in reports)
+                    {
+                        report.RunReport(dataSnapshot, HealthChecks.GetStatus, stopping.Token);
+                    }
+                }
+                catch (Exception e)
+                {
+                    log.Error("Error while reporting metrics information.", e);
+                }
+            }
         }
 
         protected override Task OnStop(IMessageSession session)
         {
-            metricsConfig.Dispose();
+            stopping.Cancel();
+
             return Task.FromResult(0);
         }
 
-        MetricsOptions metricsOptions;
+        List<Func<IBuilder, MetricsReport>> reportBulders;
+        MetricsContext metricContext;
         IBuilder builder;
-        MetricsConfig metricsConfig;
+        TimeSpan reportingInterval;
+
+        CancellationTokenSource stopping;
+
+        static ILog log = LogManager.GetLogger<MetricsReporting>();
     }
 }

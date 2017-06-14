@@ -3,8 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using global::Metrics;
-    using global::Metrics.Reports;
+    using global::Metrics.Reporters;
     using Hosting;
     using Logging;
     using ObjectBuilder;
@@ -19,69 +18,49 @@
         /// Enables sending periodic updates of metric data to ServiceControl
         /// </summary>
         /// <param name="serviceControlMetricsAddress">The transport address of the ServiceControl instance</param>
-        /// <param name="interval">How frequently metric data is sent to ServiceControl</param>
         [Obsolete("Not for public use.")]
-        public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, TimeSpan interval)
+        public void SendMetricDataToServiceControl(string serviceControlMetricsAddress)
         {
             Guard.AgainstNullAndEmpty(nameof(serviceControlMetricsAddress), serviceControlMetricsAddress);
-            Guard.AgainstNegativeAndZero(nameof(interval), interval);
 
-            reportInstallers.Add((builder, config) => config.WithReport(
-                new NServiceBusMetricReport(builder.Build<IDispatchMessages>(), serviceControlMetricsAddress, builder.Build<HostInformation>()),
-                interval
-            ));
+            ReportBuilders.Add(builder => new NServiceBusMetricReport(builder.Build<IDispatchMessages>(), serviceControlMetricsAddress, builder.Build<HostInformation>()));
         }
 
         /// <summary>
         /// Enables sending metric data to the trace log
         /// </summary>
-        /// <param name="interval">How often metric data is sent to the trace log</param>
-        public void EnableMetricTracing(TimeSpan interval)
+        public void EnableMetricTracing()
         {
-            Guard.AgainstNegativeAndZero(nameof(interval), interval);
-
-            reportInstallers.Add((builder, config) => config.WithReport(
-                new TraceReport(),
-                interval
-            ));
+            ReportBuilders.Add(builder =>  new TraceReport());
         }
 
         /// <summary>
         /// Enables sending metric data to the NServiceBus log
         /// </summary>
-        /// <param name="interval">How often metric data is sent to the log</param>
         /// <param name="logLevel">Level at which log entries should be written. Default is DEBUG.</param>
-        public void EnableLogTracing(TimeSpan interval, LogLevel logLevel = LogLevel.Debug)
+        public void EnableLogTracing(LogLevel logLevel = LogLevel.Debug)
         {
-            Guard.AgainstNegativeAndZero(nameof(interval), interval);
-
-            reportInstallers.Add((builder, config) => config.WithReport(
-                new MetricsLogReport(logLevel),
-                interval
-            ));
+            ReportBuilders.Add(builder =>  new MetricsLogReport(logLevel));
         }
 
         /// <summary>
         /// Enables custom report, allowing to consume data by any func.
         /// </summary>
         /// <param name="func">A function that will be called with a raw JSON.</param>
-        /// <param name="interval">How often metric data is sent to the log</param>
-        public void EnableCustomReport(Func<string, Task> func, TimeSpan interval)
+        public void EnableCustomReport(Func<string, Task> func)
         {
             Guard.AgainstNull(nameof(func), func);
-            Guard.AgainstNegativeAndZero(nameof(interval), interval);
 
-            reportInstallers.Add((builder, config) => config.WithReport(
-                new CustomReport(func),
-                interval
-            ));
+            ReportBuilders.Add(builder => new CustomReport(func));
         }
 
-        internal void SetUpReports(MetricsConfig config, IBuilder builder)
+        internal void ReportInterval(TimeSpan interval)
         {
-            config.WithReporting(reportsConfig => reportInstallers.ForEach(installer => installer(builder, reportsConfig)));
+            ReportingInterval = interval;
         }
 
-        List<Action<IBuilder, MetricsReports>> reportInstallers = new List<Action<IBuilder, MetricsReports>>();
+        internal List<Func<IBuilder, MetricsReport>> ReportBuilders = new List<Func<IBuilder, MetricsReport>>();
+
+        internal TimeSpan ReportingInterval = TimeSpan.FromSeconds(30);
     }
 }

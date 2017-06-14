@@ -58,11 +58,11 @@
                     var context = (Context)r.ScenarioContext;
 
                     c.LimitMessageProcessingConcurrencyTo(1);
-                    c.EnableMetrics().EnableCustomReport(payload =>
+                    c.EnableMetrics(TimeSpan.FromMilliseconds(5)).EnableCustomReport(payload =>
                     {
                         context.Data = payload;
                         return Task.FromResult(0);
-                    }, TimeSpan.FromMilliseconds(5));
+                    });
 
                     c.Pipeline.Remove("DispatchQueueLengthBehavior");
                 });

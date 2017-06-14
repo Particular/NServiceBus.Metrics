@@ -34,7 +34,7 @@
             {
                 EndpointSetup<DefaultServer>(c =>
                 {
-                    c.EnableMetrics().SendMetricDataToServiceControl("non-existing-queue", TimeSpan.FromSeconds(1));
+                    c.EnableMetrics(TimeSpan.FromSeconds(1)).SendMetricDataToServiceControl("non-existing-queue");
                 });
             }
         }

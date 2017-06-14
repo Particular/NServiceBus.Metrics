@@ -52,7 +52,7 @@
                 {
                     c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
 #pragma warning disable 618
-                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(1));
+                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress);
 #pragma warning restore 618
                 });
             }

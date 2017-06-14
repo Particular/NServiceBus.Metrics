@@ -96,11 +96,11 @@ namespace NServiceBus.Metrics.AcceptanceTests
                     var context = (Context)r.ScenarioContext;
 
                     c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
-                    c.EnableMetrics().EnableCustomReport(payload =>
+                    c.EnableMetrics(TimeSpan.FromMilliseconds(5)).EnableCustomReport(payload =>
                     {
                         context.Data = payload;
                         return Task.FromResult(0);
-                    }, TimeSpan.FromMilliseconds(5));
+                    });
                 });
             }
         }
