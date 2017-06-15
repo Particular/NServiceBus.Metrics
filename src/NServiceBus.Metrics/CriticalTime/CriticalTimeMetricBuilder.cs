@@ -7,8 +7,20 @@ using NServiceBus.Metrics;
 
 class CriticalTimeMetricBuilder : MetricBuilder
 {
+    readonly ResetMetricTimer resetMetricTimer;
+
+    public CriticalTimeMetricBuilder(ResetMetricTimer resetMetricTimer)
+    {
+        this.resetMetricTimer = resetMetricTimer;
+    }
+
     public override void WireUp(FeatureConfigurationContext featureConfigurationContext)
     {
+        resetMetricTimer.NoMessageSentForAWhile += (sender, message) =>
+        {
+            criticalTimeTimer.Record(0, TimeUnit.Milliseconds);
+        };
+
         featureConfigurationContext.Pipeline.OnReceivePipelineCompleted(e =>
         {
             DateTime timeSent;
@@ -23,6 +35,6 @@ class CriticalTimeMetricBuilder : MetricBuilder
         });
     }
 
-    [Timer("Critical Time", "Messages", "Age of the oldest message in the queue.")]
+    [Timer("Critical Time", "Messages", "The time it took from sending to processing the message.")]
     Timer criticalTimeTimer = default(Timer);
 }

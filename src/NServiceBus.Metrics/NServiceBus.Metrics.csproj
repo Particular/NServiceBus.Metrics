@@ -86,6 +86,7 @@
     <Compile Include="Reporters\TraceReport.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="InternalsVisibleTo.cs" />
+    <Compile Include="ResetMetricTimer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NServiceBus.snk" />
