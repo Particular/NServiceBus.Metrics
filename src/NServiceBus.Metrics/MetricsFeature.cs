@@ -87,11 +87,20 @@ class MetricsFeature : Feature
 
                     foreach (var report in reports)
                     {
-                        report.RunReport(dataSnapshot, HealthChecks.GetStatus, stopping.Token);
+                        try
+                        {
+                            report.RunReport(dataSnapshot, HealthChecks.GetStatus, stopping.Token);
+                        }
+                        catch (Exception ex)
+                        {
+                            log.Error($"Error generating report {report.GetType().FullName}.", ex);
+                        }
+
                     }
                 }
                 catch (Exception e)
                 {
+                    //HINT: There is not much we can do except for logging
                     log.Error("Error while reporting metrics information.", e);
                 }
             }
