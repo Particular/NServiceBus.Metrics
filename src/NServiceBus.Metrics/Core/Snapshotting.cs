@@ -4,7 +4,8 @@
     using System.Linq;
     using global::Metrics.MetricData;
 
-    static class MetricsDataExtentions {
+    static class MetricsDataExtentions 
+    {
 
         public static MetricsData ResetMetrics(this MetricsData data)
         {
