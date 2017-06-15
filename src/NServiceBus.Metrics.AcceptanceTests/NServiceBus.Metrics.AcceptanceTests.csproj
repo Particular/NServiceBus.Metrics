@@ -77,7 +77,6 @@
     <Compile Include="Tests\TagExtensions.cs" />
     <Compile Include="Tests\SubscriptionBehaviorExtensions.cs" />
     <Compile Include="Tests\When_receiving_message.cs" />
-    <Compile Include="Tests\When_reporting_to_custom_function.cs" />
     <Compile Include="Tests\When_publishing_message.cs" />
     <Compile Include="Tests\When_telemetry_queue_does_not_exist.cs" />
     <Compile Include="Tests\When_reporting_to_ServiceControl.cs" />
