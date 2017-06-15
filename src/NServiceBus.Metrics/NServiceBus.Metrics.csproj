@@ -79,12 +79,14 @@
     <Compile Include="MetricsFeature.cs" />
     <Compile Include="ProcessingTime\ProcessingTimeCalculator.cs" />
     <Compile Include="AsyncExtensions.cs" />
+    <Compile Include="QueueLength\QueueLengthMetricBuilder.cs" />
     <Compile Include="Reporters\MetricsLogReport.cs" />
     <Compile Include="Reporters\CustomReport.cs" />
     <Compile Include="Reporters\NServiceBusMetricReport.cs" />
     <Compile Include="Reporters\TraceReport.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="InternalsVisibleTo.cs" />
+    <Compile Include="ResetMetricTimer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NServiceBus.snk" />

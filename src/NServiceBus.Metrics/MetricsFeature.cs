@@ -3,6 +3,7 @@ using Metrics;
 using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Metrics;
+using NServiceBus.Metrics.QueueLength;
 using NServiceBus.ObjectBuilder;
 
 class MetricsFeature : Feature
@@ -16,9 +17,12 @@ class MetricsFeature : Feature
     {
         context.ThrowIfSendonly();
 
-        context.RegisterMetricBuilder(new CriticalTimeMetricBuilder());
+        var resetMetricTimer = new ResetMetricTimer(context);
+
+        context.RegisterMetricBuilder(new CriticalTimeMetricBuilder(resetMetricTimer));
         context.RegisterMetricBuilder(new PerformanceStatisticsMetricBuilder());
-        context.RegisterMetricBuilder(new ProcessingTimeMetricBuilder());
+        context.RegisterMetricBuilder(new ProcessingTimeMetricBuilder(resetMetricTimer));
+        context.RegisterMetricBuilder(new QueueLengthMetricBuilder());
 
         var settings = context.Settings;
         var metricsOptions = settings.Get<MetricsOptions>();
