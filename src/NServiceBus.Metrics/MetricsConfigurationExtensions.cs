@@ -25,7 +25,6 @@
                 Guard.AgainstNegativeAndZero(nameof(reportingInterval), reportingInterval);
 
                 options.ReportInterval(reportingInterval.Value);
-
             }
 
             settings.Set(typeof(MetricsFeature).FullName, FeatureState.Enabled);
