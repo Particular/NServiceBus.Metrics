@@ -21,6 +21,7 @@
                 data.ChildMetrics);
         }
     }
+
     static class GagueValueSourceExtentions
     {
         public static GaugeValueSource Snapshot(this GaugeValueSource source)
