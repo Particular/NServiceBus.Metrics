@@ -78,12 +78,18 @@ class MetricsFeature : Feature
         {
             while (!stopping.Token.IsCancellationRequested)
             {
+                var reportWindowStart = DateTime.UtcNow;
+
                 try
                 {
                     await Task.Delay(reportingInterval).ConfigureAwait(false);
 
                     var metricsData = metricContext.DataProvider.CurrentMetricsData;
-                    var dataSnapshot = metricsData.ResetMetrics();
+
+                    var now = DateTime.UtcNow;
+                    var dataSnapshot = metricsData.SnapshotMetrics(reportWindowStart, now);
+
+                    reportWindowStart = now;
 
                     foreach (var report in reports)
                     {

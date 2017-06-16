@@ -7,8 +7,13 @@
     static class MetricsDataExtentions 
     {
 
-        public static MetricsData ResetMetrics(this MetricsData data)
+        public static MetricsData SnapshotMetrics(this MetricsData data, DateTime reportWindowStart, DateTime reportWindowEnd)
         {
+            var environment = data.Environment.ToList();
+
+            environment.Add(new EnvironmentEntry("ReportWindowStart", $"{reportWindowStart:yyyy-MM-ddTHH:mm:ss.FFFZ}"));
+            environment.Add(new EnvironmentEntry("ReportWindowEnd", $"{reportWindowEnd:yyyy-MM-ddTHH:mm:ss.FFFZ}"));
+
             return new MetricsData(
                 data.Context,
                 DateTime.UtcNow,
