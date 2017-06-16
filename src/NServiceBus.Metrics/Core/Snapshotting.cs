@@ -17,7 +17,7 @@
             return new MetricsData(
                 data.Context,
                 DateTime.UtcNow,
-                data.Environment,
+                environment,
                 data.Gauges.Select(g => g.Snapshot()).ToArray(),
                 data.Counters.Select(c => c.Snapshot()).ToArray(),
                 data.Meters.Select(m => m.Snapshot()).ToArray(),
