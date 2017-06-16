@@ -76,10 +76,10 @@ class MetricsFeature : Feature
 
         async Task ReportInIntervals(MetricsReport[] reports)
         {
+            var reportWindowStart = DateTime.UtcNow;
+
             while (!stopping.Token.IsCancellationRequested)
             {
-                var reportWindowStart = DateTime.UtcNow;
-
                 try
                 {
                     await Task.Delay(reportingInterval).ConfigureAwait(false);
