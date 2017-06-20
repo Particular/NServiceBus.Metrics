@@ -36,11 +36,12 @@
                     var context = (Context) r.ScenarioContext;
 
                     c.EnableMetrics()
-                        .EnableCustomReport(payload =>
+                        .EnableCustomReport(TimeSpan.FromMilliseconds(5), 
+                        payload =>
                         {
                             context.Data = payload;
                             return Task.FromResult(0);
-                        }, TimeSpan.FromMilliseconds(5));
+                        });
                 });
             }
         }

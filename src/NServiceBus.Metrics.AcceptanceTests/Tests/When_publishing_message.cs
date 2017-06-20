@@ -116,11 +116,12 @@ namespace NServiceBus.Metrics.AcceptanceTests
                     c.Pipeline.Register(new PreQueueLengthStep());
                     c.Pipeline.Register(new PostQueueLengthStep());
 
-                    c.EnableMetrics().EnableCustomReport(payload =>
+                    c.EnableMetrics().EnableCustomReport(TimeSpan.FromMilliseconds(5), payload =>
                     {
                         context.Data = payload;
                         return Task.FromResult(0);
-                    }, TimeSpan.FromMilliseconds(5));
+                    });
+
                 });
             }
         }

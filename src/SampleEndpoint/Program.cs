@@ -22,7 +22,7 @@ class Program
         var metrics = endpointConfig.EnableMetrics();
         metrics.EnableLogTracing(TimeSpan.FromSeconds(10), LogLevel.Info); // LogLevel.Debug is the default. Overriding to INFO just for the sample.
 #pragma warning disable 618
-        metrics.SendMetricDataToServiceControl("Sample.Endpoint", TimeSpan.FromSeconds(1));
+        metrics.SendMetricDataToServiceControl(TimeSpan.FromSeconds(30), "Sample.Endpoint");
 #pragma warning restore 618
 
         var endpoint = await Endpoint.Start(endpointConfig)
