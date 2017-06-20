@@ -96,7 +96,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
                     var context = (Context)r.ScenarioContext;
 
                     c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
-                    c.EnableMetrics(TimeSpan.FromMilliseconds(5)).EnableCustomReport(payload =>
+                    c.EnableMetrics().EnableCustomReport(TimeSpan.FromMilliseconds(5), payload =>
                     {
                         context.Data = payload;
                         return Task.FromResult(0);

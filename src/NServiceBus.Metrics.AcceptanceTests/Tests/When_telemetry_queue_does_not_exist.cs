@@ -34,7 +34,9 @@
             {
                 EndpointSetup<DefaultServer>(c =>
                 {
-                    c.EnableMetrics(TimeSpan.FromSeconds(1)).SendMetricDataToServiceControl("non-existing-queue");
+#pragma warning disable 618
+                    c.EnableMetrics().SendMetricDataToServiceControl(TimeSpan.FromSeconds(1), "non-existing-queue");
+#pragma warning restore 618
                 });
             }
         }

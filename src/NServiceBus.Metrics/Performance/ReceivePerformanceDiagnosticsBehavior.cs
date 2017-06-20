@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Metrics;
+using NServiceBus.Metrics;
 using NServiceBus.Pipeline;
 
 class ReceivePerformanceDiagnosticsBehavior : IBehavior<IIncomingPhysicalMessageContext, IIncomingPhysicalMessageContext>
 {
-    public ReceivePerformanceDiagnosticsBehavior(Meter messagesPulledFromQueueMeter, Meter failureRateMeter, Meter successRateMeter)
+    public ReceivePerformanceDiagnosticsBehavior(Probe messagesPulledFromQueueMeter, Probe failureRateMeter, Probe successRateMeter)
     {
         this.messagesPulledFromQueueMeter = messagesPulledFromQueueMeter;
         this.failureRateMeter = failureRateMeter;
@@ -14,7 +14,7 @@ class ReceivePerformanceDiagnosticsBehavior : IBehavior<IIncomingPhysicalMessage
 
     public async Task Invoke(IIncomingPhysicalMessageContext context, Func<IIncomingPhysicalMessageContext, Task> next)
     {
-        messagesPulledFromQueueMeter.Mark();
+        messagesPulledFromQueueMeter.Record(1);
 
         try
         {
@@ -22,14 +22,14 @@ class ReceivePerformanceDiagnosticsBehavior : IBehavior<IIncomingPhysicalMessage
         }
         catch (Exception)
         {
-            failureRateMeter.Mark();
+            failureRateMeter.Record(1);
             throw;
         }
 
-        successRateMeter.Mark();
+        successRateMeter.Record(1);
     }
 
-    Meter messagesPulledFromQueueMeter;
-    Meter failureRateMeter;
-    Meter successRateMeter;
+    Probe messagesPulledFromQueueMeter;
+    Probe failureRateMeter;
+    Probe successRateMeter;
 }

@@ -62,17 +62,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\FeatureConfigurationContextExtensions.cs" />
-    <Compile Include="Core\MetricAttribute.cs" />
+    <Compile Include="Core\Probe.cs" />
     <Compile Include="Core\Snapshotting.cs" />
-    <Compile Include="Core\TimerAttribute.cs" />
-    <Compile Include="CriticalTime\CriticalTimeMetricBuilder.cs" />
-    <Compile Include="Core\MeterAttribute.cs" />
-    <Compile Include="Core\MetricBuilder.cs" />
-    <Compile Include="Core\MetricsRegistry.cs" />
-    <Compile Include="Performance\PerformanceStatisticsMetricBuilder.cs" />
+    <Compile Include="CriticalTime\CriticalTimeProbeBuilder.cs" />
+    <Compile Include="Core\ProbeBuilder.cs" />
+    <Compile Include="Performance\PerformanceStatisticsProbeBuilder.cs" />
     <Compile Include="Performance\ReceivePerformanceDiagnosticsBehavior.cs" />
-    <Compile Include="ProcessingTime\ProcessingTimeMetricBuilder.cs" />
+    <Compile Include="ProcessingTime\ProcessingTimeProbeBuilder.cs" />
     <Compile Include="Guard.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="MetricsOptions.cs" />
@@ -80,7 +76,7 @@
     <Compile Include="MetricsFeature.cs" />
     <Compile Include="ProcessingTime\ProcessingTimeCalculator.cs" />
     <Compile Include="AsyncExtensions.cs" />
-    <Compile Include="QueueLength\QueueLengthMetricBuilder.cs" />
+    <Compile Include="QueueLength\QueueLenghtSequenceNumberTracker.cs" />
     <Compile Include="Reporters\MetricsLogReport.cs" />
     <Compile Include="Reporters\CustomReport.cs" />
     <Compile Include="Reporters\NServiceBusMetricReport.cs" />

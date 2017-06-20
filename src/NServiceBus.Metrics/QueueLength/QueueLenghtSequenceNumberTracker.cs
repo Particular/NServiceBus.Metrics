@@ -11,7 +11,7 @@
     using Pipeline;
     using Routing;
 
-    class QueueLengthMetricBuilder : MetricBuilder
+    class QueueLenghtSequenceNumberTracker
     {
         const string KeyHeaderName = "NServiceBus.Metrics.QueueLength.Key";
         const string ValueHeaderName = "NServiceBus.Metrics.QueueLength.Value";
@@ -22,12 +22,8 @@
         ConcurrentDictionary<string, SequenceReporter> receivingReporters = new ConcurrentDictionary<string, SequenceReporter>();
         static readonly Unit Unit = Unit.Custom("Sequence");
 
-        public override void Define(MetricsContext metricsContext)
-        {
-            this.metricsContext = metricsContext;
-        }
 
-        public override void WireUp(FeatureConfigurationContext featureConfigurationContext)
+        public void WireUp(FeatureConfigurationContext featureConfigurationContext)
         {
             var pipeline = featureConfigurationContext.Pipeline;
 
@@ -36,6 +32,11 @@
 
             var incomingBehavior = new IncomingQueueLengthBehavior(this, featureConfigurationContext.Settings.LocalAddress());
             pipeline.Register(incomingBehavior, nameof(IncomingQueueLengthBehavior));
+        }
+
+        public void AttachMetricsContext(MetricsContext context)
+        {
+            metricsContext = context;
         }
 
         long RegisterSend(string key)
@@ -69,12 +70,12 @@
 
         class DispatchQueueLengthBehavior : IBehavior<IDispatchContext, IDispatchContext>
         {
-            readonly QueueLengthMetricBuilder queueLengthMetricBuilder;
+            readonly QueueLenghtSequenceNumberTracker queueLenghtSequenceNumberTracker;
             readonly Guid session;
 
-            public DispatchQueueLengthBehavior(QueueLengthMetricBuilder queueLengthMetricBuilder, Guid session)
+            public DispatchQueueLengthBehavior(QueueLenghtSequenceNumberTracker queueLenghtSequenceNumberTracker, Guid session)
             {
-                this.queueLengthMetricBuilder = queueLengthMetricBuilder;
+                this.queueLenghtSequenceNumberTracker = queueLenghtSequenceNumberTracker;
                 this.session = session;
             }
 
@@ -90,7 +91,7 @@
                     if (unicastAddressTag != null)
                     {
                         key = BuildKey(unicastAddressTag.Destination);
-                        sequence = queueLengthMetricBuilder.RegisterSend(key);
+                        sequence = queueLenghtSequenceNumberTracker.RegisterSend(key);
                     }
                     else
                     {
@@ -98,7 +99,7 @@
                         if (multicastAddressTag != null)
                         {
                             key = BuildKey(multicastAddressTag.MessageType.AssemblyQualifiedName);
-                            sequence = queueLengthMetricBuilder.RegisterSend(key);
+                            sequence = queueLenghtSequenceNumberTracker.RegisterSend(key);
                         }
                         else
                         {
@@ -119,12 +120,12 @@
 
         class IncomingQueueLengthBehavior : IBehavior<IIncomingLogicalMessageContext, IIncomingLogicalMessageContext>
         {
-            readonly QueueLengthMetricBuilder queueLengthMetricBuilder;
+            readonly QueueLenghtSequenceNumberTracker queueLenghtSequenceNumberTracker;
             readonly string inputQueue;
 
-            public IncomingQueueLengthBehavior(QueueLengthMetricBuilder queueLengthMetricBuilder, string inputQueue)
+            public IncomingQueueLengthBehavior(QueueLenghtSequenceNumberTracker queueLenghtSequenceNumberTracker, string inputQueue)
             {
-                this.queueLengthMetricBuilder = queueLengthMetricBuilder;
+                this.queueLenghtSequenceNumberTracker = queueLenghtSequenceNumberTracker;
                 this.inputQueue = inputQueue;
             }
 
@@ -137,7 +138,7 @@
 
                     if (long.TryParse(value, out sequence))
                     {
-                        queueLengthMetricBuilder.RegisterReceive(key, sequence, inputQueue);
+                        queueLenghtSequenceNumberTracker.RegisterReceive(key, sequence, inputQueue);
                     }
                 }
                 return next(context);

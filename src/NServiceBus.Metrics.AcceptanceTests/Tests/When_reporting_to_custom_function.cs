@@ -35,8 +35,9 @@
                 {
                     var context = (Context) r.ScenarioContext;
 
-                    c.EnableMetrics(TimeSpan.FromMilliseconds(5))
-                        .EnableCustomReport(payload =>
+                    c.EnableMetrics()
+                        .EnableCustomReport(TimeSpan.FromMilliseconds(5), 
+                        payload =>
                         {
                             context.Data = payload;
                             return Task.FromResult(0);

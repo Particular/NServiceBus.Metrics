@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,67 +13,95 @@ using NServiceBus.ObjectBuilder;
 
 class MetricsFeature : Feature
 {
-    public MetricsFeature()
-    {
-        Defaults(s => { s.Set<MetricsRegistry>(new MetricsRegistry()); });
-    }
-
     protected override void Setup(FeatureConfigurationContext context)
     {
         context.ThrowIfSendonly();
 
-        var resetMetricTimer = new ResetMetricTimer(context);
-
-        context.RegisterMetricBuilder(new CriticalTimeMetricBuilder(resetMetricTimer));
-        context.RegisterMetricBuilder(new PerformanceStatisticsMetricBuilder());
-        context.RegisterMetricBuilder(new ProcessingTimeMetricBuilder(resetMetricTimer));
-        context.RegisterMetricBuilder(new QueueLengthMetricBuilder());
-
         var settings = context.Settings;
         var metricsOptions = settings.Get<MetricsOptions>();
 
-        // the context is used as originating endpoint in the headers
-        MetricsContext metricsContext = new DefaultMetricsContext($"{settings.EndpointName()}");
 
-        ConfigureMetrics(context, metricsContext);
+        if (metricsOptions.ProbeObservers.Any() ||
+            metricsOptions.ReportDefintions.Any())
+        {
+            var metrics = new ProbeBuilder[]
+            {
+                new CriticalTimeProbeBuilder(),
+                new PerformanceStatisticsProbeBuilder(),
+                new ProcessingTimeProbeBuilder()
+            };
 
-        context.RegisterStartupTask(builder => new MetricsReporting(metricsOptions.ReportBuilders, metricsContext, builder, metricsOptions.ReportingInterval));
+            var probes = metrics.SelectMany(pb => pb.WireUp(context)).ToArray();
+            
+            foreach (var probeObserver in metricsOptions.ProbeObservers)
+            {
+                probeObserver.Invoke(probes);
+            }
+
+            var queueLengthTracker = new QueueLenghtSequenceNumberTracker();
+            queueLengthTracker.WireUp(context);
+
+            Func<DefaultMetricsContext> buildContext = () =>
+            {
+                var metricContext = BuildMetricContext(settings.EndpointName(), probes);
+                queueLengthTracker.AttachMetricsContext(metricContext);
+
+                return metricContext;
+            };
+
+            context.RegisterStartupTask(builder => new MetricsReporting(buildContext, metricsOptions.ReportDefintions.ToArray(), builder));
+        }
     }
 
-
-    static void ConfigureMetrics(FeatureConfigurationContext context, MetricsContext metricsContext)
+    static DefaultMetricsContext BuildMetricContext(string endpointName, Probe[] probes)
     {
-        var builders = context.Settings.Get<MetricsRegistry>().Builders;
+        var context = new DefaultMetricsContext($"{endpointName}");
 
-        foreach (var builder in builders)
+        foreach (var probe in probes)
         {
-            builder.Define(metricsContext);
-            builder.WireUp(context);
+            if (probe.Type == MeasurementValueType.Count)
+            {
+                var counter = context.Counter(probe.Name, string.Empty, default(MetricTags));
+
+                probe.MeasurementTaken += v => counter.Increment(v);
+            }
+            else if (probe.Type == MeasurementValueType.Time)
+            {
+                var timer = context.Timer(probe.Name, string.Empty, SamplingType.LongTerm, TimeUnit.Seconds, TimeUnit.Milliseconds, default(MetricTags));
+
+                probe.MeasurementTaken += v => timer.Record(v, TimeUnit.Milliseconds);
+            }
         }
+
+        return context;
     }
 
     class MetricsReporting : FeatureStartupTask
     {
-        public MetricsReporting(List<Func<IBuilder, MetricsReport>> reportBulders, MetricsContext metricContext, IBuilder builder, TimeSpan reportingInterval)
+        public MetricsReporting(Func<DefaultMetricsContext> buildContext, MetricsOptions.ReportDefintion[] reportDefinitions, IBuilder builder)
         {
-            this.reportBulders = reportBulders;
-            this.metricContext = metricContext;
+            this.buildContext = buildContext;
+            this.reportDefinitions = reportDefinitions;
             this.builder = builder;
-            this.reportingInterval = reportingInterval;
 
             stopping = new CancellationTokenSource();
         }
 
         protected override Task OnStart(IMessageSession session)
         {
-            var reports = reportBulders.Select(rb => rb(builder)).ToArray();
+            foreach (var reportDefinition in reportDefinitions)
+            {
+                var context = buildContext();
 
-            ReportInIntervals(reports).IgnoreContinuation();
+                var report = reportDefinition.Builder(builder);
+
+                ReportInIntervals(report, reportDefinition.Interval, context).IgnoreContinuation();
+            }
 
             return Task.FromResult(0);
         }
 
-        async Task ReportInIntervals(MetricsReport[] reports)
+        async Task ReportInIntervals(MetricsReport report, TimeSpan interval, MetricsContext context)
         {
             var reportWindowStart = DateTime.UtcNow;
 
@@ -82,27 +109,16 @@ class MetricsFeature : Feature
             {
                 try
                 {
-                    await Task.Delay(reportingInterval).ConfigureAwait(false);
+                    await Task.Delay(interval).ConfigureAwait(false);
 
-                    var metricsData = metricContext.DataProvider.CurrentMetricsData;
+                    var reportWindowEnd = DateTime.UtcNow;
 
-                    var now = DateTime.UtcNow;
-                    var dataSnapshot = metricsData.SnapshotMetrics(reportWindowStart, now);
+                    var metricsData = context.DataProvider.CurrentMetricsData;
+                    var dataSnapshot = metricsData.SnapshotMetrics(reportWindowStart, reportWindowEnd);
 
-                    reportWindowStart = now;
+                    report.RunReport(dataSnapshot, HealthChecks.GetStatus, stopping.Token);
 
-                    foreach (var report in reports)
-                    {
-                        try
-                        {
-                            report.RunReport(dataSnapshot, HealthChecks.GetStatus, stopping.Token);
-                        }
-                        catch (Exception ex)
-                        {
-                            log.Error($"Error generating report {report.GetType().FullName}.", ex);
-                        }
-
-                    }
+                    reportWindowStart = reportWindowEnd;
                 }
                 catch (Exception e)
                 {
@@ -119,13 +135,12 @@ class MetricsFeature : Feature
             return Task.FromResult(0);
         }
 
-        List<Func<IBuilder, MetricsReport>> reportBulders;
-        MetricsContext metricContext;
-        IBuilder builder;
-        TimeSpan reportingInterval;
+        readonly Func<DefaultMetricsContext> buildContext;
+        readonly MetricsOptions.ReportDefintion[] reportDefinitions;
+        readonly IBuilder builder;
 
-        CancellationTokenSource stopping;
+        readonly CancellationTokenSource stopping;
 
-        static ILog log = LogManager.GetLogger<MetricsReporting>();
+        static readonly ILog log = LogManager.GetLogger<MetricsReporting>();
     }
 }
