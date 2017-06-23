@@ -1,100 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B1325985-F0CF-4EC6-81E2-C57C56380537}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NServiceBus.Metrics</RootNamespace>
-    <AssemblyName>NServiceBus.Metrics</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\..\binaries\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\binaries\NServiceBus.Metrics.xml</DocumentationFile>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>CS8002</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\..\binaries\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\binaries\NServiceBus.Metrics.xml</DocumentationFile>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>CS8002</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup>
+    <TargetFramework>net452</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(SolutionDir)NServiceBus.snk</AssemblyOriginatorKeyFile>
+    <DebugType>full</DebugType>
+    <DebugSymbols>True</DebugSymbols>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <OutputPath>..\..\binaries\</OutputPath>
+    <NoWarn>CS8002</NoWarn>
+    <UpdateAssemblyInfo>true</UpdateAssemblyInfo>
   </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>NServiceBus.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Metrics, Version=0.4.8.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Metrics.NET.0.4.8\lib\net45\Metrics.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NServiceBus.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NServiceBus.6.2.0\lib\net452\NServiceBus.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <None Include="..\..\packaging\nuget\NServiceBus.Metrics.nuspec" Link="NServiceBus.Metrics.nuspec" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\FeatureConfigurationContextExtensions.cs" />
-    <Compile Include="Core\MetricAttribute.cs" />
-    <Compile Include="Core\TimerAttribute.cs" />
-    <Compile Include="CriticalTime\CriticalTimeMetricBuilder.cs" />
-    <Compile Include="Core\MeterAttribute.cs" />
-    <Compile Include="Core\MetricBuilder.cs" />
-    <Compile Include="Core\MetricsRegistry.cs" />
-    <Compile Include="Performance\PerformanceStatisticsMetricBuilder.cs" />
-    <Compile Include="Performance\ReceivePerformanceDiagnosticsBehavior.cs" />
-    <Compile Include="ProcessingTime\ProcessingTimeMetricBuilder.cs" />
-    <Compile Include="Guard.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="MetricsOptions.cs" />
-    <Compile Include="MetricsConfigurationExtensions.cs" />
-    <Compile Include="MetricsFeature.cs" />
-    <Compile Include="ProcessingTime\ProcessingTimeCalculator.cs" />
-    <Compile Include="AsyncExtensions.cs" />
-    <Compile Include="QueueLength\QueueLengthMetricBuilder.cs" />
-    <Compile Include="Reporters\MetricsLogReport.cs" />
-    <Compile Include="Reporters\CustomReport.cs" />
-    <Compile Include="Reporters\NServiceBusMetricReport.cs" />
-    <Compile Include="Reporters\TraceReport.cs" />
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="InternalsVisibleTo.cs" />
-    <Compile Include="ResetMetricTimer.cs" />
+    <PackageReference Include="Metrics.NET" Version="0.4.8" />
+    <PackageReference Include="NServiceBus" Version="6.2.0" />
+    <PackageReference Include="NuGetPackager" Version="0.6.3" />
+    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="NServiceBus.snk" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets" Condition="Exists('..\packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets')" />
-  <Target Name="AfterBuild">
+  <Target Name="BeforeBuildPackages" BeforeTargets="BuildPackages">
     <MakeDir Directories="$(TargetDir)temp\" />
     <Exec Command="&quot;$(SolutionDir)..\tools\ilmerge.exe&quot; /log:$(TargetDir)ilmerge.log /keyfile:&quot;$(SolutionDir)NServiceBus.snk&quot; /internalize /out:&quot;$(TargetDir)temp\$(TargetFileName)&quot; &quot;$(TargetPath)&quot; &quot;$(TargetDir)Metrics.dll&quot; /target:library /targetplatform:&quot;v4,$(FrameworkPathOverride)&quot;" />
     <ItemGroup>
@@ -104,12 +32,4 @@
     <Delete Files="@(TempFiles)" />
     <RemoveDir Directories="$(TargetDir)temp\" />
   </Target>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets'))" />
-    <Error Condition="!Exists('..\packages\NuGetPackager.0.6.1\build\NuGetPackager.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NuGetPackager.0.6.1\build\NuGetPackager.targets'))" />
-  </Target>
-  <Import Project="..\packages\NuGetPackager.0.6.1\build\NuGetPackager.targets" Condition="Exists('..\packages\NuGetPackager.0.6.1\build\NuGetPackager.targets')" />
 </Project>
