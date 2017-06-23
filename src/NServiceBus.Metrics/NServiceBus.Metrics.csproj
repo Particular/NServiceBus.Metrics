@@ -14,6 +14,9 @@
     <UpdateAssemblyInfo>true</UpdateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="..\..\packaging\nuget\NServiceBus.Metrics.nuspec" Link="NServiceBus.Metrics.nuspec" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Metrics.NET" Version="0.4.8" />
     <PackageReference Include="NServiceBus" Version="6.2.0" />
     <PackageReference Include="NuGetPackager" Version="0.6.3" />
