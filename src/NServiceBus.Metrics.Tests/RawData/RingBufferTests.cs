@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Metrics.Tests.RawData
 {
     using System.Linq;
+    using System.Threading.Tasks;
     using Metrics.RawData;
     using NUnit.Framework;
 
@@ -50,6 +51,75 @@
             Consume(1, 2);
             Consume(3, 4);
             Consume();
+        }
+
+        [Test]
+        public void Full_write_multiple_times()
+        {
+            var values = Enumerable.Repeat(1, RingBuffer.Size).Select(i => (long)i).ToArray();
+            WriteValues(values);
+            Consume(values);
+            WriteValues(values);
+            Consume(values);
+            WriteValues(values);
+            Consume(values);
+        }
+
+        [Test]
+        public Task Concurrent_test()
+        {
+            const int size = 100000;
+
+            var result = new byte[size * 2];
+
+            var producer1 = Task.Factory.StartNew(() =>
+            {
+                for (var i = 0; i < size; i++)
+                {
+                    while (ringBuffer.TryWrite(i) == false)
+                    {
+                    }
+                }
+            }, TaskCreationOptions.LongRunning);
+
+            var producer2 = Task.Factory.StartNew(() =>
+            {
+                for (var i = 0; i < size; i++)
+                {
+                    while (ringBuffer.TryWrite(i + size) == false)
+                    {
+                    }
+                }
+            }, TaskCreationOptions.LongRunning);
+
+            var consumer = Task.Factory.StartNew(() =>
+            {
+
+                while (true)
+                {
+                    int read;
+
+                    // read till it returns
+                    do
+                    {
+                        read = ringBuffer.Consume(chunk =>
+                        {
+                            foreach (var value in chunk)
+                            {
+                                result[value.Value] = 1;
+                            }
+                        });
+                    } while (read > 0);
+
+                    var completed = result.Count(b => b > 0);
+                    if (completed == result.Length)
+                    {
+                        break;
+                    }
+                }
+            });
+
+            return Task.WhenAll(producer1, producer2, consumer);
         }
 
         void Consume(params long[] values)

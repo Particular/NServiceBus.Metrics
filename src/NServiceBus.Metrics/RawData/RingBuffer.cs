@@ -22,15 +22,24 @@
 
         public bool TryWrite(long value)
         {
-            var write = Interlocked.Increment(ref nextToWrite) - 1;
-            var consume = Volatile.Read(ref nextToConsume);
+            var readNextWrite = Volatile.Read(ref nextToWrite);
+            long index;
 
-            if (write - consume >= Size)
+            do
             {
-                return false;
-            }
+                var consume = Volatile.Read(ref nextToConsume);
 
-            var i = write & SizeMask;
+                // if writers overlaps with not consumed writes, end
+                if (readNextWrite - consume >= Size)
+                {
+                    return false;
+                }
+                index = readNextWrite;
+                readNextWrite = Interlocked.CompareExchange(ref nextToWrite, index + 1, index);
+            } while (index != readNextWrite);
+            
+            // index is claimed, writing data
+            var i = index & SizeMask;
             var ticks = DateTime.Now.Ticks;
 
             entries[i].Value = value;
