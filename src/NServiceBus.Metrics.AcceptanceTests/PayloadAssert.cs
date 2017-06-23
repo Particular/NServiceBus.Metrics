@@ -20,8 +20,6 @@ public static class PayloadAssert
     {
         "# of message failures / sec",
         "# of messages pulled from the input queue / sec",
-        "# of messages successfully processed / sec",
-        "Critical Time",
-        "Processing Time"
+        "# of messages successfully processed / sec"
     };
 }

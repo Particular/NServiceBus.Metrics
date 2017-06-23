@@ -12,7 +12,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
 
-    public class When_sending_message : NServiceBusAcceptanceTest
+    public class When_sending_message : QueueLengthAcceptanceTests
     {
         static string ReceiverAddress1 => Conventions.EndpointNamingConvention(typeof(Receiver1));
         static string ReceiverAddress2 => Conventions.EndpointNamingConvention(typeof(Receiver2));
@@ -38,6 +38,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
                 }))
                 .WithEndpoint<Receiver1>()
                 .WithEndpoint<Receiver2>()
+                .WithEndpoint<QueueLengthAcceptanceTests.MonitoringSpy>()
                 .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2)
                 .Run()
                 .ConfigureAwait(false);
@@ -80,11 +81,10 @@ namespace NServiceBus.Metrics.AcceptanceTests
             return sessionKey1;
         }
 
-        class Context : ScenarioContext
+        class Context : QueueLengthContext
         {
             public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers1 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
             public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers2 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
-            public string Data { get; set; }
         }
 
         class Sender : EndpointConfigurationBuilder
@@ -96,11 +96,9 @@ namespace NServiceBus.Metrics.AcceptanceTests
                     var context = (Context)r.ScenarioContext;
 
                     c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
-                    c.EnableMetrics().EnableCustomReport(payload =>
-                    {
-                        context.Data = payload;
-                        return Task.FromResult(0);
-                    }, TimeSpan.FromMilliseconds(5));
+#pragma warning disable 618
+                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromMilliseconds(5));
+#pragma warning restore 618
                 });
             }
         }

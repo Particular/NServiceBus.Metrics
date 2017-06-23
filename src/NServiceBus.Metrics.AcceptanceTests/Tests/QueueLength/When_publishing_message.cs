@@ -10,7 +10,6 @@ namespace NServiceBus.Metrics.AcceptanceTests
     using Extensibility;
     using Features;
     using global::Newtonsoft.Json.Linq;
-    using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
     using ObjectBuilder;
@@ -18,7 +17,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
     using Routing;
     using Transport;
 
-    public class When_publishing_message : NServiceBusAcceptanceTest
+    public class When_publishing_message : QueueLengthAcceptanceTests
     {
         static Guid HostId = Guid.NewGuid();
 
@@ -38,6 +37,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
                     await session.Subscribe<TestEventMessage1>();
                     await session.Subscribe<TestEventMessage2>();
                 }))
+                .WithEndpoint<QueueLengthAcceptanceTests.MonitoringSpy>()
                 .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2)
                 .Run()
                 .ConfigureAwait(false);
@@ -88,12 +88,11 @@ namespace NServiceBus.Metrics.AcceptanceTests
             sequence = long.Parse(parts[1]);
         }
 
-        class Context : ScenarioContext
+        class Context : QueueLengthContext
         {
             public volatile int SubscriptionCount;
             public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers1 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
             public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers2 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
-            public string Data { get; set; }
         }
 
         class Publisher : EndpointConfigurationBuilder
@@ -102,8 +101,6 @@ namespace NServiceBus.Metrics.AcceptanceTests
             {
                 EndpointSetup<DefaultServer>((c, r) =>
                 {
-                    var context = (Context)r.ScenarioContext;
-
                     c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
                     c.OnEndpointSubscribed<Context>((s, ctx) =>
                     {
@@ -116,11 +113,9 @@ namespace NServiceBus.Metrics.AcceptanceTests
                     c.Pipeline.Register(new PreQueueLengthStep());
                     c.Pipeline.Register(new PostQueueLengthStep());
 
-                    c.EnableMetrics().EnableCustomReport(payload =>
-                    {
-                        context.Data = payload;
-                        return Task.FromResult(0);
-                    }, TimeSpan.FromMilliseconds(5));
+#pragma warning disable 618
+                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromMilliseconds(5));
+#pragma warning restore 618
                 });
             }
         }

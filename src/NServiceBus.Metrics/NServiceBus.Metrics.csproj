@@ -22,6 +22,10 @@
     <PackageReference Include="NuGetPackager" Version="0.6.3" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CriticalTime\" />
+    <Folder Include="ProcessingTime\" />
+  </ItemGroup>
   <Target Name="BeforeBuildPackages" BeforeTargets="BuildPackages">
     <MakeDir Directories="$(TargetDir)temp\" />
     <Exec Command="&quot;$(SolutionDir)..\tools\ilmerge.exe&quot; /log:$(TargetDir)ilmerge.log /keyfile:&quot;$(SolutionDir)NServiceBus.snk&quot; /internalize /out:&quot;$(TargetDir)temp\$(TargetFileName)&quot; &quot;$(TargetPath)&quot; &quot;$(TargetDir)Metrics.dll&quot; /target:library /targetplatform:&quot;v4,$(FrameworkPathOverride)&quot;" />

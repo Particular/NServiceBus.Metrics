@@ -1,63 +1,101 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Metrics;
 using NServiceBus;
 using NServiceBus.Features;
+using NServiceBus.Hosting;
 using NServiceBus.Metrics;
 using NServiceBus.Metrics.QueueLength;
 using NServiceBus.ObjectBuilder;
+using NServiceBus.Transport;
 
 class MetricsFeature : Feature
 {
-    public MetricsFeature()
-    {
-        Defaults(s => { s.Set<MetricsRegistry>(new MetricsRegistry()); });
-    }
-
     protected override void Setup(FeatureConfigurationContext context)
     {
         context.ThrowIfSendonly();
-
-        var resetMetricTimer = new ResetMetricTimer(context);
-
-        context.RegisterMetricBuilder(new CriticalTimeMetricBuilder(resetMetricTimer));
-        context.RegisterMetricBuilder(new PerformanceStatisticsMetricBuilder());
-        context.RegisterMetricBuilder(new ProcessingTimeMetricBuilder(resetMetricTimer));
-        context.RegisterMetricBuilder(new QueueLengthMetricBuilder());
+        
+        var probeContext = BuildProbes(context);
 
         var settings = context.Settings;
         var metricsOptions = settings.Get<MetricsOptions>();
 
+        metricsOptions.SetUpObservers(probeContext);
+
         // the context is used as originating endpoint in the headers
         MetricsContext metricsContext = new DefaultMetricsContext($"{settings.EndpointName()}");
 
-        ConfigureMetrics(context, metricsContext);
+        SetUpQueueLengthReporting(context, metricsContext);
 
-        context.RegisterStartupTask(builder => new MetricsReporting(metricsContext, metricsOptions, builder));
+        SetUpSingalReporting(probeContext, metricsContext);
+
+        context.RegisterStartupTask(builder => new ServiceControlReporting(metricsContext, builder, metricsOptions));
     }
 
-    static void ConfigureMetrics(FeatureConfigurationContext context, MetricsContext metricsContext)
+    static void SetUpSingalReporting(ProbeContext probeContext, MetricsContext metricsContext)
     {
-        var builders = context.Settings.Get<MetricsRegistry>().Builders;
-
-        foreach (var builder in builders)
+        probeContext.Signals.ToList().ForEach(sp =>
         {
-            builder.Define(metricsContext);
-            builder.WireUp(context);
-        }
+            var meter = metricsContext.Meter(sp.Name, string.Empty);
+
+            sp.Register(() => meter.Mark());
+        });
     }
 
-    class MetricsReporting : FeatureStartupTask
+    static void SetUpQueueLengthReporting(FeatureConfigurationContext context, MetricsContext metricsContext)
     {
-        public MetricsReporting(MetricsContext metricsContext, MetricsOptions metricsOptions, IBuilder builder)
+        new QueueLengthTracker().SetUp(metricsContext, context);
+    }
+
+    static ProbeContext BuildProbes(FeatureConfigurationContext context)
+    {
+        var durationBuilders = new DurationProbeBuilder[]
         {
-            this.metricsOptions = metricsOptions;
+            new CriticalTimeProbeBuilder(),
+            new ProcessingTimeProbeBuilder()
+        };
+
+        var performanceDiagnosticsBehavior = new ReceivePerformanceDiagnosticsBehavior();
+
+        context.Pipeline.Register(
+            "NServiceBus.Metrics.ReceivePerformanceDiagnosticsBehavior",
+            performanceDiagnosticsBehavior,
+            "Provides various performance counters for receive statistics"
+        );
+
+        var signalBuilders = new SignalProbeBuilder[]
+        {
+            new MessagePulledFromQueueProbeBuilder(performanceDiagnosticsBehavior),
+            new MessageProcessingFailureProbeBuilder(performanceDiagnosticsBehavior),
+            new MessageProcessingSuccessProbeBuilder(performanceDiagnosticsBehavior)
+        };
+
+        return new ProbeContext
+        {
+            Durations = durationBuilders.Select(b => b.Build(context)).ToArray(),
+            Signals = signalBuilders.Select(b => b.Build(context)).ToArray()
+        };
+    }
+
+    class ServiceControlReporting : FeatureStartupTask
+    {
+        public ServiceControlReporting(MetricsContext metricsContext, IBuilder builder, MetricsOptions options)
+        {
             this.builder = builder;
+            this.options = options;
+
             metricsConfig = new MetricsConfig(metricsContext);
         }
 
         protected override Task OnStart(IMessageSession session)
         {
-            metricsOptions.SetUpReports(metricsConfig, builder);
+            var serviceControlReport = new NServiceBusMetricReport(
+                builder.Build<IDispatchMessages>(), 
+                options.ServiceControlMetricsAddress, 
+                builder.Build<HostInformation>());
+
+            metricsConfig.WithReporting(mr => mr.WithReport(serviceControlReport, options.ReportingInterval));
+
             return Task.FromResult(0);
         }
 
@@ -67,8 +105,8 @@ class MetricsFeature : Feature
             return Task.FromResult(0);
         }
 
-        MetricsOptions metricsOptions;
         IBuilder builder;
+        MetricsOptions options;
         MetricsConfig metricsConfig;
     }
 }
