@@ -1,4 +1,5 @@
-﻿namespace NServiceBus.Metrics.AcceptanceTests
+﻿#pragma warning disable 618
+namespace NServiceBus.Metrics.AcceptanceTests
 {
     using System;
     using System.Linq;
@@ -34,7 +35,8 @@
             {
                 EndpointSetup<DefaultServer>(c =>
                 {
-                    c.EnableMetrics().SendMetricDataToServiceControl("non-existing-queue", TimeSpan.FromSeconds(1));
+                    var metrics = c.EnableMetrics();
+                    metrics.SendMetricDataToServiceControl("non-existing-queue", TimeSpan.FromSeconds(1));
                 });
             }
         }

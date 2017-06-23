@@ -1,35 +1,19 @@
 ﻿namespace NServiceBus.Metrics.Tests
 {
-    using System;
-    using System.Linq;
+    using System.IO;
     using System.Runtime.CompilerServices;
-    using ApprovalTests;
-    using ApprovalTests.Reporters;
+    using ApiApprover;
     using NUnit.Framework;
-    using PublicApiGenerator;
 
     [TestFixture]
     public class APIApprovals
     {
         [Test]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UseReporter(typeof(DiffReporter))]
-        public void ApproveAPI()
+        public void Approve()
         {
-            var publicApi = Filter(ApiGenerator.GeneratePublicApi(typeof(MetricsFeature).Assembly));
-            Approvals.Verify(publicApi);
+            Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
+            PublicApiApprover.ApprovePublicApi(typeof(MetricsFeature).Assembly);
         }
-
-        string Filter(string text)
-        {
-            return string.Join(Environment.NewLine, text.Split(new[]
-            {
-                Environment.NewLine
-            }, StringSplitOptions.RemoveEmptyEntries)
-                .Where(l => !l.StartsWith("[assembly: ReleaseDateAttribute("))
-                .Where(l => !string.IsNullOrWhiteSpace(l))
-                );
-        }
-
     }
 }
