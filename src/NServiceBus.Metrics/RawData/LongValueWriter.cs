@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Metrics.RawData
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
 
     static class LongValueWriter
@@ -37,18 +36,6 @@
                 var date = (int)(array[offset + i].Ticks - minDate);
                 outputWriter.Write(date);
                 outputWriter.Write(array[offset + i].Value);
-            }
-        }
-
-        class EntryTickComparer : IComparer<RingBuffer.Entry>
-        {
-            public static readonly EntryTickComparer Instance = new EntryTickComparer();
-
-            EntryTickComparer() { }
-
-            public int Compare(RingBuffer.Entry x, RingBuffer.Entry y)
-            {
-                return x.Ticks.CompareTo(y.Ticks);
             }
         }
     }

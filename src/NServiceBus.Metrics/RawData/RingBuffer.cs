@@ -5,7 +5,7 @@
 
     class RingBuffer
     {
-        const long Size = 65536;
+        public const int Size = 4096;
         const long SizeMask = Size - 1;
         const long EpochMask = ~SizeMask;
 
@@ -25,7 +25,7 @@
             var write = Interlocked.Increment(ref nextToWrite) - 1;
             var consume = Volatile.Read(ref nextToConsume);
 
-            if (write - consume > Size)
+            if (write - consume >= Size)
             {
                 return false;
             }
@@ -38,7 +38,7 @@
 
             return true;
         }
-        
+
         /// <summary>
         /// Consumes a chunk of entries. This method will call <paramref name="onChunk"/> zero, or one time. No multiple calls will be issued.
         /// </summary>
@@ -49,40 +49,27 @@
             var max = Volatile.Read(ref nextToWrite);
 
             var i = consume;
-            while (Volatile.Read(ref entries[i].Ticks) > 0 && i < max)
+            var epoch = i & EpochMask;
+            var length = 0;
+            while (Volatile.Read(ref entries[i & SizeMask].Ticks) > 0 && i < max)
             {
+                if ((i & EpochMask) != epoch)
+                    break;
+
+                length++;
                 i++;
             }
 
             // [consume, i) - entries to process
             var indexStart = (int)(consume & SizeMask);
-            var length = (int)(i - consume);
 
             if (length == 0)
             {
-                return length;
+                return 0;
             }
 
-            var startEpoch = indexStart & EpochMask;
-            var endEpoch = (indexStart + length) & EpochMask;
-
-            if (startEpoch == endEpoch)
-            {
-                onChunk(new ArraySegment<Entry>(entries, indexStart, length));
-                Array.Clear(entries, indexStart, length);
-            }
-            else
-            {
-                // buffer overlaps
-                var firstEpochEnd = startEpoch + Size - 1;
-                var firstEpochLength = (int)(consume - firstEpochEnd);
-                onChunk(new ArraySegment<Entry>(entries, indexStart, firstEpochLength));
-                Array.Clear(entries, indexStart, firstEpochLength);
-
-                // onChunk is called once per call now
-                //onChunk(new ArraySegment<Entry>(entries, 0, length - firstEpochLength));
-                //Array.Clear(entries, 0, length - firstEpochLength);
-            }
+            onChunk(new ArraySegment<Entry>(entries, indexStart, length));
+            Array.Clear(entries, indexStart, length);
 
             Interlocked.Add(ref nextToConsume, length);
             return length;
