@@ -1,5 +1,4 @@
 using NServiceBus;
-using NServiceBus.Features;
 using NServiceBus.Metrics;
 
 [ProbeProperties(ProbeType.Signal, "# of message failures / sec", "Message processing failed.")]
