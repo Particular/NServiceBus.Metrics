@@ -27,12 +27,12 @@ class MetricsFeature : Feature
 
         SetUpQueueLengthReporting(context, metricsContext);
 
-        SetUpSingalReporting(probeContext, metricsContext);
+        SetUpSignalReporting(probeContext, metricsContext);
 
         context.RegisterStartupTask(builder => new ServiceControlReporting(metricsContext, builder, metricsOptions));
     }
 
-    static void SetUpSingalReporting(ProbeContext probeContext, MetricsContext metricsContext)
+    static void SetUpSignalReporting(ProbeContext probeContext, MetricsContext metricsContext)
     {
         probeContext.Signals.ToList().ForEach(sp =>
         {
@@ -70,11 +70,10 @@ class MetricsFeature : Feature
             new MessageProcessingSuccessProbeBuilder(performanceDiagnosticsBehavior)
         };
 
-        return new ProbeContext
-        {
-            Durations = durationBuilders.Select(b => b.Build(context)).ToArray(),
-            Signals = signalBuilders.Select(b => b.Build(context)).ToArray()
-        };
+        return new ProbeContext(
+            durationBuilders.Select(b => b.Build(context)).ToArray(),
+            signalBuilders.Select(b => b.Build(context)).ToArray()
+        );
     }
 
     class ServiceControlReporting : FeatureStartupTask

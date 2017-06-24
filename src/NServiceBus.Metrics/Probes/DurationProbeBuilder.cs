@@ -22,21 +22,16 @@ namespace NServiceBus.Metrics
 
         DurationProbe GetProbe()
         {
-            var attr = GetType().GetCustomAttribute<ProbePropertiesAttribute>();
+            var attribute = GetType().GetCustomAttribute<ProbePropertiesAttribute>();
 
-            return new DurationProbe(attr.Name, attr.Description);
+            if(attribute == null)
+            {
+                var exceptionMessage = $"The type '{GetType()}' is not annotated with required '{typeof(ProbePropertiesAttribute).Name}'. This attribute has to be added to provide necessary metadata for the probe.";
+
+                throw new Exception(exceptionMessage);
+            }
+
+            return new DurationProbe(attribute.Name, attribute.Description);
         }
-    }
-
-    class ProbePropertiesAttribute : Attribute
-    {
-        public ProbePropertiesAttribute(string name, string description)
-        {
-            Name = name;
-            Description = description;
-        }
-
-        public readonly string Name;
-        public readonly string Description;
     }
 }

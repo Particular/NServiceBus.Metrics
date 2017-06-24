@@ -29,9 +29,8 @@ namespace NServiceBus
     }
     public class ProbeContext
     {
-        public NServiceBus.DurationProbe[] Durations;
-        public NServiceBus.SignalProbe[] Signals;
-        public ProbeContext() { }
+        public NServiceBus.DurationProbe[] Durations { get; }
+        public NServiceBus.SignalProbe[] Signals { get; }
     }
     public class SignalProbe : NServiceBus.Probe
     {

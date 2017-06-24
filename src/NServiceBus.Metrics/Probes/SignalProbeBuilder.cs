@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using NServiceBus;
 using NServiceBus.Features;
@@ -20,8 +21,15 @@ abstract class SignalProbeBuilder
 
     SignalProbe GetProbe()
     {
-        var attr = GetType().GetCustomAttribute<ProbePropertiesAttribute>();
+        var attribute = GetType().GetCustomAttribute<ProbePropertiesAttribute>();
 
-        return new SignalProbe(attr.Name, attr.Description);
+        if (attribute == null)
+        {
+            var exceptionMessage = $"The type '{GetType()}' is not annotated with required '{typeof(ProbePropertiesAttribute).Name}'. This attribute has to be added to provide necessary metadata for the probe.";
+
+            throw new Exception(exceptionMessage);
+        }
+
+        return new SignalProbe(attribute.Name, attribute.Description);
     }
 }
