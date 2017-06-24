@@ -49,15 +49,21 @@
     /// </summary>
     public class ProbeContext
     {
+        internal ProbeContext(DurationProbe[] durations, SignalProbe[] signals)
+        {
+            Durations = durations;
+            Signals = signals;
+        }
+
         /// <summary>
         /// Duration type probes.
         /// </summary>
-        public DurationProbe[] Durations;
+        public DurationProbe[] Durations { get; }
 
         /// <summary>
         /// Signal type probes.
         /// </summary>
-        public SignalProbe[] Signals;
+        public SignalProbe[] Signals { get; }
     }
 
     /// <summary>
