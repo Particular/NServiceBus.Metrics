@@ -1,23 +1,21 @@
-﻿namespace NServiceBus
+﻿using System;
+using NServiceBus;
+
+class SignalProbe : Probe, ISignalProbe
 {
-    using System;
-
-    class SignalProbe : Probe, ISignalProbe
+    public SignalProbe(string name, string description) : base(name, description)
     {
-        public SignalProbe(string name, string description) : base(name, description)
-        {
-        }
-
-        internal void Signal()
-        {
-            observers();
-        }
-
-        public void Register(Action observer)
-        {
-            observers += observer;
-        }
-
-        Action observers = () => { };
     }
+
+    public void Register(Action observer)
+    {
+        observers += observer;
+    }
+
+    internal void Signal()
+    {
+        observers();
+    }
+
+    Action observers = () => { };
 }

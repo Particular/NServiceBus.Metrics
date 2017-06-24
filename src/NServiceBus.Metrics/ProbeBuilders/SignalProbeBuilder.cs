@@ -1,7 +1,5 @@
 using System;
 using System.Reflection;
-using NServiceBus;
-using NServiceBus.Metrics;
 
 abstract class SignalProbeBuilder
 {

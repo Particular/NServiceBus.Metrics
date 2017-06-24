@@ -5,9 +5,17 @@
 namespace NServiceBus
 {
     
-    public class DurationProbe : NServiceBus.Probe
+    public interface IDurationProbe
     {
-        public void Register(System.Action<System.TimeSpan> observer) { }
+        string Description { get; }
+        string Name { get; }
+        void Register(System.Action<System.TimeSpan> observer);
+    }
+    public interface ISignalProbe
+    {
+        string Description { get; }
+        string Name { get; }
+        void Register(System.Action observer);
     }
     public class static MetricsConfigurationExtensions
     {
@@ -21,19 +29,10 @@ namespace NServiceBus
         [System.ObsoleteAttribute("Not for public use.")]
         public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, System.TimeSpan interval) { }
     }
-    public abstract class Probe
-    {
-        protected Probe(string name, string description) { }
-        public string Description { get; }
-        public string Name { get; }
-    }
     public class ProbeContext
     {
-        public NServiceBus.DurationProbe[] Durations { get; }
-        public NServiceBus.SignalProbe[] Signals { get; }
-    }
-    public class SignalProbe : NServiceBus.Probe
-    {
-        public void Register(System.Action observer) { }
+        public ProbeContext(NServiceBus.IDurationProbe[] durations, NServiceBus.ISignalProbe[] signals) { }
+        public NServiceBus.IDurationProbe[] Durations { get; }
+        public NServiceBus.ISignalProbe[] Signals { get; }
     }
 }
