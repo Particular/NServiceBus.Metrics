@@ -49,7 +49,12 @@
     /// </summary>
     public class ProbeContext
     {
-        internal ProbeContext(DurationProbe[] durations, SignalProbe[] signals)
+        /// <summary>
+        /// Crates <see cref="ProbeContext"/>.
+        /// </summary>
+        /// <param name="durations">Duration probes collection.</param>
+        /// <param name="signals">Signal probes collection</param>
+        public ProbeContext(IDurationProbe[] durations, ISignalProbe[] signals)
         {
             Durations = durations;
             Signals = signals;
@@ -58,24 +63,39 @@
         /// <summary>
         /// Duration type probes.
         /// </summary>
-        public DurationProbe[] Durations { get; }
+        public IDurationProbe[] Durations { get; }
 
         /// <summary>
         /// Signal type probes.
         /// </summary>
-        public SignalProbe[] Signals { get; }
+        public ISignalProbe[] Signals { get; }
     }
 
     /// <summary>
     /// Probe that signals event occurence
     /// </summary>
-    public class SignalProbe : Probe
+    public interface ISignalProbe
     {
         /// <summary>
-        /// Creates <see cref="SignalProbe"/>
+        /// Enables registering action called on event occurence.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="description"></param>
+        /// <param name="observer"></param>
+        void Register(Action observer);
+
+        /// <summary>
+        /// Name of the probe.
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
+        /// Descripton of the probe.
+        /// </summary>
+        string Description { get; }
+    }
+
+    
+    class SignalProbe : Probe, ISignalProbe
+    {
         public SignalProbe(string name, string description) : base(name, description)
         {
         }
@@ -85,10 +105,6 @@
             observers();
         }
 
-        /// <summary>
-        /// Enables registering action called on event occurence.
-        /// </summary>
-        /// <param name="observer"></param>
         public void Register(Action observer)
         {
             observers += observer;
@@ -100,13 +116,27 @@
     /// <summary>
     /// Probe that measures duration of an event.
     /// </summary>
-    public class DurationProbe : Probe
+    public interface IDurationProbe
     {
         /// <summary>
-        /// Creates <see cref="DurationProbe"/>.
+        /// Enables registering action called on event occurence.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="description"></param>
+        /// <param name="observer"></param>
+        void Register(Action<TimeSpan> observer);
+
+        /// <summary>
+        /// Name of the probe.
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
+        /// Descripton of the probe.
+        /// </summary>
+        string Description { get; }
+    }
+
+    class DurationProbe : Probe, IDurationProbe
+    {
         public DurationProbe(string name, string description) : base(name, description)
         {
         }
@@ -116,10 +146,6 @@
             observers(duration);
         }
 
-        /// <summary>
-        /// Enables registering action called on event occurence.
-        /// </summary>
-        /// <param name="observer"></param>
         public void Register(Action<TimeSpan> observer)
         {
             observers += observer;
@@ -128,26 +154,12 @@
         Action<TimeSpan> observers = span => { };
     }
 
-    /// <summary>
-    /// Enables receiving notifications after registering an observer
-    /// </summary>
-    public abstract class Probe
+    abstract class Probe
     {
-        /// <summary>
-        /// Name of the probe.
-        /// </summary>
         public string Name { get; }
 
-        /// <summary>
-        /// Descripton of the probe.
-        /// </summary>
         public string Description { get; }
 
-        /// <summary>
-        /// Creates <see cref="Probe"/>.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="description"></param>
         protected Probe(string name, string description)
         {
             Name = name;
