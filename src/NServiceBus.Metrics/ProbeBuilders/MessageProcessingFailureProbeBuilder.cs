@@ -1,4 +1,4 @@
-[ProbeProperties("# of messages successfully processed / sec", "Message processing succeeded.")]
+[ProbeProperties("# of msgs failures / sec", "The current number of failed processed messages by the transport per second.")]
 class MessageProcessingFailureProbeBuilder : SignalProbeBuilder
 {
     public MessageProcessingFailureProbeBuilder(ReceivePerformanceDiagnosticsBehavior behavior)
