@@ -71,7 +71,12 @@
     /// </summary>
     public class SignalProbe : Probe
     {
-        internal SignalProbe(string name, string description) : base(name, description)
+        /// <summary>
+        /// Creates <see cref="SignalProbe"/>
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="description"></param>
+        public SignalProbe(string name, string description) : base(name, description)
         {
         }
 
@@ -97,7 +102,12 @@
     /// </summary>
     public class DurationProbe : Probe
     {
-        internal DurationProbe(string name, string description) : base(name, description)
+        /// <summary>
+        /// Creates <see cref="DurationProbe"/>.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="description"></param>
+        public DurationProbe(string name, string description) : base(name, description)
         {
         }
 
