@@ -93,25 +93,6 @@
         string Description { get; }
     }
 
-    
-    class SignalProbe : Probe, ISignalProbe
-    {
-        public SignalProbe(string name, string description) : base(name, description)
-        {
-        }
-
-        internal void Signal()
-        {
-            observers();
-        }
-
-        public void Register(Action observer)
-        {
-            observers += observer;
-        }
-
-        Action observers = () => { };
-    }
 
     /// <summary>
     /// Probe that measures duration of an event.
@@ -133,37 +114,5 @@
         /// Descripton of the probe.
         /// </summary>
         string Description { get; }
-    }
-
-    class DurationProbe : Probe, IDurationProbe
-    {
-        public DurationProbe(string name, string description) : base(name, description)
-        {
-        }
-
-        internal void Record(TimeSpan duration)
-        {
-            observers(duration);
-        }
-
-        public void Register(Action<TimeSpan> observer)
-        {
-            observers += observer;
-        }
-
-        Action<TimeSpan> observers = span => { };
-    }
-
-    abstract class Probe
-    {
-        public string Name { get; }
-
-        public string Description { get; }
-
-        protected Probe(string name, string description)
-        {
-            Name = name;
-            Description = description;
-        }
     }
 }
