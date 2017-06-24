@@ -1,4 +1,4 @@
-[ProbeProperties(ProbeType.Signal, "# of messages successfully processed / sec", "Message processing succeeded.")]
+[ProbeProperties("# of messages successfully processed / sec", "Message processing succeeded.")]
 class MessageProcessingFailureProbeBuilder : SignalProbeBuilder
 {
     public MessageProcessingFailureProbeBuilder(ReceivePerformanceDiagnosticsBehavior behavior)

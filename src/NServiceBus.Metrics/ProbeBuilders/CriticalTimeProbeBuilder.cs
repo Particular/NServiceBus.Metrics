@@ -2,7 +2,7 @@ using System;
 using NServiceBus;
 using NServiceBus.Features;
 
-[ProbeProperties(ProbeType.Duration, "Critical Time", "Time between message sent till end of processing.")]
+[ProbeProperties("Critical Time", "Time between message sent till end of processing.")]
 class CriticalTimeProbeBuilder : DurationProbeBuilder
 {
     public CriticalTimeProbeBuilder(FeatureConfigurationContext context)

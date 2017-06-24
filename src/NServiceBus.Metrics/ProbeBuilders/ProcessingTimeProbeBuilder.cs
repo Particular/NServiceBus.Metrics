@@ -1,7 +1,7 @@
 using NServiceBus;
 using NServiceBus.Features;
 
-[ProbeProperties(ProbeType.Duration, "Processing Time", "The time it took to successfully process a message.")]
+[ProbeProperties("Processing Time", "The time it took to successfully process a message.")]
 class ProcessingTimeProbeBuilder : DurationProbeBuilder
 {
     public ProcessingTimeProbeBuilder(FeatureConfigurationContext context)

@@ -4,7 +4,6 @@ using Metrics;
 using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Hosting;
-using NServiceBus.Metrics;
 using NServiceBus.Metrics.QueueLength;
 using NServiceBus.ObjectBuilder;
 using NServiceBus.Transport;
@@ -29,7 +28,10 @@ class MetricsFeature : Feature
 
         SetUpSignalReporting(probeContext, metricsContext);
 
-        context.RegisterStartupTask(builder => new ServiceControlReporting(metricsContext, builder, metricsOptions));
+        if (!string.IsNullOrEmpty(metricsOptions.ServiceControlMetricsAddress))
+        {
+            context.RegisterStartupTask(builder => new ServiceControlReporting(metricsContext, builder, metricsOptions));
+        }
     }
 
     static void SetUpSignalReporting(ProbeContext probeContext, MetricsContext metricsContext)
