@@ -29,7 +29,7 @@
                     options.SetHeader(ValueHeader, SequenceValue);
                     await s.Send(new TestMessage(), options);
                 }))
-                .WithEndpoint<QueueLengthAcceptanceTests.MonitoringSpy>()
+                .WithEndpoint<MonitoringSpy>()
                 .Done(c => c.Handled && c.Data != null && c.Data.Contains("Received sequence for"))
                 .Run()
                 .ConfigureAwait(false);

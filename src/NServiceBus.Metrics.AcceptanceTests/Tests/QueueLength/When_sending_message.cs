@@ -8,7 +8,6 @@ namespace NServiceBus.Metrics.AcceptanceTests
     using AcceptanceTesting;
     using AcceptanceTesting.Customization;
     using global::Newtonsoft.Json.Linq;
-    using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
 
@@ -38,8 +37,8 @@ namespace NServiceBus.Metrics.AcceptanceTests
                 }))
                 .WithEndpoint<Receiver1>()
                 .WithEndpoint<Receiver2>()
-                .WithEndpoint<QueueLengthAcceptanceTests.MonitoringSpy>()
-                .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2)
+                .WithEndpoint<MonitoringSpy>()
+                .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2 && c.Handled)
                 .Run()
                 .ConfigureAwait(false);
 
@@ -93,11 +92,9 @@ namespace NServiceBus.Metrics.AcceptanceTests
             {
                 EndpointSetup<DefaultServer>((c, r) =>
                 {
-                    var context = (Context)r.ScenarioContext;
-
                     c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
 #pragma warning disable 618
-                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromMilliseconds(5));
+                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(5));
 #pragma warning restore 618
                 });
             }

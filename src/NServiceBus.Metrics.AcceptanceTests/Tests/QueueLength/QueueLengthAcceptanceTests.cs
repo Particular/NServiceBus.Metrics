@@ -34,6 +34,7 @@
                 public Task Handle(MetricReport message, IMessageHandlerContext context)
                 {
                     TestContext.Data = message.Data.ToString();
+                    TestContext.Handled = true;
 
                     return Task.FromResult(0);
                 }

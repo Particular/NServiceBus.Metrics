@@ -37,8 +37,8 @@ namespace NServiceBus.Metrics.AcceptanceTests
                     await session.Subscribe<TestEventMessage1>();
                     await session.Subscribe<TestEventMessage2>();
                 }))
-                .WithEndpoint<QueueLengthAcceptanceTests.MonitoringSpy>()
-                .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2)
+                .WithEndpoint<MonitoringSpy>()
+                .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2 & c.Handled)
                 .Run()
                 .ConfigureAwait(false);
 
@@ -114,7 +114,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
                     c.Pipeline.Register(new PostQueueLengthStep());
 
 #pragma warning disable 618
-                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromMilliseconds(5));
+                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(5));
 #pragma warning restore 618
                 });
             }
