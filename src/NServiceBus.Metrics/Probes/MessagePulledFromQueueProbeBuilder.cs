@@ -1,7 +1,7 @@
 using NServiceBus;
 using NServiceBus.Metrics;
 
-[ProbeProperties("# of messages pulled from the input queue / sec", "Message pulled from the queue.")]
+[ProbeProperties(ProbeType.Signal, "# of messages pulled from the input queue / sec", "Message pulled from the queue.")]
 class MessagePulledFromQueueProbeBuilder : SignalProbeBuilder
 {
     public MessagePulledFromQueueProbeBuilder(ReceivePerformanceDiagnosticsBehavior behavior)

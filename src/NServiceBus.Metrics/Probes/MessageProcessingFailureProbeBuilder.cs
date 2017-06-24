@@ -1,7 +1,7 @@
 using NServiceBus;
 using NServiceBus.Metrics;
 
-[ProbeProperties("# of messages successfully processed / sec", "Message processing succeeded.")]
+[ProbeProperties(ProbeType.Signal, "# of messages successfully processed / sec", "Message processing succeeded.")]
 class MessageProcessingFailureProbeBuilder : SignalProbeBuilder
 {
     public MessageProcessingFailureProbeBuilder(ReceivePerformanceDiagnosticsBehavior behavior)
