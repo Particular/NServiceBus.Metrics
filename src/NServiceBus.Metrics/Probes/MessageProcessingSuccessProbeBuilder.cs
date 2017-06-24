@@ -10,7 +10,7 @@ class MessageProcessingSuccessProbeBuilder : SignalProbeBuilder
         this.behavior = behavior;
     }
 
-    protected override void WireUp(FeatureConfigurationContext context, SignalProbe probe)
+    protected override void WireUp(SignalProbe probe)
     {
         behavior.ProcessingSuccess = probe;
     }

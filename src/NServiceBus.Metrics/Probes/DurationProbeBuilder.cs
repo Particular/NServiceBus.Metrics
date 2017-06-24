@@ -2,20 +2,20 @@ namespace NServiceBus.Metrics
 {
     using System;
     using System.Reflection;
-    using Features;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Defines a custom metric.
     /// </summary>
     abstract class DurationProbeBuilder
     {
-        protected abstract void WireUp(FeatureConfigurationContext context, DurationProbe probe);
+        protected abstract void WireUp(DurationProbe probe);
 
-        public DurationProbe Build(FeatureConfigurationContext context)
+        public DurationProbe Build()
         {
             var probe = GetProbe();
 
-            WireUp(context, probe);
+            WireUp(probe);
 
             return probe;
         }
@@ -33,5 +33,7 @@ namespace NServiceBus.Metrics
 
             return new DurationProbe(attribute.Name, attribute.Description);
         }
+
+        protected static readonly Task<int> CompletedTask = Task.FromResult(0);
     }
 }

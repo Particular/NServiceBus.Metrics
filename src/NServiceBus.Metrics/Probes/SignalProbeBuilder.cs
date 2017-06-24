@@ -1,20 +1,17 @@
 using System;
 using System.Reflection;
 using NServiceBus;
-using NServiceBus.Features;
 using NServiceBus.Metrics;
-
-
 
 abstract class SignalProbeBuilder
 {
-    protected abstract void WireUp(FeatureConfigurationContext context, SignalProbe probe);
+    protected abstract void WireUp(SignalProbe probe);
 
-    public SignalProbe Build(FeatureConfigurationContext context)
+    public SignalProbe Build()
     {
         var probe = GetProbe();
 
-        WireUp(context, probe);
+        WireUp(probe);
 
         return probe;
     }

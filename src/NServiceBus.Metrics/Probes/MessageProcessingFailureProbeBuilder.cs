@@ -1,5 +1,4 @@
 using NServiceBus;
-using NServiceBus.Features;
 using NServiceBus.Metrics;
 
 [ProbeProperties("# of messages successfully processed / sec", "Message processing succeeded.")]
@@ -10,7 +9,7 @@ class MessageProcessingFailureProbeBuilder : SignalProbeBuilder
         this.behavior = behavior;
     }
 
-    protected override void WireUp(FeatureConfigurationContext context, SignalProbe probe)
+    protected override void WireUp(SignalProbe probe)
     {
         behavior.ProcessingFailure = probe;
     }

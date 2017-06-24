@@ -1,14 +1,16 @@
 namespace NServiceBus.Metrics
 {
-    using System.Threading.Tasks;
     using Features;
 
     [ProbeProperties("Processing Time", "The time it took to successfully process a message.")]
     class ProcessingTimeProbeBuilder : DurationProbeBuilder
     {
-        static readonly Task<int> CompletedTask = Task.FromResult(0);
+        public ProcessingTimeProbeBuilder(FeatureConfigurationContext context)
+        {
+            this.context = context;
+        }
 
-        protected override void WireUp(FeatureConfigurationContext context, DurationProbe probe)
+        protected override void WireUp(DurationProbe probe)
         {
             context.Pipeline.OnReceivePipelineCompleted(e =>
             {
@@ -22,5 +24,7 @@ namespace NServiceBus.Metrics
                 return CompletedTask;
             });
         }
+
+        readonly FeatureConfigurationContext context;
     }
 }

@@ -51,8 +51,8 @@ class MetricsFeature : Feature
     {
         var durationBuilders = new DurationProbeBuilder[]
         {
-            new CriticalTimeProbeBuilder(),
-            new ProcessingTimeProbeBuilder()
+            new CriticalTimeProbeBuilder(context),
+            new ProcessingTimeProbeBuilder(context)
         };
 
         var performanceDiagnosticsBehavior = new ReceivePerformanceDiagnosticsBehavior();
@@ -71,8 +71,8 @@ class MetricsFeature : Feature
         };
 
         return new ProbeContext(
-            durationBuilders.Select(b => b.Build(context)).ToArray(),
-            signalBuilders.Select(b => b.Build(context)).ToArray()
+            durationBuilders.Select(b => b.Build()).ToArray(),
+            signalBuilders.Select(b => b.Build()).ToArray()
         );
     }
 

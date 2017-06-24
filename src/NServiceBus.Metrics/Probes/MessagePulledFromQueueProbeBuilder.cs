@@ -1,5 +1,4 @@
 using NServiceBus;
-using NServiceBus.Features;
 using NServiceBus.Metrics;
 
 [ProbeProperties("# of messages pulled from the input queue / sec", "Message pulled from the queue.")]
@@ -10,7 +9,7 @@ class MessagePulledFromQueueProbeBuilder : SignalProbeBuilder
         this.behavior = behavior;
     }
 
-    protected override void WireUp(FeatureConfigurationContext context, SignalProbe probe)
+    protected override void WireUp(SignalProbe probe)
     {
         behavior.MessagePulledFromQueue = probe;
     }
