@@ -16,6 +16,12 @@
 
         public struct Entry
         {
+            public Entry(long ticks, long value)
+            {
+                Ticks = ticks;
+                Value = value;
+            }
+
             public long Ticks;
             public long Value;
         }
@@ -35,7 +41,11 @@
                     return false;
                 }
                 index = readNextWrite;
+
+                // try to swap nextToWrite
                 readNextWrite = Interlocked.CompareExchange(ref nextToWrite, index + 1, index);
+
+                // do until the swap not succeeded
             } while (index != readNextWrite);
             
             // index is claimed, writing data
