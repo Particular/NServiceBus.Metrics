@@ -64,7 +64,7 @@
         /// <param name="onChunk"></param>
         public int Consume(Action<ArraySegment<Entry>> onChunk)
         {
-            var consume = Interlocked.Read(ref nextToConsume);
+            var consume = Interlocked.CompareExchange(ref nextToConsume, 0, 0);
             var max = Volatile.Read(ref nextToWrite);
 
             var i = consume;
