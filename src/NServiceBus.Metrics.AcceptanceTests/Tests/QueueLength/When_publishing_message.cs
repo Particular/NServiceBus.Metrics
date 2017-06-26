@@ -38,26 +38,44 @@ namespace NServiceBus.Metrics.AcceptanceTests
                     await session.Subscribe<TestEventMessage2>();
                 }))
                 .WithEndpoint<MonitoringSpy>()
-                .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2 & c.Handled)
+                .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2 && SequencesReported(c))
                 .Run()
                 .ConfigureAwait(false);
 
-            var sessionIds = new[] { AssertHeaders(context.Headers1), AssertHeaders(context.Headers2) };
+            SequencesReported(context);
+        }
 
-            var data = JObject.Parse(context.Data);
-            var counters = (JArray)data["Counters"];
-            var counterTokens = counters.Where(c => c.Value<string>("Name").StartsWith("Sent sequence for"));
-
-            foreach (var counter in counterTokens)
+        static bool SequencesReported(Context context)
+        {
+            try
             {
-                var tags = counter["Tags"].ToObject<string[]>();
-                var counterBasedKey = tags.GetTagValue("key");
-                var type = tags.GetTagValue("type");
+                var sessionIds = new[]
+                {
+                    AssertHeaders(context.Headers1),
+                    AssertHeaders(context.Headers2)
+                };
 
-                CollectionAssert.Contains(sessionIds, counterBasedKey);
-                Assert.AreEqual(2, counter.Value<int>("Count"));
-                Assert.AreEqual("queue-length.sent", type);
+                var data = JObject.Parse(context.Data);
+                var counters = (JArray) data["Counters"];
+                var counterTokens = counters.Where(c => c.Value<string>("Name").StartsWith("Sent sequence for"));
+
+                foreach (var counter in counterTokens)
+                {
+                    var tags = counter["Tags"].ToObject<string[]>();
+                    var counterBasedKey = tags.GetTagValue("key");
+                    var type = tags.GetTagValue("type");
+
+                    CollectionAssert.Contains(sessionIds, counterBasedKey);
+                    Assert.AreEqual(2, counter.Value<int>("Count"));
+                    Assert.AreEqual("queue-length.sent", type);
+                }
             }
+            catch
+            {
+                return false;
+            }
+
+            return true;
         }
 
         static string AssertHeaders(IProducerConsumerCollection<IReadOnlyDictionary<string, string>> oneReceiverHeaders)
