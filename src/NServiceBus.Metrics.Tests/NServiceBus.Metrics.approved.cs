@@ -5,16 +5,17 @@
 namespace NServiceBus
 {
     
-    public interface IDurationProbe
+    public interface IDurationProbe : NServiceBus.IProbe
     {
-        string Description { get; }
-        string Name { get; }
         void Register(System.Action<System.TimeSpan> observer);
     }
-    public interface ISignalProbe
+    public interface IProbe
     {
         string Description { get; }
         string Name { get; }
+    }
+    public interface ISignalProbe : NServiceBus.IProbe
+    {
         void Register(System.Action observer);
     }
     public class static MetricsConfigurationExtensions
