@@ -68,6 +68,15 @@
             var max = Volatile.Read(ref nextToWrite);
 
             var i = consume;
+            
+            // The epoch identifies the id of the current passage over the circular buffer. 
+            // This is used to ensure, that once the Consume goes over the edge of the buffer, 
+            // and starts from the beginning, this part won't be included in the result passed to onChunk. 
+            // If it was, this could not be represented as a continuous ArraySegment<Entry>.
+            //
+            // Example:
+            // To consume a buffer with following values [5, 6, null, 4] the consumer would first consume
+            // a segment [4] followed by consumption of [5, 6] in the next Consume call.
             var epoch = i & EpochMask;
             var length = 0;
             while (Volatile.Read(ref entries[i & SizeMask].Ticks) > 0 && i < max)
