@@ -72,16 +72,10 @@
     }
 
     /// <summary>
-    /// Probe that signals event occurence
+    /// Represents probe description.
     /// </summary>
-    public interface ISignalProbe
+    public interface IProbe
     {
-        /// <summary>
-        /// Enables registering action called on event occurence.
-        /// </summary>
-        /// <param name="observer"></param>
-        void Register(Action observer);
-
         /// <summary>
         /// Name of the probe.
         /// </summary>
@@ -93,11 +87,23 @@
         string Description { get; }
     }
 
+    /// <summary>
+    /// Probe that signals event occurence
+    /// </summary>
+    public interface ISignalProbe : IProbe
+    {
+        /// <summary>
+        /// Enables registering action called on event occurence.
+        /// </summary>
+        /// <param name="observer"></param>
+        void Register(Action observer);
+    }
+
 
     /// <summary>
     /// Probe that measures duration of an event.
     /// </summary>
-    public interface IDurationProbe
+    public interface IDurationProbe : IProbe
     {
         /// <summary>
         /// Enables registering action called on event occurence.
@@ -105,14 +111,5 @@
         /// <param name="observer"></param>
         void Register(Action<TimeSpan> observer);
 
-        /// <summary>
-        /// Name of the probe.
-        /// </summary>
-        string Name { get; }
-
-        /// <summary>
-        /// Descripton of the probe.
-        /// </summary>
-        string Description { get; }
     }
 }
