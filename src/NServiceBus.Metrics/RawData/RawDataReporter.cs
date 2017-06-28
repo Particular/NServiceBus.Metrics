@@ -49,7 +49,7 @@
 
         public void Start()
         {
-            reporter = Task.Factory.StartNew(async () =>
+            reporter = Task.Run(async () =>
             {
                 while (cancellationTokenSource.IsCancellationRequested == false)
                 {
@@ -60,7 +60,7 @@
 
                     if (consumed == 0)
                     {
-                        await Task.Delay(delayTime);
+                        await Task.Delay(delayTime).ConfigureAwait(false);
                     }
                     else
                     {
