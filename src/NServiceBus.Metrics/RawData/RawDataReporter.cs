@@ -7,6 +7,7 @@
     using System.Threading.Tasks;
     using Extensibility;
     using Hosting;
+    using Logging;
     using Routing;
     using Support;
     using Transport;
@@ -26,7 +27,8 @@
         readonly CancellationTokenSource cancellationTokenSource;
         Task reporter;
         static readonly TimeSpan delayTime = TimeSpan.FromSeconds(1);
-
+        static ILog log = LogManager.GetLogger<RawDataReporter>();
+        
         public RawDataReporter(IDispatchMessages dispatcher, string destination, HostInformation hostInformation, RingBuffer buffer, string messageTypeName, string endpointName,
             WriteOutput outputWriter)
         {
@@ -67,7 +69,14 @@
 
                         var message = new OutgoingMessage(Guid.NewGuid().ToString(), headers, body);
                         var operation = new TransportOperation(message, destination);
-                        await dispatcher.Dispatch(new TransportOperations(operation), transportTransaction, new ContextBag()).ConfigureAwait(false);
+                        try
+                        {
+                            await dispatcher.Dispatch(new TransportOperations(operation), transportTransaction, new ContextBag()).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            log.Error($"Error while reporting raw data to {destination}.", ex);
+                        }
                     }
                 }
             });
