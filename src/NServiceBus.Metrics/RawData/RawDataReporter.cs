@@ -14,7 +14,7 @@
 
     delegate void WriteOutput(ArraySegment<RingBuffer.Entry> entries, BinaryWriter outputWriter);
 
-    class RawDataReporter
+    class RawDataReporter : IDisposable
     {
         const int DefaultFlushSize = RingBuffer.Size / 2;
         readonly RingBuffer buffer;
@@ -84,11 +84,11 @@
                         await Task.Delay(singleSpinningTime).ConfigureAwait(false);
                     }
 
-                    await Consume();
+                    await Consume().ConfigureAwait(false);
                 }
 
                 // flush data before ending
-                await Consume();
+                await Consume().ConfigureAwait(false);
             });
         }
 
@@ -121,6 +121,13 @@
         {
             cancellationTokenSource.Cancel();
             return reporter;
+        }
+
+        public void Dispose()
+        {
+            writer?.Dispose();
+            memoryStream?.Dispose();
+            cancellationTokenSource?.Dispose();
         }
     }
 }
