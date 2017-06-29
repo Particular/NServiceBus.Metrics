@@ -6,7 +6,7 @@ namespace NServiceBus.Metrics.Tests.RawData
     using Metrics.RawData;
     using NUnit.Framework;
 
-    public abstract class WriterTestBase
+    public abstract class WriterTestBase : IDisposable
     {
         MemoryStream ms;
         BinaryWriter bw;
@@ -40,12 +40,22 @@ namespace NServiceBus.Metrics.Tests.RawData
 
         protected void Assert(Action<BinaryWriter> write)
         {
-            var stream = new MemoryStream();
-            var writer = new BinaryWriter(stream);
-            write(writer);
-            writer.Flush();
+            using (var stream = new MemoryStream())
+            {
+                using (var binaryWriter = new BinaryWriter(stream))
+                {
+                    write(binaryWriter);
+                    binaryWriter.Flush();
+                }
 
-            CollectionAssert.AreEqual(stream.ToArray(), ms.ToArray());
+                CollectionAssert.AreEqual(stream.ToArray(), ms.ToArray());
+            }
+        }
+
+        public void Dispose()
+        {
+            bw?.Dispose();
+            ms?.Dispose();
         }
     }
 }

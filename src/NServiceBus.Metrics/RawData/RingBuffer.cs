@@ -58,10 +58,7 @@
             return true;
         }
 
-        /// <summary>
-        /// Consumes a chunk of entries. This method will call <paramref name="onChunk"/> zero, or one time. No multiple calls will be issued.
-        /// </summary>
-        /// <param name="onChunk"></param>
+        // Consumes a chunk of entries. This method will call onChunk zero, or one time. No multiple calls will be issued.
         public int Consume(Action<ArraySegment<Entry>> onChunk)
         {
             var consume = Interlocked.CompareExchange(ref nextToConsume, 0, 0);
