@@ -16,7 +16,9 @@
 
     class RawDataReporter
     {
+        const int DefaultFlushSize = RingBuffer.Size / 2;
         readonly RingBuffer buffer;
+        readonly int flushSize;
         readonly Action<ArraySegment<RingBuffer.Entry>> outputWriter;
         readonly IDispatchMessages dispatcher;
         readonly UnicastAddressTag destination;
@@ -25,21 +27,30 @@
         readonly BinaryWriter writer;
         readonly MemoryStream memoryStream;
         readonly CancellationTokenSource cancellationTokenSource;
+        readonly TimeSpan maxSpinningTime;
         Task reporter;
-        static readonly TimeSpan delayTime = TimeSpan.FromSeconds(1);
+
+        static readonly TimeSpan DefaultMaxSpinningTime = TimeSpan.FromSeconds(5);
+        static readonly TimeSpan singleSpinningTime = TimeSpan.FromMilliseconds(50);
         static ILog log = LogManager.GetLogger<RawDataReporter>();
-        
+
         public RawDataReporter(IDispatchMessages dispatcher, string destination, HostInformation hostInformation, RingBuffer buffer, string messageTypeName, string endpointName,
-            WriteOutput outputWriter)
+            WriteOutput outputWriter) : this(dispatcher, destination, hostInformation, buffer, messageTypeName, endpointName, outputWriter, DefaultFlushSize, DefaultMaxSpinningTime)
+        { }
+
+        public RawDataReporter(IDispatchMessages dispatcher, string destination, HostInformation hostInformation, RingBuffer buffer, string messageTypeName, string endpointName,
+            WriteOutput outputWriter, int flushSize, TimeSpan maxSpinningTime)
         {
             this.buffer = buffer;
-            this.outputWriter = entries=>outputWriter(entries,writer);
+            this.flushSize = flushSize;
+            this.maxSpinningTime = maxSpinningTime;
+            this.outputWriter = entries => outputWriter(entries, writer);
             this.dispatcher = dispatcher;
             this.destination = new UnicastAddressTag(destination);
 
             headers[Headers.OriginatingMachine] = RuntimeEnvironment.MachineName;
             headers[Headers.OriginatingHostId] = hostInformation.HostId.ToString("N");
-            headers[Headers.EnclosedMessageTypes] = "NServiceBus.Metrics." + messageTypeName; 
+            headers[Headers.EnclosedMessageTypes] = "NServiceBus.Metrics." + messageTypeName;
             headers[Headers.OriginatingEndpoint] = endpointName;
 
             memoryStream = new MemoryStream();
@@ -53,33 +64,57 @@
             {
                 while (cancellationTokenSource.IsCancellationRequested == false)
                 {
-                    // clear stream first
-                    memoryStream.SetLength(0);
+                    var totalSpinningTime = TimeSpan.Zero;
 
-                    var consumed = buffer.Consume(outputWriter);
-
-                    if (consumed == 0)
+                    // spin till either MaxSpinningTime is reached OR items to consume are more than FlushSize
+                    while (totalSpinningTime < maxSpinningTime)
                     {
-                        await Task.Delay(delayTime).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        writer.Flush();
-                        var body = memoryStream.ToArray(); // if only transport operation allowed ArraySegment<byte>...
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            break;
+                        }
 
-                        var message = new OutgoingMessage(Guid.NewGuid().ToString(), headers, body);
-                        var operation = new TransportOperation(message, destination);
-                        try
+                        var itemsToConsume = buffer.RoughlyEstimateItemsToConsume();
+                        if (itemsToConsume >= flushSize)
                         {
-                            await dispatcher.Dispatch(new TransportOperations(operation), transportTransaction, new ContextBag()).ConfigureAwait(false);
+                            break;
                         }
-                        catch (Exception ex)
-                        {
-                            log.Error($"Error while reporting raw data to {destination}.", ex);
-                        }
+
+                        totalSpinningTime += singleSpinningTime;
+                        await Task.Delay(singleSpinningTime).ConfigureAwait(false);
                     }
+
+                    await Consume();
                 }
+
+                // flush data before ending
+                await Consume();
             });
+        }
+
+        async Task Consume()
+        {
+            var consumed = buffer.Consume(outputWriter);
+
+            if (consumed > 0)
+            {
+                writer.Flush();
+                var body = memoryStream.ToArray(); // if only transport operation allowed ArraySegment<byte>...
+
+                // clean stream
+                memoryStream.SetLength(0);
+
+                var message = new OutgoingMessage(Guid.NewGuid().ToString(), headers, body);
+                var operation = new TransportOperation(message, destination);
+                try
+                {
+                    await dispatcher.Dispatch(new TransportOperations(operation), transportTransaction, new ContextBag()).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    log.Error($"Error while reporting raw data to {destination}.", ex);
+                }
+            }
         }
 
         public Task Stop()

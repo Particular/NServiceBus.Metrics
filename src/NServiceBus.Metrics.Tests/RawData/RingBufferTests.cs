@@ -66,6 +66,37 @@
         }
 
         [Test]
+        public void Estimate_just_initialized_ring_size()
+        {
+            // This test is single threaded so no cross-thread aberrations will be visible.
+
+            Assert.AreEqual(0, ringBuffer.RoughlyEstimateItemsToConsume());
+        }
+
+        [Test]
+        public void Estimate_empty_ring_size()
+        {
+            // This test is single threaded so no cross-thread aberrations will be visible.
+
+            var values = Enumerable.Repeat(1, RingBuffer.Size).Select(i => (long)i).ToArray();
+            WriteValues(values);
+            Consume(values);
+
+            Assert.AreEqual(0, ringBuffer.RoughlyEstimateItemsToConsume());
+        }
+
+        [Test]
+        public void Estimate_full_ring_size()
+        {
+            // This test is single threaded so no cross-thread aberrations will be visible.
+
+            var values = Enumerable.Repeat(1, RingBuffer.Size).Select(i => (long)i).ToArray();
+            WriteValues(values);
+
+            Assert.AreEqual(RingBuffer.Size, ringBuffer.RoughlyEstimateItemsToConsume());
+        }
+
+        [Test]
         public Task Concurrent_test()
         {
             const int size = 100000;

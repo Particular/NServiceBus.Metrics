@@ -58,6 +58,11 @@
             return true;
         }
 
+        public long RoughlyEstimateItemsToConsume()
+        {
+            return Volatile.Read(ref nextToWrite) - Volatile.Read(ref nextToConsume);
+        }
+
         // Consumes a chunk of entries. This method will call onChunk zero, or one time. No multiple calls will be issued.
         public int Consume(Action<ArraySegment<Entry>> onChunk)
         {
