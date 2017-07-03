@@ -2,8 +2,8 @@
 {
     using System.Threading.Tasks;
 
-    class TaskExtensions
+    static class TaskExtensions
     {
-        public static Task Completed => Task.FromResult(0);
+        public static readonly Task Completed = Task.FromResult(0);
     }
 }
