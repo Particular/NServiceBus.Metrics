@@ -1,5 +1,6 @@
 using NServiceBus;
 using NServiceBus.Features;
+using NServiceBus.Metrics;
 
 [ProbeProperties("Processing Time", "The time it took to successfully process a message.")]
 class ProcessingTimeProbeBuilder : DurationProbeBuilder
@@ -20,7 +21,7 @@ class ProcessingTimeProbeBuilder : DurationProbeBuilder
 
             probe.Record(processingTime);
 
-            return CompletedTask;
+            return TaskExtensions.Completed;
         });
     }
 

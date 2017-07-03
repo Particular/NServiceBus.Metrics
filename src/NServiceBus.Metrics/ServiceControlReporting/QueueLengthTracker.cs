@@ -22,16 +22,21 @@
         ConcurrentDictionary<string, SequenceReporter> receivingReporters = new ConcurrentDictionary<string, SequenceReporter>();
         static readonly Unit Unit = Unit.Custom("Sequence");
 
-        public void SetUp(MetricsContext metricsContext, FeatureConfigurationContext featureContext)
+        private QueueLengthTracker(MetricsContext metricsContext)
         {
             this.metricsContext = metricsContext;
+        }
+
+        public static void SetUp(MetricsContext metricsContext, FeatureConfigurationContext featureContext)
+        {
+            var queueLengthTracker = new QueueLengthTracker(metricsContext);
 
             var pipeline = featureContext.Pipeline;
 
             //Use HostId as a stable session ID
-            pipeline.Register(b => new DispatchQueueLengthBehavior(this, b.Build<HostInformation>().HostId), nameof(DispatchQueueLengthBehavior));
+            pipeline.Register(b => new DispatchQueueLengthBehavior(queueLengthTracker, b.Build<HostInformation>().HostId), nameof(DispatchQueueLengthBehavior));
 
-            pipeline.Register(new IncomingQueueLengthBehavior(this, featureContext.Settings.LocalAddress()), nameof(IncomingQueueLengthBehavior));
+            pipeline.Register(new IncomingQueueLengthBehavior(queueLengthTracker, featureContext.Settings.LocalAddress()), nameof(IncomingQueueLengthBehavior));
         }
 
         long RegisterSend(string key)

@@ -36,17 +36,17 @@ class MetricsFeature : Feature
 
     static void SetUpSignalReporting(ProbeContext probeContext, MetricsContext metricsContext)
     {
-        probeContext.Signals.ToList().ForEach(sp =>
+        foreach (var signalProbe in probeContext.Signals)
         {
-            var meter = metricsContext.Meter(sp.Name, string.Empty);
+            var meter = metricsContext.Meter(signalProbe.Name, string.Empty);
 
-            sp.Register(() => meter.Mark());
-        });
+            signalProbe.Register(() => meter.Mark());
+        }
     }
 
     static void SetUpQueueLengthReporting(FeatureConfigurationContext context, MetricsContext metricsContext)
     {
-        new QueueLengthTracker().SetUp(metricsContext, context);
+        QueueLengthTracker.SetUp(metricsContext, context);
     }
 
     static ProbeContext BuildProbes(FeatureConfigurationContext context)

@@ -1,6 +1,7 @@
 using System;
 using NServiceBus;
 using NServiceBus.Features;
+using NServiceBus.Metrics;
 
 [ProbeProperties("Critical Time", "The time it took from sending to processing the message.")]
 class CriticalTimeProbeBuilder : DurationProbeBuilder
@@ -22,7 +23,7 @@ class CriticalTimeProbeBuilder : DurationProbeBuilder
                 probe.Record(endToEndTime);
             }
 
-            return CompletedTask;
+            return TaskExtensions.Completed;
         });
     }
 

@@ -1,6 +1,5 @@
 using System;
 using System.Reflection;
-using System.Threading.Tasks;
 
 /// <summary>
 /// Defines a custom metric.
@@ -31,6 +30,4 @@ abstract class DurationProbeBuilder
 
         return new DurationProbe(attribute.Name, attribute.Description);
     }
-
-    protected static readonly Task<int> CompletedTask = Task.FromResult(0);
 }

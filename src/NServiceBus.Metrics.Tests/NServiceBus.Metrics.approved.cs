@@ -33,7 +33,7 @@ namespace NServiceBus
     public class ProbeContext
     {
         public ProbeContext(NServiceBus.IDurationProbe[] durations, NServiceBus.ISignalProbe[] signals) { }
-        public NServiceBus.IDurationProbe[] Durations { get; }
-        public NServiceBus.ISignalProbe[] Signals { get; }
+        public System.Collections.Generic.IReadOnlyCollection<NServiceBus.IDurationProbe> Durations { get; }
+        public System.Collections.Generic.IReadOnlyCollection<NServiceBus.ISignalProbe> Signals { get; }
     }
 }

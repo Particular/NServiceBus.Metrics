@@ -11,7 +11,7 @@
         /// Enables sending periodic updates of metric data to ServiceControl
         /// </summary>
         /// <param name="serviceControlMetricsAddress">The transport address of the ServiceControl instance</param>
-        /// <param name="interval">Inteval between consequitive reports</param>
+        /// <param name="interval">Interval between consecutive reports</param>
         [Obsolete("Not for public use.")]
         public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, TimeSpan interval)
         {
@@ -42,74 +42,5 @@
         internal TimeSpan ReportingInterval;
 
         Action<ProbeContext> registerObservers = c => {};
-    }
-
-    /// <summary>
-    /// Stores avialbe probes
-    /// </summary>
-    public class ProbeContext
-    {
-        /// <summary>
-        /// Crates <see cref="ProbeContext"/>.
-        /// </summary>
-        /// <param name="durations">Duration probes collection.</param>
-        /// <param name="signals">Signal probes collection</param>
-        public ProbeContext(IDurationProbe[] durations, ISignalProbe[] signals)
-        {
-            Durations = durations;
-            Signals = signals;
-        }
-
-        /// <summary>
-        /// Duration type probes.
-        /// </summary>
-        public IDurationProbe[] Durations { get; }
-
-        /// <summary>
-        /// Signal type probes.
-        /// </summary>
-        public ISignalProbe[] Signals { get; }
-    }
-
-    /// <summary>
-    /// Represents probe description.
-    /// </summary>
-    public interface IProbe
-    {
-        /// <summary>
-        /// Name of the probe.
-        /// </summary>
-        string Name { get; }
-
-        /// <summary>
-        /// Descripton of the probe.
-        /// </summary>
-        string Description { get; }
-    }
-
-    /// <summary>
-    /// Probe that signals event occurence
-    /// </summary>
-    public interface ISignalProbe : IProbe
-    {
-        /// <summary>
-        /// Enables registering action called on event occurence.
-        /// </summary>
-        /// <param name="observer"></param>
-        void Register(Action observer);
-    }
-
-
-    /// <summary>
-    /// Probe that measures duration of an event.
-    /// </summary>
-    public interface IDurationProbe : IProbe
-    {
-        /// <summary>
-        /// Enables registering action called on event occurence.
-        /// </summary>
-        /// <param name="observer"></param>
-        void Register(Action<TimeSpan> observer);
-
     }
 }
