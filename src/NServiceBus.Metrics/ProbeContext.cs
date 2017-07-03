@@ -10,7 +10,7 @@
         /// <summary>
         /// Creates <see cref="ProbeContext"/>.
         /// </summary>
-        public ProbeContext(IDurationProbe[] durations, ISignalProbe[] signals)
+        public ProbeContext(IReadOnlyCollection<IDurationProbe> durations, IReadOnlyCollection<ISignalProbe> signals)
         {
             Durations = durations;
             Signals = signals;
