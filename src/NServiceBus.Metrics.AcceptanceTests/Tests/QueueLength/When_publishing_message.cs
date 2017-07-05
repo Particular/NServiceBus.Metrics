@@ -24,7 +24,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
         [Test]
         public async Task Should_enhance_it_with_queue_length_properties()
         {
-            var context = await Scenario.Define<Context>()
+            await Scenario.Define<Context>()
                 .WithEndpoint<Publisher>(c => c.When(ctx => ctx.SubscriptionCount == 2, async s =>
                   {
                       await s.Publish(new TestEventMessage1());
