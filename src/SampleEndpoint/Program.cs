@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using NServiceBus;
+using NServiceBus.Logging;
 
 class Program
 {
@@ -19,6 +20,8 @@ class Program
         endpointConfig.UseSerialization<NewtonsoftSerializer>();
 
         var metrics = endpointConfig.EnableMetrics();
+        // LogLevel.Debug is the default. Overriding to INFO just for the sample.
+        metrics.EnableLogTracing(TimeSpan.FromSeconds(10), LogLevel.Info);
 #pragma warning disable 618
         metrics.SendMetricDataToServiceControl("Sample.Endpoint", TimeSpan.FromSeconds(1));
 #pragma warning restore 618

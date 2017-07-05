@@ -17,19 +17,38 @@ class MetricsFeature : Feature
         var probeContext = BuildProbes(context);
 
         var settings = context.Settings;
-        var metricsOptions = settings.Get<MetricsOptions>();
+        var options = settings.Get<MetricsOptions>();
+        var endpointName = settings.EndpointName();
 
-        metricsOptions.SetUpObservers(probeContext);
+        options.SetUpObservers(probeContext);
 
-        // the context is used as originating endpoint in the headers
-        MetricsContext metricsContext = new DefaultMetricsContext($"{settings.EndpointName()}");
+        SetUpServiceControlReporting(context, options, endpointName, probeContext);
 
-        SetUpQueueLengthReporting(context, metricsContext);
+        SetUpLegacyReporters(context, options, endpointName, probeContext);
+    }
+
+    void SetUpLegacyReporters(FeatureConfigurationContext featureContext, MetricsOptions options, string endpointName, ProbeContext probeContext)
+    {
+        var metricsContext = new DefaultMetricsContext(endpointName);
+        var metricsConfig = new MetricsConfig(metricsContext);
 
         SetUpSignalReporting(probeContext, metricsContext);
 
+        SetUpDurationReporting(probeContext, metricsContext);
+
+        options.SetUpLegacyReports(metricsConfig);
+    }
+
+    static void SetUpServiceControlReporting(FeatureConfigurationContext context, MetricsOptions metricsOptions, string endpointName, ProbeContext probeContext)
+    {
         if (!string.IsNullOrEmpty(metricsOptions.ServiceControlMetricsAddress))
         {
+            MetricsContext metricsContext = new DefaultMetricsContext(endpointName);
+
+            SetUpQueueLengthReporting(context, metricsContext);
+
+            SetUpSignalReporting(probeContext, metricsContext);
+
             context.RegisterStartupTask(builder => new ServiceControlReporting(metricsContext, builder, metricsOptions));
         }
     }
@@ -41,6 +60,16 @@ class MetricsFeature : Feature
             var meter = metricsContext.Meter(signalProbe.Name, string.Empty);
 
             signalProbe.Register(() => meter.Mark());
+        }
+    }
+
+    static void SetUpDurationReporting(ProbeContext probeContext, DefaultMetricsContext metricsContext)
+    {
+        foreach (var durationProbe in probeContext.Durations)
+        {
+            var timer = metricsContext.Timer(durationProbe.Name, "Messages", SamplingType.Default, TimeUnit.Seconds, TimeUnit.Milliseconds, default(MetricTags));
+
+            durationProbe.Register(v => timer.Record((long)v.TotalMilliseconds, TimeUnit.Milliseconds));
         }
     }
 
@@ -95,7 +124,7 @@ class MetricsFeature : Feature
                 options.ServiceControlMetricsAddress, 
                 builder.Build<HostInformation>());
 
-            metricsConfig.WithReporting(mr => mr.WithReport(serviceControlReport, options.ReportingInterval));
+            metricsConfig.WithReporting(mr => mr.WithReport(serviceControlReport, options.ServiceControlReportingInterval));
 
             return Task.FromResult(0);
         }

@@ -26,6 +26,9 @@ namespace NServiceBus
     public class MetricsOptions
     {
         public MetricsOptions() { }
+        public void EnableCustomReport(System.Func<string, System.Threading.Tasks.Task> func, System.TimeSpan interval) { }
+        public void EnableLogTracing(System.TimeSpan interval, NServiceBus.Logging.LogLevel logLevel = 0) { }
+        public void EnableMetricTracing(System.TimeSpan interval) { }
         public void RegisterObservers(System.Action<NServiceBus.ProbeContext> register) { }
         [System.ObsoleteAttribute("Not for public use.")]
         public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, System.TimeSpan interval) { }
