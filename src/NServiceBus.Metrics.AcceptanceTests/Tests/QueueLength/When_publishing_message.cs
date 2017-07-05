@@ -41,8 +41,6 @@ namespace NServiceBus.Metrics.AcceptanceTests
                 .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2 && SequencesReported(c))
                 .Run()
                 .ConfigureAwait(false);
-
-            SequencesReported(context);
         }
 
         static bool SequencesReported(Context context)
