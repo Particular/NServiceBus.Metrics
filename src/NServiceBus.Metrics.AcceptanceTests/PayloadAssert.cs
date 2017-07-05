@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 public static class PayloadAssert
 {
-    public static void ContainsMeters(string payload)
+    public static void ContainsMeters(string payload, List<string> meters)
     {
         var matches = Regex.Matches(payload, @"""Name"":""(.+?(?=""))");
         var foundMeters = new List<string>();
@@ -15,11 +15,4 @@ public static class PayloadAssert
 
         CollectionAssert.AreEquivalent(foundMeters, meters);
     }
-
-    static List<string> meters = new List<string>
-    {
-        "# of msgs failures / sec",
-        "# of msgs pulled from the input queue /sec",
-        "# of msgs successfully processed / sec"
-    };
 }

@@ -30,7 +30,7 @@
 
             var metricsContext = context.Report["Context"].Value<string>();
             Assert.AreEqual($"{Conventions.EndpointNamingConvention(typeof(Sender))}", metricsContext);
-            PayloadAssert.ContainsMeters(context.Report.ToString(Formatting.None));
+            PayloadAssert.ContainsMeters(context.Report.ToString(Formatting.None), meters);
             Assert.AreEqual(metricsContext, context.Headers[Headers.OriginatingEndpoint]);
             Assert.AreEqual(HostId.ToString("N"), context.Headers[Headers.OriginatingHostId]);
             Assert.AreEqual("NServiceBus.Metrics.MetricReport", context.Headers[Headers.EnclosedMessageTypes]);
@@ -82,5 +82,12 @@
                 }
             }
         }
+
+        static List<string> meters = new List<string>
+        {
+            "# of msgs failures / sec",
+            "# of msgs pulled from the input queue /sec",
+            "# of msgs successfully processed / sec"
+        };
     }
 }
