@@ -46,6 +46,7 @@
             this.outputWriter = entries => outputWriter(entries, writer);
             this.dispatcher = dispatcher;
             this.destination = new UnicastAddressTag(destination);
+            this.headers = headers;
 
             memoryStream = new MemoryStream();
             writer = new BinaryWriter(memoryStream);
