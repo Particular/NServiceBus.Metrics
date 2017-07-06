@@ -52,6 +52,7 @@
             headers[Headers.OriginatingHostId] = hostInformation.HostId.ToString("N");
             headers[Headers.EnclosedMessageTypes] = "NServiceBus.Metrics." + messageTypeName;
             headers[Headers.OriginatingEndpoint] = endpointName;
+            headers[Headers.ContentType] = "LongValueOccurrence";
 
             memoryStream = new MemoryStream();
             writer = new BinaryWriter(memoryStream);

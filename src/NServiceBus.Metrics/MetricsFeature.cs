@@ -1,10 +1,13 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Metrics;
 using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Hosting;
+using NServiceBus.Logging;
 using NServiceBus.Metrics.QueueLength;
+using NServiceBus.Metrics.RawData;
 using NServiceBus.ObjectBuilder;
 using NServiceBus.Transport;
 
@@ -50,6 +53,7 @@ class MetricsFeature : Feature
             SetUpSignalReporting(probeContext, metricsContext);
 
             context.RegisterStartupTask(builder => new ServiceControlReporting(metricsContext, builder, metricsOptions));
+            context.RegisterStartupTask(builder => new ServiceControlRawDataReporting(probeContext.Durations, builder, metricsOptions, endpointName));
         }
     }
 
@@ -138,5 +142,90 @@ class MetricsFeature : Feature
         IBuilder builder;
         MetricsOptions options;
         MetricsConfig metricsConfig;
+    }
+
+    class ServiceControlRawDataReporting : FeatureStartupTask
+    {
+        IReadOnlyCollection<IDurationProbe> probes;
+        IBuilder builder;
+        MetricsOptions options;
+        string endpointName;
+        RawDataReporter processingTimeReporter;
+        RawDataReporter criticalTimeReporter;
+
+        public ServiceControlRawDataReporting(IReadOnlyCollection<IDurationProbe> probes, IBuilder builder, MetricsOptions options, string endpointName)
+        {
+            this.probes = probes;
+            this.builder = builder;
+            this.options = options;
+            this.endpointName = endpointName;
+        }
+
+        protected override Task OnStart(IMessageSession session)
+        {
+            foreach (var durationProbe in probes)
+            {
+                if (durationProbe.Name == ProcessingTimeProbeBuilder.ProcessingTime)
+                {
+                    processingTimeReporter = CreateRawDataReporter(durationProbe);
+                }
+
+                if (durationProbe.Name == CriticalTimeProbeBuilder.CriticalTime)
+                {
+                    criticalTimeReporter = CreateRawDataReporter(durationProbe);
+                }
+            }
+
+            processingTimeReporter.Start();
+            criticalTimeReporter.Start();
+
+            return Task.FromResult(0);
+        }
+
+        RawDataReporter CreateRawDataReporter(IDurationProbe probe)
+        {
+            var buffer = new RingBuffer();
+
+            var reporter = new RawDataReporter(
+                builder.Build<IDispatchMessages>(),
+                options.ServiceControlMetricsAddress,
+                builder.Build<HostInformation>(),
+                buffer,
+                probe.Name.Replace(" ", string.Empty),
+                endpointName,
+                (entries, writer) => LongValueWriter.Write(writer, entries));
+
+            probe.Register(ct =>
+            {
+                var written = false;
+                var attempts = 0;
+
+                while (!written)
+                {
+                    written = buffer.TryWrite((long)ct.TotalMilliseconds);
+
+                    attempts++;
+
+                    if (attempts >= MaxExpectedWriteAttempts)
+                    {
+                        log.Warn($"Failed to buffer timing metrics data after ${attempts} attempts.");
+                        attempts = 0;
+                    }
+                }
+            });
+
+            return reporter;
+        }
+
+        protected override async Task OnStop(IMessageSession session)
+        {
+            await Task.WhenAll(criticalTimeReporter.Stop(), processingTimeReporter.Stop());
+
+            criticalTimeReporter.Dispose();
+            processingTimeReporter.Dispose();
+        }
+
+        static int MaxExpectedWriteAttempts = 10;
+        static ILog log = LogManager.GetLogger<ServiceControlRawDataReporting>();
     }
 }
