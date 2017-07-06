@@ -31,7 +31,7 @@
         [Test]
         public async Task When_flush_size_is_reached()
         {
-            var reporter = new RawDataReporter(dispatcher, Destination, HostInformation, buffer, MessageTypeName, EndpointName, WriteEntriesValues, 4, TimeSpan.MaxValue);
+            var reporter = new RawDataReporter(dispatcher, Destination, new Dictionary<string, string>(), buffer, WriteEntriesValues, 4, TimeSpan.MaxValue);
             reporter.Start();
             buffer.TryWrite(1);
             buffer.TryWrite(2);
@@ -48,7 +48,7 @@
         {
             var maxSpinningTime = TimeSpan.FromMilliseconds(100);
 
-            var reporter = new RawDataReporter(dispatcher, Destination, HostInformation, buffer, MessageTypeName, EndpointName, WriteEntriesValues, int.MaxValue, maxSpinningTime);
+            var reporter = new RawDataReporter(dispatcher, Destination, new Dictionary<string, string>(), buffer, WriteEntriesValues, int.MaxValue, maxSpinningTime);
             reporter.Start();
             buffer.TryWrite(1);
             buffer.TryWrite(2);
@@ -62,7 +62,7 @@
         [Test]
         public async Task When_stopped()
         {
-            var reporter = new RawDataReporter(dispatcher, Destination, HostInformation, buffer, MessageTypeName, EndpointName, WriteEntriesValues, int.MaxValue, TimeSpan.MaxValue);
+            var reporter = new RawDataReporter(dispatcher, Destination, new Dictionary<string, string>(), buffer, WriteEntriesValues, int.MaxValue, TimeSpan.MaxValue);
             reporter.Start();
             buffer.TryWrite(1);
             buffer.TryWrite(2);

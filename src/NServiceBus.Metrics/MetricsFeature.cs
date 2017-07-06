@@ -9,6 +9,7 @@ using NServiceBus.Logging;
 using NServiceBus.Metrics.QueueLength;
 using NServiceBus.Metrics.RawData;
 using NServiceBus.ObjectBuilder;
+using NServiceBus.Support;
 using NServiceBus.Transport;
 
 class MetricsFeature : Feature
@@ -186,13 +187,20 @@ class MetricsFeature : Feature
         {
             var buffer = new RingBuffer();
 
+            var headers = new Dictionary<string, string>
+            {
+                { Headers.OriginatingMachine, RuntimeEnvironment.MachineName},
+                { Headers.OriginatingHostId, builder.Build<HostInformation>().HostId.ToString("N")},
+                { Headers.EnclosedMessageTypes, $"NServiceBus.Metrics.{probe.Name.Replace(" ", string.Empty)}"},
+                { Headers.OriginatingEndpoint, endpointName },
+                { Headers.ContentType, "LongValueOccurrence"}
+            };
+
             var reporter = new RawDataReporter(
                 builder.Build<IDispatchMessages>(),
                 options.ServiceControlMetricsAddress,
-                builder.Build<HostInformation>(),
+                headers,
                 buffer,
-                probe.Name.Replace(" ", string.Empty),
-                endpointName,
                 (entries, writer) => LongValueWriter.Write(writer, entries));
 
             probe.Register(ct =>

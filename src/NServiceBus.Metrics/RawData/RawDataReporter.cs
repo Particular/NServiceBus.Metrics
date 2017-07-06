@@ -34,12 +34,11 @@
         static readonly TimeSpan singleSpinningTime = TimeSpan.FromMilliseconds(50);
         static ILog log = LogManager.GetLogger<RawDataReporter>();
 
-        public RawDataReporter(IDispatchMessages dispatcher, string destination, HostInformation hostInformation, RingBuffer buffer, string messageTypeName, string endpointName,
-            WriteOutput outputWriter) : this(dispatcher, destination, hostInformation, buffer, messageTypeName, endpointName, outputWriter, DefaultFlushSize, DefaultMaxSpinningTime)
+        public RawDataReporter(IDispatchMessages dispatcher, string destination, Dictionary<string, string> headers, RingBuffer buffer, WriteOutput outputWriter) 
+            : this(dispatcher, destination, headers, buffer, outputWriter, DefaultFlushSize, DefaultMaxSpinningTime)
         { }
 
-        public RawDataReporter(IDispatchMessages dispatcher, string destination, HostInformation hostInformation, RingBuffer buffer, string messageTypeName, string endpointName,
-            WriteOutput outputWriter, int flushSize, TimeSpan maxSpinningTime)
+        public RawDataReporter(IDispatchMessages dispatcher, string destination, Dictionary<string, string> headers, RingBuffer buffer, WriteOutput outputWriter, int flushSize, TimeSpan maxSpinningTime)
         {
             this.buffer = buffer;
             this.flushSize = flushSize;
@@ -47,12 +46,6 @@
             this.outputWriter = entries => outputWriter(entries, writer);
             this.dispatcher = dispatcher;
             this.destination = new UnicastAddressTag(destination);
-
-            headers[Headers.OriginatingMachine] = RuntimeEnvironment.MachineName;
-            headers[Headers.OriginatingHostId] = hostInformation.HostId.ToString("N");
-            headers[Headers.EnclosedMessageTypes] = "NServiceBus.Metrics." + messageTypeName;
-            headers[Headers.OriginatingEndpoint] = endpointName;
-            headers[Headers.ContentType] = "LongValueOccurrence";
 
             memoryStream = new MemoryStream();
             writer = new BinaryWriter(memoryStream);
