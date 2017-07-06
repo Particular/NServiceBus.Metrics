@@ -12,10 +12,10 @@
         // 0                   1                   2                   3
         // 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
         //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-        //|     Version   | Min date time | date1 |    value 1    | date2 |  
-        //+---------------+---------------+-------------------------------+
-        //|     value 2   | date3 |   value  3    | date4 |     value 4   |
-        //+---------------+---------------+-------------------------------+
+        //|     Version   | Min date time | count | date1 |     value 1   |
+        //+-------+-------+-------+-------+---------------+-------+-------+
+        //| date2 |   value  2    | date3 |     value 3   | date4 | ...   |
+        //+-------+---------------+-------+---------------+-------+-------+
 
         public static void Write(BinaryWriter outputWriter, ArraySegment<RingBuffer.Entry> chunk)
         {
@@ -29,6 +29,7 @@
 
             outputWriter.Write(Version);
             outputWriter.Write(minDate);
+            outputWriter.Write(count);
 
             for (var i = 0; i < count; i++)
             {

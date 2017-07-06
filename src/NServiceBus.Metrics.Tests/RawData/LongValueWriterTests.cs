@@ -24,6 +24,7 @@
             {
                 writer.Write(version);
                 writer.Write(ticks);
+                writer.Write(1);
                 writer.Write(0);
                 writer.Write(value);
             });
@@ -47,6 +48,7 @@
             {
                 writer.Write(version);
                 writer.Write(ticks);
+                writer.Write(2);
                 writer.Write(0);
                 writer.Write(value1);
                 writer.Write(timeDiff);

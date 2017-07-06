@@ -12,9 +12,9 @@ namespace NServiceBus.Metrics.RawData
         //0                   1                   2                   3
         //0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
         //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-        //|     Version   | Base ticks    | date1 | date2 | date3 | date4 |  
+        //|     Version   | Base ticks    | count | date1 | date2 | date3 |  
         //+---------------+---------------+-------------------------------+
-        //| date5 | date6 | date7 | date8 | date9 | ...
+        //| date4 | date5 | date6 | date7 | date8 | ...
         //+---------------+---------------+-------------------------------+
         //| ....
 
@@ -30,6 +30,7 @@ namespace NServiceBus.Metrics.RawData
 
             outputWriter.Write(Version);
             outputWriter.Write(minDate);
+            outputWriter.Write(count);
 
             for (var i = 0; i < count; i++)
             {
