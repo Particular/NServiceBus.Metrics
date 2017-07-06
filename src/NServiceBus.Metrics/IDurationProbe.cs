@@ -10,7 +10,6 @@ namespace NServiceBus
         /// <summary>
         /// Enables registering action called on event occurrence.
         /// </summary>
-        /// <param name="observer"></param>
         void Register(Action<TimeSpan> observer);
 
     }

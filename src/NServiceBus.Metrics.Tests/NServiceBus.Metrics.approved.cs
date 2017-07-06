@@ -26,14 +26,14 @@ namespace NServiceBus
     public class MetricsOptions
     {
         public MetricsOptions() { }
-        [System.ObsoleteAttribute("Use RegisterObservers instead to attach to monitoring probes. Will be treated as " +
-            "an error from version 3.0.0. Will be removed in version 3.0.0.", false)]
+        [System.ObsoleteAttribute("Use RegisterObservers instead to attach to probes. Will be treated as an error fr" +
+            "om version 3.0.0. Will be removed in version 3.0.0.", false)]
         public void EnableCustomReport(System.Func<string, System.Threading.Tasks.Task> func, System.TimeSpan interval) { }
-        [System.ObsoleteAttribute("Use RegisterObservers instead to attach to monitoring probes. Will be treated as " +
-            "an error from version 3.0.0. Will be removed in version 3.0.0.", false)]
+        [System.ObsoleteAttribute("Use RegisterObservers instead to attach to probes. Will be treated as an error fr" +
+            "om version 3.0.0. Will be removed in version 3.0.0.", false)]
         public void EnableLogTracing(System.TimeSpan interval, NServiceBus.Logging.LogLevel logLevel = 0) { }
-        [System.ObsoleteAttribute("Use RegisterObservers instead to attach to monitoring probes. Will be treated as " +
-            "an error from version 3.0.0. Will be removed in version 3.0.0.", false)]
+        [System.ObsoleteAttribute("Use RegisterObservers instead to attach to probes. Will be treated as an error fr" +
+            "om version 3.0.0. Will be removed in version 3.0.0.", false)]
         public void EnableMetricTracing(System.TimeSpan interval) { }
         public void RegisterObservers(System.Action<NServiceBus.ProbeContext> register) { }
         [System.ObsoleteAttribute("Not for public use. Will be treated as an error from version 2.0.0. Will be remov" +

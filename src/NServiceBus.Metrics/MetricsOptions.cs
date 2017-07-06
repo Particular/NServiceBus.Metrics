@@ -16,7 +16,7 @@
         /// Enables sending metric data to the trace log
         /// </summary>
         /// <param name="interval">How often metric data is sent to the trace log</param>
-        [ObsoleteEx(RemoveInVersion = "3.0", TreatAsErrorFromVersion = "3.0", Message = "Use RegisterObservers instead to attach to monitoring probes.")]
+        [ObsoleteEx(RemoveInVersion = "3.0", TreatAsErrorFromVersion = "3.0", Message = "Use RegisterObservers instead to attach to probes.")]
         public void EnableMetricTracing(TimeSpan interval)
         {
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
@@ -32,7 +32,7 @@
         /// </summary>
         /// <param name="interval">How often metric data is sent to the log</param>
         /// <param name="logLevel">Level at which log entries should be written. Default is DEBUG.</param>
-        [ObsoleteEx(RemoveInVersion = "3.0", TreatAsErrorFromVersion = "3.0", Message = "Use RegisterObservers instead to attach to monitoring probes.")]
+        [ObsoleteEx(RemoveInVersion = "3.0", TreatAsErrorFromVersion = "3.0", Message = "Use RegisterObservers instead to attach to probes.")]
         public void EnableLogTracing(TimeSpan interval, LogLevel logLevel = LogLevel.Debug)
         {
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
@@ -48,7 +48,7 @@
         /// </summary>
         /// <param name="func">A function that will be called with a raw JSON.</param>
         /// <param name="interval">How often metric data is sent to the log</param>
-        [ObsoleteEx(RemoveInVersion = "3.0", TreatAsErrorFromVersion = "3.0", Message = "Use RegisterObservers instead to attach to monitoring probes.")]
+        [ObsoleteEx(RemoveInVersion = "3.0", TreatAsErrorFromVersion = "3.0", Message = "Use RegisterObservers instead to attach to probes.")]
         public void EnableCustomReport(Func<string, Task> func, TimeSpan interval)
         {
             Guard.AgainstNull(nameof(func), func);

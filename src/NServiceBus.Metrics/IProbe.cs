@@ -1,7 +1,7 @@
 ﻿namespace NServiceBus
 {
     /// <summary>
-    /// Represents probe description.
+    /// Provides general information about a probe
     /// </summary>
     public interface IProbe
     {
@@ -11,7 +11,7 @@
         string Name { get; }
 
         /// <summary>
-        /// Descripton of the probe.
+        /// Description of the probe.
         /// </summary>
         string Description { get; }
     }

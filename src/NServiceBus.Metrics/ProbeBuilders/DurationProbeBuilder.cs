@@ -1,9 +1,6 @@
 using System;
 using System.Reflection;
 
-/// <summary>
-/// Defines a custom metric.
-/// </summary>
 abstract class DurationProbeBuilder
 {
     protected abstract void WireUp(DurationProbe probe);
