@@ -42,10 +42,10 @@ namespace NServiceBus.Metrics.AcceptanceTests
                 .Run()
                 .ConfigureAwait(false);
 
-            SequencesReported(context);
+            AssertSequencesReported(context);
         }
 
-        static void SequencesReported(Context context)
+        static void AssertSequencesReported(Context context)
         {
             var sessionIds = new[]
             {
