@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.Metrics.AcceptanceTests
 {
+    using System;
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using NServiceBus;
@@ -13,7 +14,8 @@
         protected class QueueLengthContext : ScenarioContext
         {
             public string Data { get; set; }
-            public bool Handled { get; set; }
+
+            public Func<bool> TrackReports = () => true;
         }
 
         protected class MonitoringSpy : EndpointConfigurationBuilder
@@ -33,8 +35,10 @@
 
                 public Task Handle(MetricReport message, IMessageHandlerContext context)
                 {
-                    TestContext.Data = message.Data.ToString();
-                    TestContext.Handled = true;
+                    if (TestContext.TrackReports())
+                    {
+                        TestContext.Data = message.Data.ToString();
+                    }
 
                     return Task.FromResult(0);
                 }

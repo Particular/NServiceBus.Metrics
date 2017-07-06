@@ -19,7 +19,7 @@
         [Test]
         public async Task Should_report_sequence_for_session()
         {
-            var context = await Scenario.Define<Context>()
+            var context = await Scenario.Define<QueueLengthContext>()
                 .WithEndpoint<Receiver>(c => c.When(async s =>
                 {
                     var options = new SendOptions();
@@ -30,7 +30,7 @@
                     await s.Send(new TestMessage(), options);
                 }))
                 .WithEndpoint<MonitoringSpy>()
-                .Done(c => c.Handled && c.Data != null && c.Data.Contains("Received sequence for"))
+                .Done(c => c.Data != null && c.Data.Contains("Received sequence for"))
                 .Run()
                 .ConfigureAwait(false);
 
@@ -44,10 +44,6 @@
             Assert.AreEqual(SequenceValue, gauge.Value<string>("Value"));
         }
 
-        class Context : QueueLengthContext
-        {
-            public bool Handeled { get; set; }
-        }
 
         class Receiver : EndpointConfigurationBuilder
         {
@@ -66,11 +62,10 @@
 
             public class TestMessageHandler : IHandleMessages<TestMessage>
             {
-                public Context TestContext { get; set; }
+                public QueueLengthContext TestContext { get; set; }
 
                 public Task Handle(TestMessage message, IMessageHandlerContext context)
                 {
-                    TestContext.Handled = true;
                     return Task.FromResult(0);
                 }
             }

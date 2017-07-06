@@ -24,7 +24,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
         [Test]
         public async Task Should_enhance_it_with_queue_length_properties()
         {
-            await Scenario.Define<Context>()
+            var context = await Scenario.Define<Context>()
                 .WithEndpoint<Publisher>(c => c.When(ctx => ctx.SubscriptionCount == 2, async s =>
                   {
                       await s.Publish(new TestEventMessage1());
@@ -38,42 +38,35 @@ namespace NServiceBus.Metrics.AcceptanceTests
                     await session.Subscribe<TestEventMessage2>();
                 }))
                 .WithEndpoint<MonitoringSpy>()
-                .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2 && SequencesReported(c))
+                .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2 && c.Data != null)
                 .Run()
                 .ConfigureAwait(false);
+
+            SequencesReported(context);
         }
 
-        static bool SequencesReported(Context context)
+        static void SequencesReported(Context context)
         {
-            try
+            var sessionIds = new[]
             {
-                var sessionIds = new[]
-                {
-                    AssertHeaders(context.Headers1),
-                    AssertHeaders(context.Headers2)
-                };
+                AssertHeaders(context.Headers1),
+                AssertHeaders(context.Headers2)
+            };
 
-                var data = JObject.Parse(context.Data);
-                var counters = (JArray) data["Counters"];
-                var counterTokens = counters.Where(c => c.Value<string>("Name").StartsWith("Sent sequence for"));
+            var data = JObject.Parse(context.Data);
+            var counters = (JArray) data["Counters"];
+            var counterTokens = counters.Where(c => c.Value<string>("Name").StartsWith("Sent sequence for"));
 
-                foreach (var counter in counterTokens)
-                {
-                    var tags = counter["Tags"].ToObject<string[]>();
-                    var counterBasedKey = tags.GetTagValue("key");
-                    var type = tags.GetTagValue("type");
-
-                    CollectionAssert.Contains(sessionIds, counterBasedKey);
-                    Assert.AreEqual(2, counter.Value<int>("Count"));
-                    Assert.AreEqual("queue-length.sent", type);
-                }
-            }
-            catch
+            foreach (var counter in counterTokens)
             {
-                return false;
-            }
+                var tags = counter["Tags"].ToObject<string[]>();
+                var counterBasedKey = tags.GetTagValue("key");
+                var type = tags.GetTagValue("type");
 
-            return true;
+                CollectionAssert.Contains(sessionIds, counterBasedKey);
+                Assert.AreEqual(2, counter.Value<int>("Count"));
+                Assert.AreEqual("queue-length.sent", type);
+            }
         }
 
         static string AssertHeaders(IProducerConsumerCollection<IReadOnlyDictionary<string, string>> oneReceiverHeaders)
@@ -96,19 +89,16 @@ namespace NServiceBus.Metrics.AcceptanceTests
             return sessionKey1;
         }
 
-        static void Parse(IReadOnlyDictionary<string, string> headers, out Guid sessionId, out long sequence)
-        {
-            var rawHeader = headers["NServiceBus.Metrics.QueueLength"];
-            var parts = rawHeader.Split('_');
-            sessionId = Guid.Parse(parts[0]);
-            sequence = long.Parse(parts[1]);
-        }
-
         class Context : QueueLengthContext
         {
             public volatile int SubscriptionCount;
             public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers1 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
             public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers2 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
+
+            public Context()
+            {
+                TrackReports = () => Headers1.Count == 2 && Headers2.Count == 2;
+            }
         }
 
         class Publisher : EndpointConfigurationBuilder
