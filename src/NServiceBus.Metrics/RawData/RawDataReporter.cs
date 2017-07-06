@@ -6,10 +6,8 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Extensibility;
-    using Hosting;
     using Logging;
     using Routing;
-    using Support;
     using Transport;
 
     delegate void WriteOutput(ArraySegment<RingBuffer.Entry> entries, BinaryWriter outputWriter);
