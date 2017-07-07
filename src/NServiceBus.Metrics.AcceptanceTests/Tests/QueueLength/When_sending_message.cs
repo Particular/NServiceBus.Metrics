@@ -8,44 +8,53 @@ namespace NServiceBus.Metrics.AcceptanceTests
     using AcceptanceTesting;
     using AcceptanceTesting.Customization;
     using global::Newtonsoft.Json.Linq;
-    using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
 
-    public class When_sending_message : NServiceBusAcceptanceTest
+    public class When_sending_message : QueueLengthAcceptanceTests
     {
         static string ReceiverAddress1 => Conventions.EndpointNamingConvention(typeof(Receiver1));
         static string ReceiverAddress2 => Conventions.EndpointNamingConvention(typeof(Receiver2));
-
-        static Guid HostId = Guid.NewGuid();
 
         [Test]
         public async Task Should_enhance_it_with_queue_length_properties()
         {
             var context = await Scenario.Define<Context>()
-                .WithEndpoint<Sender>(c => c.When(async s =>
+                .WithEndpoint<Sender>(c =>
                 {
-                    var to1 = new SendOptions();
-                    to1.SetDestination(ReceiverAddress1);
-                    await s.Send(new TestMessage(), to1);
-                    await s.Send(new TestMessage(), to1);
+                    c.When(async s =>
+                    {
+                        var to1 = new SendOptions();
+                        to1.SetDestination(ReceiverAddress1);
+                        await s.Send(new TestMessage(), to1);
+                        await s.Send(new TestMessage(), to1);
 
-                    var to2 = new SendOptions();
-                    to2.SetDestination(ReceiverAddress2);
-                    await s.Send(new TestMessage(), to2);
-                    await s.Send(new TestMessage(), to2);
-
-                }))
+                        var to2 = new SendOptions();
+                        to2.SetDestination(ReceiverAddress2);
+                        await s.Send(new TestMessage(), to2);
+                        await s.Send(new TestMessage(), to2);
+                    });
+                })
                 .WithEndpoint<Receiver1>()
                 .WithEndpoint<Receiver2>()
-                .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2)
+                .WithEndpoint<MonitoringSpy>()
+                .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2 && c.Data != null)
                 .Run()
                 .ConfigureAwait(false);
 
-            var sessionIds = new [] { AssertHeaders(context.Headers1), AssertHeaders(context.Headers2)};
+            AssertSequencesReported(context);
+        }
+
+        static void AssertSequencesReported(Context context)
+        {
+            var sessionIds = new[]
+            {
+                AssertHeaders(context.Headers1),
+                AssertHeaders(context.Headers2)
+            };
 
             var data = JObject.Parse(context.Data);
-            var counters = (JArray)data["Counters"];
+            var counters = (JArray) data["Counters"];
             var counterTokens = counters.Where(c => c.Value<string>("Name").StartsWith("Sent sequence for"));
 
             foreach (var counter in counterTokens)
@@ -76,15 +85,21 @@ namespace NServiceBus.Metrics.AcceptanceTests
             Assert.AreEqual(sessionKey1, sessionKey2);
             Assert.AreEqual(1, sequence1);
             Assert.AreEqual(2, sequence2);
-            
+
             return sessionKey1;
         }
 
-        class Context : ScenarioContext
+        static readonly Guid HostId = Guid.NewGuid();
+
+        class Context : QueueLengthContext
         {
+            public Context()
+            {
+                TrackReports = () => Headers1.Count == 2 && Headers2.Count == 2;
+            }
+
             public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers1 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
             public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers2 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
-            public string Data { get; set; }
         }
 
         class Sender : EndpointConfigurationBuilder
@@ -93,14 +108,10 @@ namespace NServiceBus.Metrics.AcceptanceTests
             {
                 EndpointSetup<DefaultServer>((c, r) =>
                 {
-                    var context = (Context)r.ScenarioContext;
-
                     c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
-                    c.EnableMetrics().EnableCustomReport(payload =>
-                    {
-                        context.Data = payload;
-                        return Task.FromResult(0);
-                    }, TimeSpan.FromMilliseconds(5));
+#pragma warning disable 618
+                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(5));
+#pragma warning restore 618
                 });
             }
         }

@@ -5,6 +5,19 @@
 namespace NServiceBus
 {
     
+    public interface IDurationProbe : NServiceBus.IProbe
+    {
+        void Register(System.Action<System.TimeSpan> observer);
+    }
+    public interface IProbe
+    {
+        string Description { get; }
+        string Name { get; }
+    }
+    public interface ISignalProbe : NServiceBus.IProbe
+    {
+        void Register(System.Action observer);
+    }
     public class static MetricsConfigurationExtensions
     {
         public static NServiceBus.MetricsOptions EnableMetrics(this NServiceBus.Settings.SettingsHolder settings) { }
@@ -13,10 +26,24 @@ namespace NServiceBus
     public class MetricsOptions
     {
         public MetricsOptions() { }
+        [System.ObsoleteAttribute("Use RegisterObservers instead to attach to probes. Will be treated as an error fr" +
+            "om version 3.0.0. Will be removed in version 3.0.0.", false)]
         public void EnableCustomReport(System.Func<string, System.Threading.Tasks.Task> func, System.TimeSpan interval) { }
+        [System.ObsoleteAttribute("Use RegisterObservers instead to attach to probes. Will be treated as an error fr" +
+            "om version 3.0.0. Will be removed in version 3.0.0.", false)]
         public void EnableLogTracing(System.TimeSpan interval, NServiceBus.Logging.LogLevel logLevel = 0) { }
+        [System.ObsoleteAttribute("Use RegisterObservers instead to attach to probes. Will be treated as an error fr" +
+            "om version 3.0.0. Will be removed in version 3.0.0.", false)]
         public void EnableMetricTracing(System.TimeSpan interval) { }
-        [System.ObsoleteAttribute("Not for public use.")]
+        public void RegisterObservers(System.Action<NServiceBus.ProbeContext> register) { }
+        [System.ObsoleteAttribute("Not for public use. Will be treated as an error from version 2.0.0. Will be remov" +
+            "ed in version 3.0.0.", false)]
         public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, System.TimeSpan interval) { }
+    }
+    public class ProbeContext
+    {
+        public ProbeContext(System.Collections.Generic.IReadOnlyCollection<NServiceBus.IDurationProbe> durations, System.Collections.Generic.IReadOnlyCollection<NServiceBus.ISignalProbe> signals) { }
+        public System.Collections.Generic.IReadOnlyCollection<NServiceBus.IDurationProbe> Durations { get; }
+        public System.Collections.Generic.IReadOnlyCollection<NServiceBus.ISignalProbe> Signals { get; }
     }
 }

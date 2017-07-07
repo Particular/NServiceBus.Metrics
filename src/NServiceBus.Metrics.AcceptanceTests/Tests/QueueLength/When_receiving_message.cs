@@ -5,12 +5,12 @@
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using global::Newtonsoft.Json.Linq;
-    using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
 
-    public class When_receiving_message : NServiceBusAcceptanceTest
+    public class When_receiving_message : QueueLengthAcceptanceTests
     {
+
         const string KeyHeader = "NServiceBus.Metrics.QueueLength.Key";
         const string ValueHeader = "NServiceBus.Metrics.QueueLength.Value";
         const string SequenceValue = "42";
@@ -19,7 +19,7 @@
         [Test]
         public async Task Should_report_sequence_for_session()
         {
-            var context = await Scenario.Define<Context>()
+            var context = await Scenario.Define<QueueLengthContext>()
                 .WithEndpoint<Receiver>(c => c.When(async s =>
                 {
                     var options = new SendOptions();
@@ -29,7 +29,8 @@
                     options.SetHeader(ValueHeader, SequenceValue);
                     await s.Send(new TestMessage(), options);
                 }))
-                .Done(c => c.Handled && c.Data != null && c.Data.Contains("Received sequence for"))
+                .WithEndpoint<MonitoringSpy>()
+                .Done(c => c.Data != null && c.Data.Contains("Received sequence for"))
                 .Run()
                 .ConfigureAwait(false);
 
@@ -43,11 +44,6 @@
             Assert.AreEqual(SequenceValue, gauge.Value<string>("Value"));
         }
 
-        class Context : ScenarioContext
-        {
-            public string Data { get; set; }
-            public bool Handled { get; set; }
-        }
 
         class Receiver : EndpointConfigurationBuilder
         {
@@ -55,14 +51,10 @@
             {
                 EndpointSetup<DefaultServer>((c,r) =>
                 {
-                    var context = (Context)r.ScenarioContext;
-
                     c.LimitMessageProcessingConcurrencyTo(1);
-                    c.EnableMetrics().EnableCustomReport(payload =>
-                    {
-                        context.Data = payload;
-                        return Task.FromResult(0);
-                    }, TimeSpan.FromMilliseconds(5));
+#pragma warning disable 618
+                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(5));
+#pragma warning restore 618
 
                     c.Pipeline.Remove("DispatchQueueLengthBehavior");
                 });
@@ -70,15 +62,16 @@
 
             public class TestMessageHandler : IHandleMessages<TestMessage>
             {
-                public Context TestContext { get; set; }
+                public QueueLengthContext TestContext { get; set; }
 
                 public Task Handle(TestMessage message, IMessageHandlerContext context)
                 {
-                    TestContext.Handled = true;
                     return Task.FromResult(0);
                 }
             }
         }
+
+       
 
         public class TestMessage : ICommand
         {
