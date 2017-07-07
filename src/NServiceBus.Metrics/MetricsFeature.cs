@@ -227,7 +227,7 @@ class MetricsFeature : Feature
 
         protected override async Task OnStop(IMessageSession session)
         {
-            await Task.WhenAll(criticalTimeReporter.Stop(), processingTimeReporter.Stop());
+            await Task.WhenAll(criticalTimeReporter.Stop(), processingTimeReporter.Stop()).ConfigureAwait(false);
 
             criticalTimeReporter.Dispose();
             processingTimeReporter.Dispose();

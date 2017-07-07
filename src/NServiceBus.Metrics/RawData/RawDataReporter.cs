@@ -31,6 +31,7 @@
         static readonly TimeSpan DefaultMaxSpinningTime = TimeSpan.FromSeconds(5);
         static readonly TimeSpan singleSpinningTime = TimeSpan.FromMilliseconds(50);
         static ILog log = LogManager.GetLogger<RawDataReporter>();
+        static ContextBag ContextBag = new ContextBag();
 
         public RawDataReporter(IDispatchMessages dispatcher, string destination, Dictionary<string, string> headers, RingBuffer buffer, WriteOutput outputWriter) 
             : this(dispatcher, destination, headers, buffer, outputWriter, DefaultFlushSize, DefaultMaxSpinningTime)
@@ -101,7 +102,7 @@
                 var operation = new TransportOperation(message, destination);
                 try
                 {
-                    await dispatcher.Dispatch(new TransportOperations(operation), transportTransaction, new ContextBag()).ConfigureAwait(false);
+                    await dispatcher.Dispatch(new TransportOperations(operation), transportTransaction, ContextBag).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
