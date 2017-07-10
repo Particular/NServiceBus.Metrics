@@ -50,7 +50,7 @@
             
             // index is claimed, writing data
             var i = index & SizeMask;
-            var ticks = DateTime.Now.Ticks;
+            var ticks = DateTime.UtcNow.Ticks;
 
             entries[i].Value = value;
             Volatile.Write(ref entries[i].Ticks, ticks);
