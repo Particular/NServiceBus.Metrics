@@ -57,16 +57,24 @@ class MetricsFeature : Feature
 
             Func<IBuilder, Dictionary<string, string>> buildBaseHeaders = b =>
             {
-                var instanceId = metricsOptions.EndpointInstanceIdOverride;
                 var hostInformation = b.Build<HostInformation>();
 
-                return new Dictionary<string, string>
+                var headers =  new Dictionary<string, string>
                 {
                     {Headers.OriginatingEndpoint, endpointName},
                     {Headers.OriginatingMachine, RuntimeEnvironment.MachineName},
-                    {Headers.OriginatingHostId, string.IsNullOrEmpty(instanceId) ? hostInformation.HostId.ToString("N") : instanceId},
-                    {Headers.HostDisplayName, string.IsNullOrEmpty(instanceId) ? hostInformation.DisplayName : instanceId}
+                    {Headers.OriginatingHostId, hostInformation.HostId.ToString("N")},
+                    {Headers.HostDisplayName, hostInformation.DisplayName },
                 };
+
+                var instanceId = metricsOptions.EndpointInstanceIdOverride;
+
+                if (string.IsNullOrEmpty(instanceId) == false)
+                {
+                    headers.Add(MetricHeaders.MetricInstanceId, instanceId);
+                }
+
+                return headers;
             };
 
             context.RegisterStartupTask(builder =>
@@ -205,7 +213,7 @@ class MetricsFeature : Feature
         {
             var buffer = new RingBuffer();
 
-            var reporterHeaders = new Dictionary<string, string>(this.headers);
+            var reporterHeaders = new Dictionary<string, string>(headers);
 
             reporterHeaders.Add(Headers.ContentType, "LongValueOccurrence");
             reporterHeaders.Add(MetricHeaders.MetricType, $"{probe.Name.Replace(" ", string.Empty)}");
