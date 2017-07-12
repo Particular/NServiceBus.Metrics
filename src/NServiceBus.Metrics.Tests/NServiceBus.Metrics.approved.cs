@@ -38,7 +38,7 @@ namespace NServiceBus
         public void RegisterObservers(System.Action<NServiceBus.ProbeContext> register) { }
         [System.ObsoleteAttribute("Not for public use. Will be treated as an error from version 2.0.0. Will be remov" +
             "ed in version 3.0.0.", false)]
-        public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, System.TimeSpan interval) { }
+        public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, System.TimeSpan interval, string instanceId = null) { }
     }
     public class ProbeContext
     {

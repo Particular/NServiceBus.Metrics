@@ -9,24 +9,20 @@ using Metrics.MetricData;
 using Metrics.Reporters;
 using NServiceBus;
 using NServiceBus.Extensibility;
-using NServiceBus.Hosting;
 using NServiceBus.Logging;
 using NServiceBus.Metrics;
 using NServiceBus.Routing;
-using NServiceBus.Support;
 using NServiceBus.Transport;
 
 class NServiceBusMetricReport : MetricsReport
 {
-    public NServiceBusMetricReport(IDispatchMessages dispatcher, string destination, HostInformation hostInformation)
+    public NServiceBusMetricReport(IDispatchMessages dispatcher, MetricsOptions options, Dictionary<string, string> headers)
     {
         this.dispatcher = dispatcher;
-        this.destination = new UnicastAddressTag(destination);
+        this.headers = headers;
 
-        headers[Headers.OriginatingMachine] = RuntimeEnvironment.MachineName;
-        headers[Headers.OriginatingHostId] = hostInformation.HostId.ToString("N");
-        headers[Headers.EnclosedMessageTypes] = "NServiceBus.Metrics.MetricReport"; // without assembly name to allow ducktyping
-        headers[Headers.ContentType] = ContentTypes.Json;
+        destination = new UnicastAddressTag(options.ServiceControlMetricsAddress);
+
     }
 
     public void RunReport(MetricsData metricsData, Func<HealthStatus> healthStatus, CancellationToken token)
@@ -40,7 +36,6 @@ class NServiceBusMetricReport : MetricsReport
         var stringBody = $@"{{""Data"" : {JsonBuilderV2.BuildJson(metricsData)}}}";
         var body = Encoding.UTF8.GetBytes(stringBody);
 
-        headers[Headers.OriginatingEndpoint] = metricsData.Context; // assumption that it will be always the endpoint name
         var message = new OutgoingMessage(Guid.NewGuid().ToString(), headers, body);
         var operation = new TransportOperation(message, destination);
 
@@ -57,9 +52,9 @@ class NServiceBusMetricReport : MetricsReport
 
     UnicastAddressTag destination;
     IDispatchMessages dispatcher;
+    Dictionary<string, string> headers;
     TransportTransaction transportTransaction = new TransportTransaction();
 
-    Dictionary<string, string> headers = new Dictionary<string, string>();
 
     static ILog log = LogManager.GetLogger<NServiceBusMetricReport>();
 }
