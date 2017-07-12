@@ -53,7 +53,7 @@
                 {
                     c.LimitMessageProcessingConcurrencyTo(1);
 #pragma warning disable 618
-                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(5));
+                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(5), string.Empty);
 #pragma warning restore 618
 
                     c.Pipeline.Remove("DispatchQueueLengthBehavior");

@@ -18,15 +18,18 @@ using NServiceBus.Transport;
 
 class NServiceBusMetricReport : MetricsReport
 {
-    public NServiceBusMetricReport(IDispatchMessages dispatcher, string destination, HostInformation hostInformation)
+    public NServiceBusMetricReport(IDispatchMessages dispatcher, MetricsOptions options, string endpointName, HostInformation hostInformation)
     {
         this.dispatcher = dispatcher;
-        this.destination = new UnicastAddressTag(destination);
+
+        destination = new UnicastAddressTag(options.ServiceControlMetricsAddress);
 
         headers[Headers.OriginatingMachine] = RuntimeEnvironment.MachineName;
         headers[Headers.OriginatingHostId] = hostInformation.HostId.ToString("N");
         headers[Headers.EnclosedMessageTypes] = "NServiceBus.Metrics.MetricReport"; // without assembly name to allow ducktyping
         headers[Headers.ContentType] = ContentTypes.Json;
+        headers[Headers.OriginatingEndpoint] = endpointName;
+        headers[MetricHeaders.MetricInstanceId] = options.InstanceId;
     }
 
     public void RunReport(MetricsData metricsData, Func<HealthStatus> healthStatus, CancellationToken token)

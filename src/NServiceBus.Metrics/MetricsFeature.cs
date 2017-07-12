@@ -6,6 +6,7 @@ using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Hosting;
 using NServiceBus.Logging;
+using NServiceBus.Metrics;
 using NServiceBus.Metrics.QueueLength;
 using NServiceBus.Metrics.RawData;
 using NServiceBus.ObjectBuilder;
@@ -53,7 +54,7 @@ class MetricsFeature : Feature
 
             SetUpSignalReporting(probeContext, metricsContext);
 
-            context.RegisterStartupTask(builder => new ServiceControlReporting(metricsContext, builder, metricsOptions));
+            context.RegisterStartupTask(builder => new ServiceControlReporting(metricsContext, builder, metricsOptions, endpointName));
             context.RegisterStartupTask(builder => new ServiceControlRawDataReporting(probeContext.Durations, builder, metricsOptions, endpointName));
         }
     }
@@ -114,10 +115,11 @@ class MetricsFeature : Feature
 
     class ServiceControlReporting : FeatureStartupTask
     {
-        public ServiceControlReporting(MetricsContext metricsContext, IBuilder builder, MetricsOptions options)
+        public ServiceControlReporting(MetricsContext metricsContext, IBuilder builder, MetricsOptions options, string endpointName)
         {
             this.builder = builder;
             this.options = options;
+            this.endpointName = endpointName;
 
             metricsConfig = new MetricsConfig(metricsContext);
         }
@@ -126,7 +128,8 @@ class MetricsFeature : Feature
         {
             var serviceControlReport = new NServiceBusMetricReport(
                 builder.Build<IDispatchMessages>(), 
-                options.ServiceControlMetricsAddress, 
+                options,
+                endpointName,
                 builder.Build<HostInformation>());
 
             metricsConfig.WithReporting(mr => mr.WithReport(serviceControlReport, options.ServiceControlReportingInterval));
@@ -142,6 +145,7 @@ class MetricsFeature : Feature
 
         IBuilder builder;
         MetricsOptions options;
+        readonly string endpointName;
         MetricsConfig metricsConfig;
     }
 
@@ -193,7 +197,8 @@ class MetricsFeature : Feature
                 { Headers.OriginatingHostId, builder.Build<HostInformation>().HostId.ToString("N")},
                 { Headers.OriginatingEndpoint, endpointName },
                 { Headers.ContentType, "LongValueOccurrence"},
-                { MetricTypeHeader, $"{probe.Name.Replace(" ", string.Empty)}"}
+                { MetricHeaders.MetricType, $"{probe.Name.Replace(" ", string.Empty)}"},
+                { MetricHeaders.MetricInstanceId, options.InstanceId }
             };
 
             var reporter = new RawDataReporter(
@@ -234,7 +239,6 @@ class MetricsFeature : Feature
         }
 
         static int MaxExpectedWriteAttempts = 10;
-        static string MetricTypeHeader = "MetricType";
 
         static ILog log = LogManager.GetLogger<ServiceControlRawDataReporting>();
     }

@@ -110,7 +110,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
                 {
                     c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
 #pragma warning disable 618
-                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(5));
+                    c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(5), string.Empty);
 #pragma warning restore 618
                 });
             }
