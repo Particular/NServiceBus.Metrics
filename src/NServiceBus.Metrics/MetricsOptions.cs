@@ -65,16 +65,16 @@
         /// </summary>
         /// <param name="serviceControlMetricsAddress">The transport address of the ServiceControl instance</param>
         /// <param name="interval">Interval between consecutive reports</param>
-        /// <param name="instanceId">Unique identifier of endpoint physical instance</param>
+        /// <param name="instanceId">Unique, human-readable, stable between restarts, identifier for running endpoint instance.</param>
         [ObsoleteEx(Message = "Not for public use.")]
-        public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, TimeSpan interval, string instanceId)
+        public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, TimeSpan interval, string instanceId = null)
         {
             Guard.AgainstNullAndEmpty(nameof(serviceControlMetricsAddress), serviceControlMetricsAddress);
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
 
             ServiceControlMetricsAddress = serviceControlMetricsAddress;
             ServiceControlReportingInterval = interval;
-            InstanceId = instanceId;
+            EndpointInstanceIdOverride = instanceId;
         }
 
         /// <summary>
@@ -100,7 +100,7 @@
 
         internal string ServiceControlMetricsAddress;
         internal TimeSpan ServiceControlReportingInterval;
-        internal string InstanceId;
+        internal string EndpointInstanceIdOverride;
 
         Action<ProbeContext> registerObservers = c => {};
 

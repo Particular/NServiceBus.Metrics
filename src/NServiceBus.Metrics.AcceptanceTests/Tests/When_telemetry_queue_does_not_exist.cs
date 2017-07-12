@@ -36,7 +36,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
                 EndpointSetup<DefaultServer>(c =>
                 {
                     var metrics = c.EnableMetrics();
-                    metrics.SendMetricDataToServiceControl("non-existing-queue", TimeSpan.FromSeconds(1), string.Empty);
+                    metrics.SendMetricDataToServiceControl("non-existing-queue", TimeSpan.FromSeconds(1));
                 });
             }
         }

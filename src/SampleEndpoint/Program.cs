@@ -19,11 +19,13 @@ class Program
         endpointConfig.UsePersistence<InMemoryPersistence>();
         endpointConfig.UseSerialization<NewtonsoftSerializer>();
 
+        endpointConfig.UniquelyIdentifyRunningInstance().UsingCustomDisplayName("Sample.Instance");
+
         var metrics = endpointConfig.EnableMetrics();
 #pragma warning disable 618
         // LogLevel.Debug is the default. Overriding to INFO just for the sample.
         metrics.EnableLogTracing(TimeSpan.FromSeconds(10), LogLevel.Info);
-        metrics.SendMetricDataToServiceControl("Particular.ServiceControl.Monitoring", TimeSpan.FromSeconds(1), string.Empty);
+        metrics.SendMetricDataToServiceControl("Particular.ServiceControl.Monitoring", TimeSpan.FromSeconds(1));
 #pragma warning restore 618
 
         var endpoint = await Endpoint.Start(endpointConfig)
