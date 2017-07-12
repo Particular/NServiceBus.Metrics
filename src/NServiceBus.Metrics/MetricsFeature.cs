@@ -191,9 +191,9 @@ class MetricsFeature : Feature
             {
                 { Headers.OriginatingMachine, RuntimeEnvironment.MachineName},
                 { Headers.OriginatingHostId, builder.Build<HostInformation>().HostId.ToString("N")},
-                { Headers.EnclosedMessageTypes, $"NServiceBus.Metrics.{probe.Name.Replace(" ", string.Empty)}"},
                 { Headers.OriginatingEndpoint, endpointName },
-                { Headers.ContentType, "LongValueOccurrence"}
+                { Headers.ContentType, "LongValueOccurrence"},
+                { MetricTypeHeader, $"{probe.Name.Replace(" ", string.Empty)}"}
             };
 
             var reporter = new RawDataReporter(
@@ -234,6 +234,8 @@ class MetricsFeature : Feature
         }
 
         static int MaxExpectedWriteAttempts = 10;
+        static string MetricTypeHeader = "MetricType";
+
         static ILog log = LogManager.GetLogger<ServiceControlRawDataReporting>();
     }
 }
