@@ -87,7 +87,8 @@
         {
             "# of msgs failures / sec",
             "# of msgs pulled from the input queue /sec",
-            "# of msgs successfully processed / sec"
+            "# of msgs successfully processed / sec",
+            "Retries"
         };
     }
 }
