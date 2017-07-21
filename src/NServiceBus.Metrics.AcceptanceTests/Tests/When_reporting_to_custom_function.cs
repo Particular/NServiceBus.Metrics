@@ -53,6 +53,7 @@
             "# of msgs failures / sec",
             "# of msgs pulled from the input queue /sec",
             "# of msgs successfully processed / sec",
+            "Retries",
             "Critical Time",
             "Processing Time"
         };

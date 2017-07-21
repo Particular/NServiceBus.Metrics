@@ -8,6 +8,7 @@ using NServiceBus.Features;
 using NServiceBus.Hosting;
 using NServiceBus.Logging;
 using NServiceBus.Metrics;
+using NServiceBus.Metrics.ProbeBuilders;
 using NServiceBus.Metrics.QueueLength;
 using NServiceBus.Metrics.RawData;
 using NServiceBus.ObjectBuilder;
@@ -138,7 +139,8 @@ class MetricsFeature : Feature
         {
             new MessagePulledFromQueueProbeBuilder(performanceDiagnosticsBehavior),
             new MessageProcessingFailureProbeBuilder(performanceDiagnosticsBehavior),
-            new MessageProcessingSuccessProbeBuilder(performanceDiagnosticsBehavior)
+            new MessageProcessingSuccessProbeBuilder(performanceDiagnosticsBehavior),
+            new RetriesProbeBuilder(context)
         };
 
         return new ProbeContext(

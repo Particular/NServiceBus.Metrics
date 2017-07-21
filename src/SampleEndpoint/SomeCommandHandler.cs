@@ -6,6 +6,8 @@ class SomeCommandHandler : IHandleMessages<SomeCommand>
 {
     public Task Handle(SomeCommand message, IMessageHandlerContext context)
     {
-        return Task.Delay(TimeSpan.FromSeconds(2));
+        throw new Exception("boom!");
+
+        //return Task.Delay(TimeSpan.FromSeconds(2));
     } 
 }
