@@ -2,10 +2,10 @@
 {
     using Features;
 
-    [ProbeProperties("Retries", "A message has been scheduled for retry (FLR or SLR)")]
+    [ProbeProperties(Retries, "A message has been scheduled for retry (FLR or SLR)")]
     class RetriesProbeBuilder : SignalProbeBuilder
     {
-        Notifications notifications;
+        public const string Retries = "Retries";
 
         public RetriesProbeBuilder(FeatureConfigurationContext context)
         {
@@ -17,5 +17,7 @@
             notifications.Errors.MessageHasFailedAnImmediateRetryAttempt += (sender, message) => probe.Signal();
             notifications.Errors.MessageHasBeenSentToDelayedRetries += (sender, message) => probe.Signal();
         }
+
+        readonly Notifications notifications;
     }
 }

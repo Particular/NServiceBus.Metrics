@@ -89,7 +89,7 @@ class MetricsFeature : Feature
             {
                 var headers = buildBaseHeaders(builder);
 
-                return new ServiceControlRawDataReporting(probeContext.Durations, builder, metricsOptions, headers);
+                return new ServiceControlRawDataReporting(probeContext, builder, metricsOptions, headers);
             });
         }
     }
@@ -186,61 +186,91 @@ class MetricsFeature : Feature
 
     class ServiceControlRawDataReporting : FeatureStartupTask
     {
-        public ServiceControlRawDataReporting(IReadOnlyCollection<IDurationProbe> probes, IBuilder builder, MetricsOptions options, Dictionary<string, string> headers)
+        public ServiceControlRawDataReporting(ProbeContext probeContext, IBuilder builder, MetricsOptions options, Dictionary<string, string> headers)
         {
-            this.probes = probes;
+            this.probeContext = probeContext;
             this.builder = builder;
             this.options = options;
             this.headers = headers;
+
+            reporters = new List<RawDataReporter>();
         }
 
         protected override Task OnStart(IMessageSession session)
         {
-            foreach (var durationProbe in probes)
+            foreach (var durationProbe in probeContext.Durations)
             {
-                if (durationProbe.Name == ProcessingTimeProbeBuilder.ProcessingTime)
-                    processingTimeReporter = CreateRawDataReporter(durationProbe);
-
-                if (durationProbe.Name == CriticalTimeProbeBuilder.CriticalTime)
-                    criticalTimeReporter = CreateRawDataReporter(durationProbe);
+                if (durationProbe.Name == ProcessingTimeProbeBuilder.ProcessingTime ||
+                    durationProbe.Name == CriticalTimeProbeBuilder.CriticalTime)
+                {
+                    reporters.Add(CreateReporter(durationProbe));
+                }
             }
 
-            processingTimeReporter.Start();
-            criticalTimeReporter.Start();
+            foreach (var signalProbe in probeContext.Signals)
+            {
+                if (signalProbe.Name == RetriesProbeBuilder.Retries)
+                {
+                    reporters.Add(CreateReporter(signalProbe));       
+                }
+            }
+
+            foreach (var reporter in reporters)
+            {
+                reporter.Start();
+            }
 
             return Task.FromResult(0);
         }
 
-        RawDataReporter CreateRawDataReporter(IDurationProbe probe)
+        RawDataReporter CreateReporter(IDurationProbe probe)
+        {
+            return CreateReporter(
+                w => probe.Register(v => w((long)v.TotalMilliseconds)),
+                $"{probe.Name.Replace(" ", string.Empty)}",
+                "LongValueOccurrence",
+                (e, w) => LongValueWriter.Write(w, e));
+        }
+
+        RawDataReporter CreateReporter(ISignalProbe probe)
+        {
+            return CreateReporter(
+                w => probe.Register(() => w(1)),
+                $"{probe.Name.Replace(" ", string.Empty)}",
+                "Occurrence",
+                (e, w) => OccurrenceWriter.Write(w, e));
+        }
+
+        RawDataReporter CreateReporter(Action<Action<long>> setupProbe, string metricType, string contentType, WriteOutput outputWriter)
         {
             var buffer = new RingBuffer();
 
             var reporterHeaders = new Dictionary<string, string>(headers);
 
-            reporterHeaders.Add(Headers.ContentType, "LongValueOccurrence");
-            reporterHeaders.Add(MetricHeaders.MetricType, $"{probe.Name.Replace(" ", string.Empty)}");
+            reporterHeaders.Add(Headers.ContentType, contentType);
+            reporterHeaders.Add(MetricHeaders.MetricType, metricType);
 
             var reporter = new RawDataReporter(
                 builder.Build<IDispatchMessages>(),
                 options.ServiceControlMetricsAddress,
                 reporterHeaders,
                 buffer,
-                (entries, writer) => LongValueWriter.Write(writer, entries));
+                outputWriter);
 
-            probe.Register(ct =>
+            setupProbe(v =>
             {
                 var written = false;
                 var attempts = 0;
 
                 while (!written)
                 {
-                    written = buffer.TryWrite((long) ct.TotalMilliseconds);
+                    written = buffer.TryWrite(v);
 
                     attempts++;
 
                     if (attempts >= MaxExpectedWriteAttempts)
                     {
-                        log.Warn($"Failed to buffer timing metrics data after ${attempts} attempts.");
+                        log.Warn($"Failed to buffer metrics data for ${metricType} after ${attempts} attempts.");
                         attempts = 0;
                     }
                 }
@@ -251,19 +281,19 @@ class MetricsFeature : Feature
 
         protected override async Task OnStop(IMessageSession session)
         {
-            await Task.WhenAll(criticalTimeReporter.Stop(), processingTimeReporter.Stop()).ConfigureAwait(false);
+            await Task.WhenAll(reporters.Select(r => r.Stop())).ConfigureAwait(false);
 
-            criticalTimeReporter.Dispose();
-            processingTimeReporter.Dispose();
+            foreach (var reporter in reporters)
+            {
+                reporter.Dispose();
+            }
         }
 
-        readonly IReadOnlyCollection<IDurationProbe> probes;
+        readonly ProbeContext probeContext;
         readonly IBuilder builder;
         readonly MetricsOptions options;
         readonly Dictionary<string, string> headers;
-
-        RawDataReporter processingTimeReporter;
-        RawDataReporter criticalTimeReporter;
+        readonly List<RawDataReporter> reporters;
 
         static readonly int MaxExpectedWriteAttempts = 10;
 
