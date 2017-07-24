@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Metrics.AcceptanceTests
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using NServiceBus.AcceptanceTests;
@@ -19,7 +20,7 @@
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(context.Data);
-            PayloadAssert.ContainsMeters(context.Data);
+            PayloadAssert.ContainsMeters(context.Data, meters);
         }
 
         class Context : ScenarioContext
@@ -33,8 +34,9 @@
             {
                 EndpointSetup<DefaultServer>((c, r) =>
                 {
-                    var context = (Context) r.ScenarioContext;
+                    var context = (Context)r.ScenarioContext;
 
+#pragma warning disable 618
                     c.EnableMetrics()
                         .EnableCustomReport(payload =>
                         {
@@ -42,7 +44,17 @@
                             return Task.FromResult(0);
                         }, TimeSpan.FromMilliseconds(5));
                 });
+#pragma warning restore 618
             }
         }
+
+        static List<string> meters = new List<string>
+        {
+            "# of msgs failures / sec",
+            "# of msgs pulled from the input queue /sec",
+            "# of msgs successfully processed / sec",
+            "Critical Time",
+            "Processing Time"
+        };
     }
 }

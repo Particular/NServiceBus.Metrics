@@ -17,6 +17,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\..\binaries\NServiceBus.Metrics.???" target="lib\net452" />
+    <file src="..\..\binaries\net452\NServiceBus.Metrics.???" target="lib\net452" />
   </files>
 </package>
