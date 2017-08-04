@@ -1,4 +1,4 @@
-[ProbeProperties("# of msgs successfully processed / sec", "The current number of messages processed successfully by the transport per second.")]
+[ProbeProperties("nservicebus_success_total", "# of msgs successfully processed / sec", "The current number of messages processed successfully by the transport per second.")]
 class MessageProcessingSuccessProbeBuilder : SignalProbeBuilder
 {
     public MessageProcessingSuccessProbeBuilder(ReceivePerformanceDiagnosticsBehavior behavior)

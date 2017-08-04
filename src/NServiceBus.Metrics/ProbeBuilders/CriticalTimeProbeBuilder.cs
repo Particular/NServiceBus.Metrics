@@ -3,9 +3,10 @@ using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Metrics;
 
-[ProbeProperties(CriticalTime, "The time it took from sending to processing the message.")]
+[ProbeProperties(CriticalTimeId, CriticalTime, "The time it took from sending to processing the message.")]
 class CriticalTimeProbeBuilder : DurationProbeBuilder
 {
+    public const string CriticalTimeId = "nservicebus_criticaltime_seconds";
     public const string CriticalTime = "Critical Time";
 
     public CriticalTimeProbeBuilder(FeatureConfigurationContext context)

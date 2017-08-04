@@ -2,10 +2,11 @@
 {
     using Features;
 
-    [ProbeProperties(Retries, "A message has been scheduled for retry (FLR or SLR)")]
+    [ProbeProperties(RetriesId, Retries, "A message has been scheduled for retry (FLR or SLR)")]
     class RetriesProbeBuilder : SignalProbeBuilder
     {
         public const string Retries = "Retries";
+        public const string RetriesId = "nservicebus_retries_total";
 
         public RetriesProbeBuilder(FeatureConfigurationContext context)
         {
