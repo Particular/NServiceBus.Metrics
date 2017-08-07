@@ -14,6 +14,7 @@ using NServiceBus.Metrics.RawData;
 using NServiceBus.ObjectBuilder;
 using NServiceBus.Support;
 using NServiceBus.Transport;
+using NServiceBus.Transports;
 
 class MetricsFeature : Feature
 {
@@ -46,7 +47,7 @@ class MetricsFeature : Feature
         options.SetUpLegacyReports(metricsConfig);
     }
 
-    static void SetUpServiceControlReporting(FeatureConfigurationContext context, MetricsOptions metricsOptions, string endpointName, ProbeContext probeContext)
+    void SetUpServiceControlReporting(FeatureConfigurationContext context, MetricsOptions metricsOptions, string endpointName, ProbeContext probeContext)
     {
         if (!string.IsNullOrEmpty(metricsOptions.ServiceControlMetricsAddress))
         {
@@ -56,27 +57,11 @@ class MetricsFeature : Feature
 
             SetUpSignalReporting(probeContext, metricsContext);
 
-            Func<IBuilder, Dictionary<string, string>> buildBaseHeaders = b =>
-            {
-                var hostInformation = b.Build<HostInformation>();
+            context.Container.ConfigureComponent(() => metricsOptions, DependencyLifecycle.SingleInstance);
 
-                var headers =  new Dictionary<string, string>
-                {
-                    {Headers.OriginatingEndpoint, endpointName},
-                    {Headers.OriginatingMachine, RuntimeEnvironment.MachineName},
-                    {Headers.OriginatingHostId, hostInformation.HostId.ToString("N")},
-                    {Headers.HostDisplayName, hostInformation.DisplayName },
-                };
+            Func<IBuilder, Dictionary<string, string>> buildBaseHeaders = b => BuildHeaders(metricsOptions, endpointName, b);
 
-                var instanceId = metricsOptions.EndpointInstanceIdOverride;
-
-                if (string.IsNullOrEmpty(instanceId) == false)
-                {
-                    headers.Add(MetricHeaders.MetricInstanceId, instanceId);
-                }
-
-                return headers;
-            };
+            this.RegisterStartupTask<>();
 
             context.RegisterStartupTask(builder =>
             {
@@ -92,6 +77,28 @@ class MetricsFeature : Feature
                 return new ServiceControlRawDataReporting(probeContext, builder, metricsOptions, headers);
             });
         }
+    }
+
+    static Dictionary<string, string> BuildHeaders(MetricsOptions metricsOptions, string endpointName, IBuilder b)
+    {
+        var hostInformation = b.Build<HostInformation>();
+
+        var headers = new Dictionary<string, string>
+        {
+            {Headers.OriginatingEndpoint, endpointName},
+            {Headers.OriginatingMachine, RuntimeEnvironment.MachineName},
+            {Headers.OriginatingHostId, hostInformation.HostId.ToString("N")},
+            {Headers.HostDisplayName, hostInformation.DisplayName},
+        };
+
+        var instanceId = metricsOptions.EndpointInstanceIdOverride;
+
+        if (string.IsNullOrEmpty(instanceId) == false)
+        {
+            headers.Add(MetricHeaders.MetricInstanceId, instanceId);
+        }
+
+        return headers;
     }
 
     static void SetUpSignalReporting(ProbeContext probeContext, MetricsContext metricsContext)
@@ -163,19 +170,16 @@ class MetricsFeature : Feature
             metricsConfig = new MetricsConfig(metricsContext);
         }
 
-        protected override Task OnStart(IMessageSession session)
+        protected override void OnStart()
         {
-            var serviceControlReport = new NServiceBusMetricReport(builder.Build<IDispatchMessages>(), options, headers);
+            var serviceControlReport = new NServiceBusMetricReport(builder.Build<ISendMessages>(), options, headers);
 
             metricsConfig.WithReporting(mr => mr.WithReport(serviceControlReport, options.ServiceControlReportingInterval));
-
-            return Task.FromResult(0);
         }
 
-        protected override Task OnStop(IMessageSession session)
+        protected override void OnStop()
         {
             metricsConfig.Dispose();
-            return Task.FromResult(0);
         }
 
         readonly IBuilder builder;
@@ -196,7 +200,7 @@ class MetricsFeature : Feature
             reporters = new List<RawDataReporter>();
         }
 
-        protected override Task OnStart(IMessageSession session)
+        protected override void OnStart()
         {
             foreach (var durationProbe in probeContext.Durations)
             {
@@ -219,8 +223,6 @@ class MetricsFeature : Feature
             {
                 reporter.Start();
             }
-
-            return Task.FromResult(0);
         }
 
         RawDataReporter CreateReporter(IDurationProbe probe)
@@ -251,7 +253,7 @@ class MetricsFeature : Feature
             reporterHeaders.Add(MetricHeaders.MetricType, metricType);
 
             var reporter = new RawDataReporter(
-                builder.Build<IDispatchMessages>(),
+                builder.Build<ISendMessages>(),
                 options.ServiceControlMetricsAddress,
                 reporterHeaders,
                 buffer,
@@ -279,12 +281,11 @@ class MetricsFeature : Feature
             return reporter;
         }
 
-        protected override async Task OnStop(IMessageSession session)
+        protected override void OnStop()
         {
-            await Task.WhenAll(reporters.Select(r => r.Stop())).ConfigureAwait(false);
-
             foreach (var reporter in reporters)
             {
+                reporter.Stop();
                 reporter.Dispose();
             }
         }
@@ -295,7 +296,7 @@ class MetricsFeature : Feature
         readonly Dictionary<string, string> headers;
         readonly List<RawDataReporter> reporters;
 
-        static readonly int MaxExpectedWriteAttempts = 10;
+        const int MaxExpectedWriteAttempts = 10;
 
         static readonly ILog log = LogManager.GetLogger<ServiceControlRawDataReporting>();
     }
