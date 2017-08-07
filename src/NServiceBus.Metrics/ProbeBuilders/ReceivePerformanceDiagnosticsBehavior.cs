@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using NServiceBus.Pipeline;
 
+// as a first behavior
+
 class ReceivePerformanceDiagnosticsBehavior : IBehavior<IIncomingPhysicalMessageContext, IIncomingPhysicalMessageContext>
 {
     public async Task Invoke(IIncomingPhysicalMessageContext context, Func<IIncomingPhysicalMessageContext, Task> next)

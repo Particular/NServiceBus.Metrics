@@ -3,12 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Threading;
-    using System.Threading.Tasks;
-    using Extensibility;
     using Logging;
-    using Routing;
-    using Transport;
+    using Transports;
+    using Unicast;
 
     delegate void WriteOutput(ArraySegment<RingBuffer.Entry> entries, BinaryWriter outputWriter);
 
@@ -18,52 +17,49 @@
         readonly RingBuffer buffer;
         readonly int flushSize;
         readonly Action<ArraySegment<RingBuffer.Entry>> outputWriter;
-        readonly IDispatchMessages dispatcher;
-        readonly UnicastAddressTag destination;
-        readonly TransportTransaction transportTransaction = new TransportTransaction();
-        readonly Dictionary<string, string> headers = new Dictionary<string, string>();
+        readonly ISendMessages dispatcher;
+        readonly string destination;
+        readonly Dictionary<string, string> headers;
         readonly BinaryWriter writer;
         readonly MemoryStream memoryStream;
-        readonly CancellationTokenSource cancellationTokenSource;
         readonly TimeSpan maxSpinningTime;
-        Task reporter;
 
         static readonly TimeSpan DefaultMaxSpinningTime = TimeSpan.FromSeconds(5);
         static readonly TimeSpan singleSpinningTime = TimeSpan.FromMilliseconds(50);
         static ILog log = LogManager.GetLogger<RawDataReporter>();
-        static ContextBag ContextBag = new ContextBag();
+        Thread reportingThread;
+        volatile bool isRunning = true;
 
-        public RawDataReporter(IDispatchMessages dispatcher, string destination, Dictionary<string, string> headers, RingBuffer buffer, WriteOutput outputWriter) 
+        public RawDataReporter(ISendMessages dispatcher, string destination, Dictionary<string, string> headers, RingBuffer buffer, WriteOutput outputWriter) 
             : this(dispatcher, destination, headers, buffer, outputWriter, DefaultFlushSize, DefaultMaxSpinningTime)
         { }
 
-        public RawDataReporter(IDispatchMessages dispatcher, string destination, Dictionary<string, string> headers, RingBuffer buffer, WriteOutput outputWriter, int flushSize, TimeSpan maxSpinningTime)
+        public RawDataReporter(ISendMessages dispatcher, string destination, Dictionary<string, string> headers, RingBuffer buffer, WriteOutput outputWriter, int flushSize, TimeSpan maxSpinningTime)
         {
             this.buffer = buffer;
             this.flushSize = flushSize;
             this.maxSpinningTime = maxSpinningTime;
             this.outputWriter = entries => outputWriter(entries, writer);
             this.dispatcher = dispatcher;
-            this.destination = new UnicastAddressTag(destination);
+            this.destination = destination;
             this.headers = headers;
 
             memoryStream = new MemoryStream();
             writer = new BinaryWriter(memoryStream);
-            cancellationTokenSource = new CancellationTokenSource();
         }
 
         public void Start()
         {
-            reporter = Task.Run(async () =>
+            reportingThread = new Thread(() =>
             {
-                while (cancellationTokenSource.IsCancellationRequested == false)
+                while (isRunning)
                 {
                     var totalSpinningTime = TimeSpan.Zero;
 
                     // spin till either MaxSpinningTime is reached OR items to consume are more than FlushSize
                     while (totalSpinningTime < maxSpinningTime)
                     {
-                        if (cancellationTokenSource.IsCancellationRequested)
+                        if (isRunning == false)
                         {
                             break;
                         }
@@ -75,18 +71,18 @@
                         }
 
                         totalSpinningTime += singleSpinningTime;
-                        await Task.Delay(singleSpinningTime).ConfigureAwait(false);
+                        Thread.Sleep(singleSpinningTime);
                     }
 
-                    await Consume().ConfigureAwait(false);
+                    Consume();
                 }
 
                 // flush data before ending
-                await Consume().ConfigureAwait(false);
+                Consume();
             });
         }
 
-        async Task Consume()
+        void Consume()
         {
             var consumed = buffer.Consume(outputWriter);
 
@@ -98,11 +94,13 @@
                 // clean stream
                 memoryStream.SetLength(0);
 
-                var message = new OutgoingMessage(Guid.NewGuid().ToString(), headers, body);
-                var operation = new TransportOperation(message, destination);
                 try
                 {
-                    await dispatcher.Dispatch(new TransportOperations(operation), transportTransaction, ContextBag).ConfigureAwait(false);
+                    dispatcher.Send(new TransportMessage(Guid.NewGuid().ToString(), headers.ToDictionary(kvp => kvp.Key, kvp => kvp.Value))
+                    {
+                        Body = body,
+
+                    }, new SendOptions(destination));
                 }
                 catch (Exception ex)
                 {
@@ -111,17 +109,16 @@
             }
         }
 
-        public Task Stop()
+        public void Stop()
         {
-            cancellationTokenSource.Cancel();
-            return reporter;
+            isRunning = false;
+            reportingThread.Join();
         }
 
         public void Dispose()
         {
             writer?.Dispose();
             memoryStream?.Dispose();
-            cancellationTokenSource?.Dispose();
         }
     }
 }

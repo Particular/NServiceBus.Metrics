@@ -14,6 +14,8 @@
 
         protected override void WireUp(SignalProbe probe)
         {
+            // NServiceBus.Faults.ErrorsNotifications
+
             notifications.Errors.MessageHasFailedAnImmediateRetryAttempt += (sender, message) => probe.Signal();
             notifications.Errors.MessageHasBeenSentToDelayedRetries += (sender, message) => probe.Signal();
         }
