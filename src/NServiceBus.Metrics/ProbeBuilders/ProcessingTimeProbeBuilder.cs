@@ -2,11 +2,8 @@ using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Metrics;
 
-[ProbeProperties(Probes.ProcessingTime, ProcessingTime)]
 class ProcessingTimeProbeBuilder : DurationProbeBuilder
 {
-    const string ProcessingTime = "Processing Time";
-
     public ProcessingTimeProbeBuilder(FeatureConfigurationContext context)
     {
         this.context = context;
@@ -26,6 +23,8 @@ class ProcessingTimeProbeBuilder : DurationProbeBuilder
             return TaskExtensions.Completed;
         });
     }
+
+    protected override string ProbeId => Probes.ProcessingTime;
 
     readonly FeatureConfigurationContext context;
 }

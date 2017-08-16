@@ -1,6 +1,5 @@
 using NServiceBus.Metrics;
 
-[ProbeProperties(Probes.MessageProcessed, "# of msgs successfully processed / sec")]
 class MessageProcessingSuccessProbeBuilder : SignalProbeBuilder
 {
     public MessageProcessingSuccessProbeBuilder(ReceivePerformanceDiagnosticsBehavior behavior)
@@ -12,6 +11,8 @@ class MessageProcessingSuccessProbeBuilder : SignalProbeBuilder
     {
         behavior.ProcessingSuccess = probe;
     }
+
+    protected override string ProbeId => Probes.MessageProcessed;
 
     readonly ReceivePerformanceDiagnosticsBehavior behavior;
 }

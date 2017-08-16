@@ -19,6 +19,16 @@ using TaskExtensions = NServiceBus.Metrics.TaskExtensions;
 
 class MetricsFeature : Feature
 {
+    static readonly IReadOnlyDictionary<string, string> MetricsDotNetMapName = new Dictionary<string, string>
+    {
+        {Probes.RetryOccurred, "Retries"},
+        {Probes.CriticalTime, "Critical Time"},
+        {Probes.MessageFailed, "# of msgs failures / sec"},
+        {Probes.MessageProcessed, "# of msgs successfully processed / sec"},
+        {Probes.MessagePulled, "# of msgs pulled from the input queue /sec"},
+        {Probes.ProcessingTime, "Processing Time"}
+    };
+
     protected override void Setup(FeatureConfigurationContext context)
     {
         context.ThrowIfSendonly();
@@ -64,7 +74,7 @@ class MetricsFeature : Feature
             {
                 var hostInformation = b.Build<HostInformation>();
 
-                var headers =  new Dictionary<string, string>
+                var headers = new Dictionary<string, string>
                 {
                     {Headers.OriginatingEndpoint, endpointName},
                     {Headers.OriginatingMachine, RuntimeEnvironment.MachineName},
@@ -110,9 +120,12 @@ class MetricsFeature : Feature
     {
         foreach (var signalProbe in probeContext.Signals)
         {
-            var meter = metricsContext.Meter(signalProbe.Name, string.Empty);
-            
-            signalProbe.Register(() => meter.Mark());
+            string name;
+            if (MetricsDotNetMapName.TryGetValue(signalProbe.Id, out name))
+            {
+                var meter = metricsContext.Meter(name, string.Empty);
+                signalProbe.Register(() => meter.Mark());
+            }
         }
     }
 
@@ -120,9 +133,12 @@ class MetricsFeature : Feature
     {
         foreach (var durationProbe in probeContext.Durations)
         {
-            var timer = metricsContext.Timer(durationProbe.Name, "Messages", SamplingType.Default, TimeUnit.Seconds, TimeUnit.Milliseconds, default(MetricTags));
-
-            durationProbe.Register(v => timer.Record((long) v.TotalMilliseconds, TimeUnit.Milliseconds));
+            string name;
+            if (MetricsDotNetMapName.TryGetValue(durationProbe.Id, out name))
+            {
+                var timer = metricsContext.Timer(name, "Messages", SamplingType.Default, TimeUnit.Seconds, TimeUnit.Milliseconds, default(MetricTags));
+                durationProbe.Register(v => timer.Record((long)v.TotalMilliseconds, TimeUnit.Milliseconds));
+            }
         }
     }
 
@@ -223,7 +239,7 @@ class MetricsFeature : Feature
             {
                 if (signalProbe.Id == Probes.RetryOccurred)
                 {
-                    reporters.Add(CreateReporter(signalProbe));       
+                    reporters.Add(CreateReporter(signalProbe));
                 }
             }
 

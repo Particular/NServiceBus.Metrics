@@ -3,11 +3,8 @@ using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Metrics;
 
-[ProbeProperties(Probes.CriticalTime, CriticalTime)]
 class CriticalTimeProbeBuilder : DurationProbeBuilder
 {
-    const string CriticalTime = "Critical Time";
-
     public CriticalTimeProbeBuilder(FeatureConfigurationContext context)
     {
         this.context = context;
@@ -28,6 +25,8 @@ class CriticalTimeProbeBuilder : DurationProbeBuilder
             return TaskExtensions.Completed;
         });
     }
+
+    protected override string ProbeId => Probes.CriticalTime;
 
     readonly FeatureConfigurationContext context;
 }

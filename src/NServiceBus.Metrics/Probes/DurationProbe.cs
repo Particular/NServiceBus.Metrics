@@ -3,7 +3,7 @@ using NServiceBus;
 
 class DurationProbe : Probe, IDurationProbe
 {
-    public DurationProbe(string id, string name) : base(id, name)
+    public DurationProbe(string id) : base(id)
     {
     }
 

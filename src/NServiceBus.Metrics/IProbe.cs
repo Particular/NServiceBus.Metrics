@@ -9,10 +9,5 @@
         /// Provides an id of the probe.
         /// </summary>
         string Id { get; }
-
-        /// <summary>
-        /// A human readable name of the probe.
-        /// </summary>
-        string Name { get; }
     }
 }

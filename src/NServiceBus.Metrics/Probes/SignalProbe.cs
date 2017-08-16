@@ -3,7 +3,7 @@ using NServiceBus;
 
 class SignalProbe : Probe, ISignalProbe
 {
-    public SignalProbe(string id, string name) : base(id, name)
+    public SignalProbe(string id) : base(id)
     {
     }
 
