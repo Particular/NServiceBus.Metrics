@@ -1,4 +1,6 @@
-[ProbeProperties("# of msgs failures / sec", "The current number of failed processed messages by the transport per second.")]
+using NServiceBus.Metrics;
+
+[ProbeProperties(Probes.MessageFailed, "# of msgs failures / sec")]
 class MessageProcessingFailureProbeBuilder : SignalProbeBuilder
 {
     public MessageProcessingFailureProbeBuilder(ReceivePerformanceDiagnosticsBehavior behavior)

@@ -25,6 +25,6 @@ abstract class SignalProbeBuilder
             throw new Exception(exceptionMessage);
         }
 
-        return new SignalProbe(attribute.Name, attribute.Description);
+        return new SignalProbe(attribute.Id, attribute.Name);
     }
 }

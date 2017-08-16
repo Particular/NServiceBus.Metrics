@@ -1,4 +1,6 @@
-[ProbeProperties("# of msgs successfully processed / sec", "The current number of messages processed successfully by the transport per second.")]
+using NServiceBus.Metrics;
+
+[ProbeProperties(Probes.MessageProcessed, "# of msgs successfully processed / sec")]
 class MessageProcessingSuccessProbeBuilder : SignalProbeBuilder
 {
     public MessageProcessingSuccessProbeBuilder(ReceivePerformanceDiagnosticsBehavior behavior)

@@ -2,7 +2,7 @@
 {
     using Features;
 
-    [ProbeProperties(Retries, "A message has been scheduled for retry (FLR or SLR)")]
+    [ProbeProperties(Probes.RetryOccurred, Retries)]
     class RetriesProbeBuilder : SignalProbeBuilder
     {
         public const string Retries = "Retries";

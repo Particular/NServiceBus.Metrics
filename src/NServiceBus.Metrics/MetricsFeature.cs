@@ -111,7 +111,7 @@ class MetricsFeature : Feature
         foreach (var signalProbe in probeContext.Signals)
         {
             var meter = metricsContext.Meter(signalProbe.Name, string.Empty);
-
+            
             signalProbe.Register(() => meter.Mark());
         }
     }
@@ -212,8 +212,8 @@ class MetricsFeature : Feature
         {
             foreach (var durationProbe in probeContext.Durations)
             {
-                if (durationProbe.Name == ProcessingTimeProbeBuilder.ProcessingTime ||
-                    durationProbe.Name == CriticalTimeProbeBuilder.CriticalTime)
+                if (durationProbe.Id == Probes.ProcessingTime ||
+                    durationProbe.Id == Probes.CriticalTime)
                 {
                     reporters.Add(CreateReporter(durationProbe));
                 }
@@ -221,7 +221,7 @@ class MetricsFeature : Feature
 
             foreach (var signalProbe in probeContext.Signals)
             {
-                if (signalProbe.Name == RetriesProbeBuilder.Retries)
+                if (signalProbe.Id == Probes.RetryOccurred)
                 {
                     reporters.Add(CreateReporter(signalProbe));       
                 }
@@ -239,7 +239,7 @@ class MetricsFeature : Feature
         {
             return CreateReporter(
                 w => probe.Register(v => w((long)v.TotalMilliseconds)),
-                $"{probe.Name.Replace(" ", string.Empty)}",
+                probe.Id,
                 "LongValueOccurrence",
                 (e, w) => LongValueWriter.Write(w, e));
         }
@@ -248,7 +248,7 @@ class MetricsFeature : Feature
         {
             return CreateReporter(
                 w => probe.Register(() => w(1)),
-                $"{probe.Name.Replace(" ", string.Empty)}",
+                probe.Id,
                 "Occurrence",
                 (e, w) => OccurrenceWriter.Write(w, e));
         }

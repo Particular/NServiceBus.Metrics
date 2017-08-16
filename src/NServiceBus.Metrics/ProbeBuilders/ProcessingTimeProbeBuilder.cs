@@ -2,9 +2,11 @@ using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Metrics;
 
-[ProbeProperties(ProcessingTime, "The time it took to successfully process a message.")]
+[ProbeProperties(Probes.ProcessingTime, ProcessingTime)]
 class ProcessingTimeProbeBuilder : DurationProbeBuilder
 {
+    const string ProcessingTime = "Processing Time";
+
     public ProcessingTimeProbeBuilder(FeatureConfigurationContext context)
     {
         this.context = context;
@@ -24,8 +26,6 @@ class ProcessingTimeProbeBuilder : DurationProbeBuilder
             return TaskExtensions.Completed;
         });
     }
-    
-    readonly FeatureConfigurationContext context;
 
-    public const string ProcessingTime = "Processing Time";
+    readonly FeatureConfigurationContext context;
 }

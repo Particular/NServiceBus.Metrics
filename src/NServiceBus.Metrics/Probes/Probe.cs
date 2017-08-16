@@ -1,12 +1,12 @@
 ﻿abstract class Probe
 {
-    protected Probe(string name, string description)
+    protected Probe(string id, string name)
     {
+        Id = id;
         Name = name;
-        Description = description;
     }
 
-    public string Name { get; }
+    public string Id { get; }
 
-    public string Description { get; }
+    public string Name { get; }
 }

@@ -25,6 +25,6 @@ abstract class DurationProbeBuilder
             throw new Exception(exceptionMessage);
         }
 
-        return new DurationProbe(attribute.Name, attribute.Description);
+        return new DurationProbe(attribute.Id, attribute.Name);
     }
 }
