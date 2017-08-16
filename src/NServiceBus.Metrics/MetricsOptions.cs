@@ -74,7 +74,7 @@
 
             ServiceControlMetricsAddress = serviceControlMetricsAddress;
             ServiceControlReportingInterval = interval;
-            EndpointInstanceIdOverride = instanceId;
+            endpointInstanceIdOverride = instanceId;
         }
 
         /// <summary>
@@ -100,7 +100,19 @@
 
         internal string ServiceControlMetricsAddress;
         internal TimeSpan ServiceControlReportingInterval;
-        internal string EndpointInstanceIdOverride;
+        string endpointInstanceIdOverride;
+
+        internal bool TryGetValidEndpointInstanceIdOverride(out string instanceId)
+        {
+            if (string.IsNullOrEmpty(endpointInstanceIdOverride) == false)
+            {
+                instanceId = endpointInstanceIdOverride;
+                return true;
+            }
+
+            instanceId = null;
+            return false;
+        }
 
         Action<ProbeContext> registerObservers = c => {};
 

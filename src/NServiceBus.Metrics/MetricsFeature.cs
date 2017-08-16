@@ -7,6 +7,7 @@ using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Hosting;
 using NServiceBus.Logging;
+using NServiceBus.MessageMutator;
 using NServiceBus.Metrics;
 using NServiceBus.Metrics.ProbeBuilders;
 using NServiceBus.Metrics.QueueLength;
@@ -14,6 +15,7 @@ using NServiceBus.Metrics.RawData;
 using NServiceBus.ObjectBuilder;
 using NServiceBus.Support;
 using NServiceBus.Transport;
+using TaskExtensions = NServiceBus.Metrics.TaskExtensions;
 
 class MetricsFeature : Feature
 {
@@ -32,6 +34,8 @@ class MetricsFeature : Feature
         SetUpServiceControlReporting(context, options, endpointName, probeContext);
 
         SetUpLegacyReporters(context, options, endpointName, probeContext);
+
+        SetUpOutgoingMessageMutator(context, options);
     }
 
     void SetUpLegacyReporters(FeatureConfigurationContext featureContext, MetricsOptions options, string endpointName, ProbeContext probeContext)
@@ -68,9 +72,8 @@ class MetricsFeature : Feature
                     {Headers.HostDisplayName, hostInformation.DisplayName },
                 };
 
-                var instanceId = metricsOptions.EndpointInstanceIdOverride;
-
-                if (string.IsNullOrEmpty(instanceId) == false)
+                string instanceId;
+                if (metricsOptions.TryGetValidEndpointInstanceIdOverride(out instanceId))
                 {
                     headers.Add(MetricHeaders.MetricInstanceId, instanceId);
                 }
@@ -91,6 +94,15 @@ class MetricsFeature : Feature
 
                 return new ServiceControlRawDataReporting(probeContext, builder, metricsOptions, headers);
             });
+        }
+    }
+
+    void SetUpOutgoingMessageMutator(FeatureConfigurationContext context, MetricsOptions options)
+    {
+        string instanceId;
+        if (options.TryGetValidEndpointInstanceIdOverride(out instanceId))
+        {
+            context.Container.ConfigureComponent(() => new MetricsIdAttachingMutator(instanceId), DependencyLifecycle.SingleInstance);
         }
     }
 
@@ -298,5 +310,21 @@ class MetricsFeature : Feature
         static readonly int MaxExpectedWriteAttempts = 10;
 
         static readonly ILog log = LogManager.GetLogger<ServiceControlRawDataReporting>();
+    }
+
+    class MetricsIdAttachingMutator : IMutateOutgoingMessages
+    {
+        readonly string instanceId;
+
+        public MetricsIdAttachingMutator(string instanceId)
+        {
+            this.instanceId = instanceId;
+        }
+
+        public Task MutateOutgoing(MutateOutgoingMessageContext context)
+        {
+            context.OutgoingHeaders[MetricHeaders.MetricInstanceId] = instanceId;
+            return TaskExtensions.Completed;
+        }
     }
 }
