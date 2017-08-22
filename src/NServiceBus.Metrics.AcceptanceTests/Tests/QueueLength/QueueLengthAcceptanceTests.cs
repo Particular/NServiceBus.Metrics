@@ -24,8 +24,8 @@
             {
                 EndpointSetup<DefaultServer>(c =>
                 {
-                    SerializationConfigExtensions.UseSerialization<NewtonsoftSerializer>(c);
-                    MessageProcessingOptimizationExtensions.LimitMessageProcessingConcurrencyTo(c, 1);
+                    c.UseSerialization<NewtonsoftSerializer>();
+                    c.LimitMessageProcessingConcurrencyTo(1);
                 }).IncludeType<MetricReport>();
             }
 
