@@ -1,6 +1,6 @@
 ﻿namespace NServiceBus
 {
-    using Configuration.AdvanceExtensibility;
+    using Configuration.AdvancedExtensibility;
     using Features;
     using Settings;
 

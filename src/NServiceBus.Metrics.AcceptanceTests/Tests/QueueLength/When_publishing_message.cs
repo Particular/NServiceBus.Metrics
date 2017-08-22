@@ -134,12 +134,6 @@ namespace NServiceBus.Metrics.AcceptanceTests
                 {
                     c.LimitMessageProcessingConcurrencyTo(1);
                     c.DisableFeature<AutoSubscribe>();
-
-                    var routing = c.UseTransport<MsmqTransport>()
-                        .Routing();
-                    var publisher = AcceptanceTesting.Customization.Conventions.EndpointNamingConvention(typeof(Publisher));
-                    routing.RegisterPublisher(typeof(TestEventMessage1), publisher);
-                    routing.RegisterPublisher(typeof(TestEventMessage2), publisher);
                 });
             }
 
