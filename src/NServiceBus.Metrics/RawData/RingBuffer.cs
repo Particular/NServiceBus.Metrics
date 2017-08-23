@@ -16,17 +16,19 @@
 
         public struct Entry
         {
-            public Entry(long ticks, long value)
+            public Entry(long ticks, long value, int tag = 0)
             {
                 Ticks = ticks;
                 Value = value;
+                Tag = tag;
             }
 
             public long Ticks;
             public long Value;
+            public int Tag;
         }
 
-        public bool TryWrite(long value)
+        public bool TryWrite(long value, int tag = 0)
         {
             var readNextWrite = Volatile.Read(ref nextToWrite);
             long index;
@@ -53,6 +55,8 @@
             var ticks = DateTime.UtcNow.Ticks;
 
             entries[i].Value = value;
+            entries[i].Tag = tag;
+
             Volatile.Write(ref entries[i].Ticks, ticks);
 
             return true;
