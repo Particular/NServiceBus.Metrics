@@ -1,5 +1,4 @@
-﻿using System;
-using NServiceBus;
+﻿using NServiceBus;
 
 class SignalProbe : Probe, ISignalProbe
 {
@@ -7,15 +6,17 @@ class SignalProbe : Probe, ISignalProbe
     {
     }
 
-    public void Register(Action observer)
+    public void Register(OnEvent<SignalEvent> observer)
     {
         observers += observer;
     }
 
-    internal void Signal()
+    internal void Signal(ref SignalEvent e)
     {
-        observers();
+        observers(ref e);
     }
 
-    Action observers = () => { };
+    OnEvent<SignalEvent> observers = Empty;
+
+    static void Empty(ref SignalEvent e) { }
 }

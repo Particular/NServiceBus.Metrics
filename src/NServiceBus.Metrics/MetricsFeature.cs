@@ -64,7 +64,7 @@ class MetricsFeature : Feature
             {
                 var hostInformation = b.Build<HostInformation>();
 
-                var headers =  new Dictionary<string, string>
+                var headers = new Dictionary<string, string>
                 {
                     {Headers.OriginatingEndpoint, endpointName},
                     {Headers.OriginatingMachine, RuntimeEnvironment.MachineName},
@@ -112,7 +112,7 @@ class MetricsFeature : Feature
         {
             var meter = metricsContext.Meter(signalProbe.Name, string.Empty);
 
-            signalProbe.Register(() => meter.Mark());
+            signalProbe.Register((ref SignalEvent e) => meter.Mark());
         }
     }
 
@@ -122,7 +122,7 @@ class MetricsFeature : Feature
         {
             var timer = metricsContext.Timer(durationProbe.Name, "Messages", SamplingType.Default, TimeUnit.Seconds, TimeUnit.Milliseconds, default(MetricTags));
 
-            durationProbe.Register(v => timer.Record((long) v.TotalMilliseconds, TimeUnit.Milliseconds));
+            durationProbe.Register((ref DurationEvent e) => timer.Record((long)e.Duration.TotalMilliseconds, TimeUnit.Milliseconds));
         }
     }
 
@@ -223,7 +223,7 @@ class MetricsFeature : Feature
             {
                 if (signalProbe.Name == RetriesProbeBuilder.Retries)
                 {
-                    reporters.Add(CreateReporter(signalProbe));       
+                    reporters.Add(CreateReporter(signalProbe));
                 }
             }
 
@@ -238,7 +238,7 @@ class MetricsFeature : Feature
         RawDataReporter CreateReporter(IDurationProbe probe)
         {
             return CreateReporter(
-                w => probe.Register(v => w((long)v.TotalMilliseconds)),
+                w => probe.Register((ref DurationEvent d) => w((long)d.Duration.TotalMilliseconds)),
                 $"{probe.Name.Replace(" ", string.Empty)}",
                 "LongValueOccurrence",
                 (e, w) => LongValueWriter.Write(w, e));
@@ -247,7 +247,7 @@ class MetricsFeature : Feature
         RawDataReporter CreateReporter(ISignalProbe probe)
         {
             return CreateReporter(
-                w => probe.Register(() => w(1)),
+                w => probe.Register((ref SignalEvent e) => w(1)),
                 $"{probe.Name.Replace(" ", string.Empty)}",
                 "Occurrence",
                 (e, w) => OccurrenceWriter.Write(w, e));

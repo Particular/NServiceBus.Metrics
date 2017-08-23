@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NServiceBus;
 using NServiceBus.Features;
 
@@ -19,14 +20,18 @@ static class Extensions
 
     public static bool TryGetMessageType(this ReceivePipelineCompleted completed, out string ProcessedMessageType)
     {
-        var headers = completed.ProcessedMessage.Headers;
+        return completed.ProcessedMessage.Headers.TryGetMessageType(out ProcessedMessageType);
+    }
+
+    public static bool TryGetMessageType(this IReadOnlyDictionary<string, string> headers, out string processedMessageType)
+    {
         string enclosedMessageType;
         if (headers.TryGetValue(Headers.EnclosedMessageTypes, out enclosedMessageType))
         {
-            ProcessedMessageType = enclosedMessageType;
+            processedMessageType = enclosedMessageType;
             return true;
         }
-        ProcessedMessageType = "Undefined";
+        processedMessageType = "Undefined";
         return false;
     }
 
