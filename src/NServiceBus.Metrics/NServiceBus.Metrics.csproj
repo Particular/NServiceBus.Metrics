@@ -13,6 +13,9 @@
     <NoWarn>CS8002</NoWarn>
     <UpdateAssemblyInfo>true</UpdateAssemblyInfo>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>7</LangVersion>
+  </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\packaging\nuget\NServiceBus.Metrics.nuspec" Link="NServiceBus.Metrics.nuspec" />
   </ItemGroup>

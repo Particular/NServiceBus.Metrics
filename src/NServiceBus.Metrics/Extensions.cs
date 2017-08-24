@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NServiceBus;
 using NServiceBus.Features;
 
@@ -7,8 +8,7 @@ static class Extensions
     public static bool TryGetTimeSent(this ReceivePipelineCompleted completed, out DateTime timeSent)
     {
         var headers = completed.ProcessedMessage.Headers;
-        string timeSentString;
-        if (headers.TryGetValue(Headers.TimeSent, out timeSentString))
+        if (headers.TryGetValue(Headers.TimeSent, out var timeSentString))
         {
             timeSent = DateTimeExtensions.ToUtcDateTime(timeSentString);
             return true;
@@ -17,16 +17,19 @@ static class Extensions
         return false;
     }
 
-    public static bool TryGetMessageType(this ReceivePipelineCompleted completed, out string ProcessedMessageType)
+    public static bool TryGetMessageType(this ReceivePipelineCompleted completed, out string processedMessageType)
     {
-        var headers = completed.ProcessedMessage.Headers;
-        string enclosedMessageType;
-        if (headers.TryGetValue(Headers.EnclosedMessageTypes, out enclosedMessageType))
+        return completed.ProcessedMessage.Headers.TryGetMessageType(out processedMessageType);
+    }
+
+    internal static bool TryGetMessageType(this IReadOnlyDictionary<string, string> headers, out string processedMessageType)
+    {
+        if (headers.TryGetValue(Headers.EnclosedMessageTypes, out var enclosedMessageType))
         {
-            ProcessedMessageType = enclosedMessageType;
+            processedMessageType = enclosedMessageType;
             return true;
         }
-        ProcessedMessageType = "Undefined";
+        processedMessageType = null;
         return false;
     }
 

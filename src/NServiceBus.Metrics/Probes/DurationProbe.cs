@@ -7,15 +7,22 @@ class DurationProbe : Probe, IDurationProbe
     {
     }
 
-    public void Register(Action<TimeSpan> observer)
+    public void Register(OnEvent<DurationEvent> observer)
     {
         observers += observer;
     }
 
-    internal void Record(TimeSpan duration)
+    public void Register(Action<TimeSpan> observer)
     {
-        observers(duration);
+        Register((ref DurationEvent e) => observer(e.Duration));
     }
 
-    Action<TimeSpan> observers = span => { };
+    internal void Record(ref DurationEvent e)
+    {
+        observers(ref e);
+    }
+
+    OnEvent<DurationEvent> observers = Empty;
+
+    static void Empty(ref DurationEvent e) { }
 }

@@ -9,6 +9,9 @@
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>7</LangVersion>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="NServiceBus.Metrics.approved.cs" />
     <Compile Remove="NServiceBus.Metrics.received.cs" />
