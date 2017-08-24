@@ -8,7 +8,7 @@ static class Extensions
     public static bool TryGetTimeSent(this ReceivePipelineCompleted completed, out DateTime timeSent)
     {
         var headers = completed.ProcessedMessage.Headers;
-        if (headers.TryGetValue(Headers.TimeSent, out string timeSentString))
+        if (headers.TryGetValue(Headers.TimeSent, out var timeSentString))
         {
             timeSent = DateTimeExtensions.ToUtcDateTime(timeSentString);
             return true;
@@ -24,7 +24,7 @@ static class Extensions
 
     internal static bool TryGetMessageType(this IReadOnlyDictionary<string, string> headers, out string processedMessageType)
     {
-        if (headers.TryGetValue(Headers.EnclosedMessageTypes, out string enclosedMessageType))
+        if (headers.TryGetValue(Headers.EnclosedMessageTypes, out var enclosedMessageType))
         {
             processedMessageType = enclosedMessageType;
             return true;
