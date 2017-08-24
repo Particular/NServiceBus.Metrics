@@ -243,7 +243,7 @@ class MetricsFeature : Feature
             return CreateReporter(
                 w => probe.Register((ref DurationEvent d) =>
                 {
-                    var tag = writer.GetTagId(d.MessageType);
+                    var tag = writer.GetTagId(d.MessageType ?? "");
                     w((long)d.Duration.TotalMilliseconds, tag);
                 }),
                 metricType,
@@ -259,7 +259,7 @@ class MetricsFeature : Feature
             return CreateReporter(
                 w => probe.Register((ref SignalEvent e) =>
                 {
-                    var tag = writer.GetTagId(e.MessageType);
+                    var tag = writer.GetTagId(e.MessageType ?? "");
                     w(1, tag);
                 }),
                 metricType,
