@@ -1,4 +1,5 @@
-﻿using NServiceBus;
+﻿using System;
+using NServiceBus;
 
 class DurationProbe : Probe, IDurationProbe
 {
@@ -9,6 +10,11 @@ class DurationProbe : Probe, IDurationProbe
     public void Register(OnEvent<DurationEvent> observer)
     {
         observers += observer;
+    }
+
+    public void Register(Action<TimeSpan> observer)
+    {
+        Register((ref DurationEvent e) => observer(e.Duration));
     }
 
     internal void Record(ref DurationEvent e)

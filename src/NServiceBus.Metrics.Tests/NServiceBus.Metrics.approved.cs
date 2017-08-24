@@ -14,6 +14,8 @@ namespace NServiceBus
     public interface IDurationProbe : NServiceBus.IProbe
     {
         void Register(NServiceBus.OnEvent<NServiceBus.DurationEvent> observer);
+        [System.ObsoleteAttribute("Use Register with a DurationEvent instead. Will be removed in version 2.0.0.", true)]
+        void Register(System.Action<System.TimeSpan> observer);
     }
     public interface IProbe
     {
@@ -23,6 +25,8 @@ namespace NServiceBus
     public interface ISignalProbe : NServiceBus.IProbe
     {
         void Register(NServiceBus.OnEvent<NServiceBus.SignalEvent> observer);
+        [System.ObsoleteAttribute("Use Register with a DurationEvent instead. Will be removed in version 2.0.0.", true)]
+        void Register(System.Action observer);
     }
     public class static MetricsConfigurationExtensions
     {
