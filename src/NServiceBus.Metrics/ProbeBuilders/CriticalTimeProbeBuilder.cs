@@ -21,8 +21,7 @@ class CriticalTimeProbeBuilder : DurationProbeBuilder
             if (e.TryGetTimeSent(out timeSent))
             {
                 var endToEndTime = e.CompletedAt - timeSent;
-                string messageType;
-                e.TryGetMessageType(out messageType);
+                e.TryGetMessageType(out string messageType);
 
                 var @event = new DurationEvent(endToEndTime, messageType);
                 probe.Record(ref @event);

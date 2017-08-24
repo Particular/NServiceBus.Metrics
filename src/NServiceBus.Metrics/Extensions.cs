@@ -29,7 +29,7 @@ static class Extensions
             processedMessageType = enclosedMessageType;
             return true;
         }
-        processedMessageType = "Undefined";
+        processedMessageType = null;
         return false;
     }
 
