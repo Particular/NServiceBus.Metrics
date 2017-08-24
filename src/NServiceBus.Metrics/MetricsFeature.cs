@@ -198,6 +198,8 @@ class MetricsFeature : Feature
 
     class ServiceControlRawDataReporting : FeatureStartupTask
     {
+        const string TaggedValueMetricContentType = "TaggedLongValueWriterOccurrence";
+
         public ServiceControlRawDataReporting(ProbeContext probeContext, IBuilder builder, MetricsOptions options, Dictionary<string, string> headers)
         {
             this.probeContext = probeContext;
@@ -241,14 +243,14 @@ class MetricsFeature : Feature
             var writer = new TaggedLongValueWriter();
 
             return CreateReporter(
-                w => probe.Register((ref DurationEvent d) =>
+                writeAction => probe.Register((ref DurationEvent d) =>
                 {
                     var tag = writer.GetTagId(d.MessageType ?? "");
-                    w((long)d.Duration.TotalMilliseconds, tag);
+                    writeAction((long)d.Duration.TotalMilliseconds, tag);
                 }),
                 metricType,
-                "TaggedLongValueWriterOccurrence",
-                (e, w) => writer.Write(w, e));
+                TaggedValueMetricContentType,
+                (entries, binaryWriter) => writer.Write(binaryWriter, entries));
         }
 
         RawDataReporter CreateReporter(ISignalProbe probe)
@@ -257,14 +259,14 @@ class MetricsFeature : Feature
             var writer = new TaggedLongValueWriter();
 
             return CreateReporter(
-                w => probe.Register((ref SignalEvent e) =>
+                writeAction => probe.Register((ref SignalEvent e) =>
                 {
                     var tag = writer.GetTagId(e.MessageType ?? "");
-                    w(1, tag);
+                    writeAction(1, tag);
                 }),
                 metricType,
-                "TaggedLongValueWriterOccurrence",
-                (e, w) => writer.Write(w, e));
+                TaggedValueMetricContentType,
+                (entries, binaryWriter) => writer.Write(binaryWriter, entries));
         }
 
         static string GetMetricType(IProbe probe) => $"{probe.Name.Replace(" ", string.Empty)}";
