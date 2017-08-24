@@ -6,13 +6,8 @@
     public interface IProbe
     {
         /// <summary>
-        /// Name of the probe.
+        /// Provides an id of the probe.
         /// </summary>
-        string Name { get; }
-
-        /// <summary>
-        /// Description of the probe.
-        /// </summary>
-        string Description { get; }
+        string Id { get; }
     }
 }

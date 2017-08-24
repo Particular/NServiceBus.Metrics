@@ -1,4 +1,5 @@
-[ProbeProperties("# of msgs pulled from the input queue /sec", "The current number of messages pulled from the input queue by the transport per second.")]
+using NServiceBus.Metrics;
+
 class MessagePulledFromQueueProbeBuilder : SignalProbeBuilder
 {
     public MessagePulledFromQueueProbeBuilder(ReceivePerformanceDiagnosticsBehavior behavior)
@@ -10,6 +11,8 @@ class MessagePulledFromQueueProbeBuilder : SignalProbeBuilder
     {
         behavior.MessagePulledFromQueue = probe;
     }
+
+    protected override string ProbeId => Probes.MessagePulled;
 
     readonly ReceivePerformanceDiagnosticsBehavior behavior;
 }
