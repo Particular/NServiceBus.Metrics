@@ -19,7 +19,9 @@ class ProcessingTimeProbeBuilder : DurationProbeBuilder
 
             var processingTime = e.CompletedAt - e.StartedAt;
 
-            probe.Record(processingTime);
+            var @event = new DurationEvent(processingTime, messageTypeProcessed);
+
+            probe.Record(ref @event);
 
             return TaskExtensions.Completed;
         });

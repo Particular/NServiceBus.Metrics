@@ -5,8 +5,16 @@
 namespace NServiceBus
 {
     
+    public struct DurationEvent
+    {
+        public readonly System.TimeSpan Duration;
+        public readonly string MessageType;
+        public DurationEvent(System.TimeSpan duration, string messageType) { }
+    }
     public interface IDurationProbe : NServiceBus.IProbe
     {
+        void Register(NServiceBus.OnEvent<NServiceBus.DurationEvent> observer);
+        [System.ObsoleteAttribute("Use Register with a DurationEvent instead. Will be removed in version 2.0.0.", true)]
         void Register(System.Action<System.TimeSpan> observer);
     }
     public interface IProbe
@@ -16,6 +24,8 @@ namespace NServiceBus
     }
     public interface ISignalProbe : NServiceBus.IProbe
     {
+        void Register(NServiceBus.OnEvent<NServiceBus.SignalEvent> observer);
+        [System.ObsoleteAttribute("Use Register with a DurationEvent instead. Will be removed in version 2.0.0.", true)]
         void Register(System.Action observer);
     }
     public class static MetricsConfigurationExtensions
@@ -40,10 +50,16 @@ namespace NServiceBus
             "ed in version 3.0.0.", false)]
         public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, System.TimeSpan interval, string instanceId = null) { }
     }
+    public delegate void OnEvent<TEventType>(ref TEventType e);
     public class ProbeContext
     {
         public ProbeContext(System.Collections.Generic.IReadOnlyCollection<NServiceBus.IDurationProbe> durations, System.Collections.Generic.IReadOnlyCollection<NServiceBus.ISignalProbe> signals) { }
         public System.Collections.Generic.IReadOnlyCollection<NServiceBus.IDurationProbe> Durations { get; }
         public System.Collections.Generic.IReadOnlyCollection<NServiceBus.ISignalProbe> Signals { get; }
+    }
+    public struct SignalEvent
+    {
+        public readonly string MessageType;
+        public SignalEvent(string messageType) { }
     }
 }
