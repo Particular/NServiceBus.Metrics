@@ -20,6 +20,7 @@
     <None Include="..\..\packaging\nuget\NServiceBus.Metrics.nuspec" Link="NServiceBus.Metrics.nuspec" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="ILRepack" Version="2.0.13" />
     <PackageReference Include="Metrics.NET" Version="0.4.8" />
     <PackageReference Include="NServiceBus" Version="6.2.0" />
     <PackageReference Include="NuGetPackager" Version="0.6.3" />
@@ -27,14 +28,17 @@
     <PackageReference Include="Obsolete.Fody" Version="4.2.2" />
     <PackageReference Include="ServiceControl.Monitoring.Data" Version="1.0.1" />
   </ItemGroup>
-  <Target Name="BeforeBuildPackages" BeforeTargets="BuildPackages">
-    <MakeDir Directories="$(TargetDir)temp\" />
-    <Exec Command="&quot;$(SolutionDir)..\tools\ilmerge.exe&quot; /log:$(TargetDir)ilmerge.log /keyfile:&quot;$(SolutionDir)NServiceBus.snk&quot; /internalize /out:&quot;$(TargetDir)temp\$(TargetFileName)&quot; &quot;$(TargetPath)&quot; &quot;$(TargetDir)Metrics.dll&quot; /target:library /targetplatform:&quot;v4,$(FrameworkPathOverride)&quot;" />
+  <Target Name="MergeDependencies" AfterTargets="CopyFilesToOutputDirectory" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <TempFolder>$(ProjectDir)$(OutputPath)temp</TempFolder>
+    </PropertyGroup>
+    <MakeDir Directories="$(TempFolder)" />
+    <Exec Command="$(ILRepack) /out:&quot;$(TempFolder)\$(AssemblyName).dll&quot; &quot;$(ProjectDir)$(OutputPath)$(AssemblyName).dll&quot; &quot;$(ProjectDir)$(OutputPath)ServiceControl.Monitoring.Data.dll&quot; /targetplatform:v4 /internalize /lib:&quot;$(ProjectDir)$(OutputPath).&quot; /keyfile:$(AssemblyOriginatorKeyFile)" />
     <ItemGroup>
-      <TempFiles Include="$(TargetDir)temp\*.*" />
+      <TempFiles Include="$(TempFolder)\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(TempFiles)" DestinationFolder="$(TargetDir)" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(TempFiles)" DestinationFolder="$(OutputPath)" OverwriteReadOnlyFiles="true" />
     <Delete Files="@(TempFiles)" />
-    <RemoveDir Directories="$(TargetDir)temp\" />
+    <RemoveDir Directories="$(TempFolder)" />
   </Target>
 </Project>
