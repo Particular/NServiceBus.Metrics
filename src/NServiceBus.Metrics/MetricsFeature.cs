@@ -198,6 +198,8 @@ class MetricsFeature : Feature
 
     class ServiceControlRawDataReporting : FeatureStartupTask
     {
+        const string TaggedValueMetricContentType = "TaggedLongValueWriterOccurrence";
+
         public ServiceControlRawDataReporting(ProbeContext probeContext, IBuilder builder, MetricsOptions options, Dictionary<string, string> headers)
         {
             this.probeContext = probeContext;
@@ -237,23 +239,39 @@ class MetricsFeature : Feature
 
         RawDataReporter CreateReporter(IDurationProbe probe)
         {
+            var metricType = GetMetricType(probe);
+            var writer = new TaggedLongValueWriter();
+
             return CreateReporter(
-                w => probe.Register((ref DurationEvent d) => w((long)d.Duration.TotalMilliseconds)),
-                $"{probe.Name.Replace(" ", string.Empty)}",
-                "LongValueOccurrence",
-                (e, w) => LongValueWriter.Write(w, e));
+                writeAction => probe.Register((ref DurationEvent d) =>
+                {
+                    var tag = writer.GetTagId(d.MessageType ?? "");
+                    writeAction((long)d.Duration.TotalMilliseconds, tag);
+                }),
+                metricType,
+                TaggedValueMetricContentType,
+                (entries, binaryWriter) => writer.Write(binaryWriter, entries));
         }
 
         RawDataReporter CreateReporter(ISignalProbe probe)
         {
+            var metricType = GetMetricType(probe);
+            var writer = new TaggedLongValueWriter();
+
             return CreateReporter(
-                w => probe.Register((ref SignalEvent e) => w(1)),
-                $"{probe.Name.Replace(" ", string.Empty)}",
-                "Occurrence",
-                (e, w) => OccurrenceWriter.Write(w, e));
+                writeAction => probe.Register((ref SignalEvent e) =>
+                {
+                    var tag = writer.GetTagId(e.MessageType ?? "");
+                    writeAction(1, tag);
+                }),
+                metricType,
+                TaggedValueMetricContentType,
+                (entries, binaryWriter) => writer.Write(binaryWriter, entries));
         }
 
-        RawDataReporter CreateReporter(Action<Action<long>> setupProbe, string metricType, string contentType, WriteOutput outputWriter)
+        static string GetMetricType(IProbe probe) => $"{probe.Name.Replace(" ", string.Empty)}";
+
+        RawDataReporter CreateReporter(Action<Action<long, int>> setupProbe, string metricType, string contentType, WriteOutput outputWriter)
         {
             var buffer = new RingBuffer();
 
@@ -269,14 +287,14 @@ class MetricsFeature : Feature
                 buffer,
                 outputWriter);
 
-            setupProbe(v =>
+            setupProbe((value, tag) =>
             {
                 var written = false;
                 var attempts = 0;
 
                 while (!written)
                 {
-                    written = buffer.TryWrite(v);
+                    written = buffer.TryWrite(value, tag);
 
                     attempts++;
 
