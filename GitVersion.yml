@@ -2,5 +2,7 @@ assembly-versioning-scheme: Major
 next-version: 2.0.0
 commit-message-incrementing: Disabled
 branches:
+  release:
+    tag: beta
   develop:
     tag: alpha
