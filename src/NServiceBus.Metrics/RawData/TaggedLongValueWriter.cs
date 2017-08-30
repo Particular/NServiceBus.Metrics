@@ -67,6 +67,7 @@
                 // int allows to write ticks of 7minutes, as reporter runs much more frequent, this can be int
                 var date = (int)(array[offset + i].Ticks - minDate);
                 outputWriter.Write(date);
+                outputWriter.Write(array[offset + i].Tag);
                 outputWriter.Write(array[offset + i].Value);
             }
         }
