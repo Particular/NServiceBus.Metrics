@@ -32,6 +32,7 @@
                 writer.Write(0); // tag count
                 writer.Write(1); // entry count
                 writer.Write(0);
+                writer.Write(0);
                 writer.Write(value);
             });
         }
@@ -64,6 +65,7 @@
 
                 writer.Write(1); // entry count
                 writer.Write(0);
+                writer.Write(tagId);
                 writer.Write(value);
             });
         }
@@ -109,8 +111,10 @@
 
                 writer.Write(2);
                 writer.Write(0);
+                writer.Write(tagId1);
                 writer.Write(value1);
                 writer.Write(timeDiff);
+                writer.Write(tagId2);
                 writer.Write(value2);
             });
         }
