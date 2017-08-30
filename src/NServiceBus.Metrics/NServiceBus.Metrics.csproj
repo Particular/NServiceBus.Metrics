@@ -30,10 +30,10 @@
   </ItemGroup>
   <Target Name="MergeDependencies" AfterTargets="CopyFilesToOutputDirectory" Condition="'$(Configuration)' == 'Release'">
     <PropertyGroup>
-      <TempFolder>$(ProjectDir)$(OutputPath)temp</TempFolder>
+      <TempFolder>$(TargetDir)temp</TempFolder>
     </PropertyGroup>
     <MakeDir Directories="$(TempFolder)" />
-    <Exec Command="$(ILRepack) /out:&quot;$(TempFolder)\$(AssemblyName).dll&quot; &quot;$(ProjectDir)$(OutputPath)$(AssemblyName).dll&quot; &quot;$(ProjectDir)$(OutputPath)ServiceControl.Monitoring.Data.dll&quot; /targetplatform:v4 /internalize /lib:&quot;$(ProjectDir)$(OutputPath).&quot; /keyfile:$(AssemblyOriginatorKeyFile)" />
+    <Exec Command="$(ILRepack) /out:&quot;$(TempFolder)\$(AssemblyName).dll&quot; &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(TargetDir)Metrics.dll&quot; &quot;$(TargetDir)ServiceControl.Monitoring.Data.dll&quot; /targetplatform:v4 /internalize /lib:&quot;$(TargetDir).&quot; /keyfile:$(AssemblyOriginatorKeyFile)" />
     <ItemGroup>
       <TempFiles Include="$(TempFolder)\*.*" />
     </ItemGroup>
