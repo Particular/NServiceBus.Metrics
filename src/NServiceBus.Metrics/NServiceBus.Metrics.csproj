@@ -21,7 +21,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Metrics.NET" Version="0.4.8" />
-    <PackageReference Include="NServiceBus" Version="7.0.0-alpharelease0051" />
+    <PackageReference Include="NServiceBus" Version="7.0.0-beta0001" />
     <PackageReference Include="NuGetPackager" Version="0.6.3" />
     <PackageReference Include="Obsolete.Fody" Version="4.2.4" PrivateAssets="All" />
   </ItemGroup>
