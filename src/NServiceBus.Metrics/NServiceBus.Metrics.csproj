@@ -28,7 +28,7 @@
     <PackageReference Include="Obsolete.Fody" Version="4.2.2" />
     <PackageReference Include="ServiceControl.Monitoring.Data" Version="1.0.1" />
   </ItemGroup>
-  <Target Name="MergeDependencies" AfterTargets="CopyFilesToOutputDirectory" Condition="'$(Configuration)' == 'Release'">
+  <Target Name="MergeDependencies" AfterTargets="CopyFilesToOutputDirectory">
     <PropertyGroup>
       <TempFolder>$(TargetDir)temp</TempFolder>
     </PropertyGroup>
