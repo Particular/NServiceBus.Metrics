@@ -25,6 +25,7 @@
     <PackageReference Include="NuGetPackager" Version="0.6.3" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012" />
     <PackageReference Include="Obsolete.Fody" Version="4.2.2" />
+    <PackageReference Include="ServiceControl.Monitoring.Data" Version="1.0.1" />
   </ItemGroup>
   <Target Name="BeforeBuildPackages" BeforeTargets="BuildPackages">
     <MakeDir Directories="$(TargetDir)temp\" />
