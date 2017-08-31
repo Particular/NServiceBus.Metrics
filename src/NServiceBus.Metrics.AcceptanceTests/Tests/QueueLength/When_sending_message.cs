@@ -81,7 +81,7 @@ public class When_sending_message : QueueLengthAcceptanceTests
         var sequence1 = long.Parse(headers[0][valueHeader]);
         var sequence2 = long.Parse(headers[1][valueHeader]);
 
-        Assert.AreEqual(sessionKey1, sessionKey2);
+        Assert.AreEqual(sessionKey1, sessionKey2, "expected sessionKey1 == sessionKey2");
         Assert.AreEqual(1, sequence1);
         Assert.AreEqual(2, sequence2);
 
