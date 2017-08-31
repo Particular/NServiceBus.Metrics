@@ -4,7 +4,6 @@ namespace NServiceBus.Metrics.AcceptanceTests
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using Extensibility;
@@ -25,7 +24,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
         public async Task Should_enhance_it_with_queue_length_properties()
         {
             var context = await Scenario.Define<Context>()
-                .WithEndpoint<Publisher>(c => c.When(ctx => ctx.SubscriptionCount == 2, async s =>
+                .WithEndpoint<Publisher>(c => c.When(ctx => ctx.EndpointsStarted, async s =>
                   {
                       await s.Publish(new TestEventMessage1());
                       await s.Publish(new TestEventMessage1());
@@ -91,7 +90,6 @@ namespace NServiceBus.Metrics.AcceptanceTests
 
         class Context : QueueLengthContext
         {
-            public volatile int SubscriptionCount;
             public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers1 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
             public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers2 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
 
@@ -108,13 +106,6 @@ namespace NServiceBus.Metrics.AcceptanceTests
                 EndpointSetup<DefaultServer>((c, r) =>
                 {
                     c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
-                    c.OnEndpointSubscribed<Context>((s, ctx) =>
-                    {
-                        if (s.SubscriberReturnAddress.Contains("Subscriber"))
-                        {
-                            Interlocked.Increment(ref ctx.SubscriptionCount);
-                        }
-                    });
 
                     c.Pipeline.Register(new PreQueueLengthStep());
                     c.Pipeline.Register(new PostQueueLengthStep());
@@ -134,12 +125,6 @@ namespace NServiceBus.Metrics.AcceptanceTests
                 {
                     c.LimitMessageProcessingConcurrencyTo(1);
                     c.DisableFeature<AutoSubscribe>();
-
-                    var routing = c.UseTransport<MsmqTransport>()
-                        .Routing();
-                    var publisher = AcceptanceTesting.Customization.Conventions.EndpointNamingConvention(typeof(Publisher));
-                    routing.RegisterPublisher(typeof(TestEventMessage1), publisher);
-                    routing.RegisterPublisher(typeof(TestEventMessage2), publisher);
                 });
             }
 

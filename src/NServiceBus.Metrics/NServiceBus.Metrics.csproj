@@ -22,10 +22,10 @@
   <ItemGroup>
     <PackageReference Include="ILRepack" Version="2.0.13" />
     <PackageReference Include="Metrics.NET" Version="0.4.8" />
-    <PackageReference Include="NServiceBus" Version="6.2.0" />
+    <PackageReference Include="NServiceBus" Version="7.0.0-beta0001" />
     <PackageReference Include="NuGetPackager" Version="0.6.3" />
+    <PackageReference Include="Obsolete.Fody" Version="4.2.4" PrivateAssets="All" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012" />
-    <PackageReference Include="Obsolete.Fody" Version="4.2.2" />
     <PackageReference Include="ServiceControl.Monitoring.Data" Version="1.0.2" />
   </ItemGroup>
   <Target Name="MergeDependencies" AfterTargets="CopyFilesToOutputDirectory">
