@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Metrics;
 using NServiceBus;
+using NServiceBus.Extensibility;
 using NServiceBus.Features;
 using NServiceBus.Hosting;
 using NServiceBus.Logging;
@@ -11,10 +12,11 @@ using NServiceBus.MessageMutator;
 using NServiceBus.Metrics;
 using NServiceBus.Metrics.ProbeBuilders;
 using NServiceBus.Metrics.QueueLength;
-using NServiceBus.Metrics.RawData;
 using NServiceBus.ObjectBuilder;
+using NServiceBus.Routing;
 using NServiceBus.Support;
 using NServiceBus.Transport;
+using ServiceControl.Monitoring.Data;
 using TaskExtensions = NServiceBus.Metrics.TaskExtensions;
 
 class MetricsFeature : Feature
@@ -198,6 +200,8 @@ class MetricsFeature : Feature
 
     class ServiceControlRawDataReporting : FeatureStartupTask
     {
+        const string TaggedValueMetricContentType = "TaggedLongValueWriterOccurrence";
+
         public ServiceControlRawDataReporting(ProbeContext probeContext, IBuilder builder, MetricsOptions options, Dictionary<string, string> headers)
         {
             this.probeContext = probeContext;
@@ -237,46 +241,77 @@ class MetricsFeature : Feature
 
         RawDataReporter CreateReporter(IDurationProbe probe)
         {
+            var metricType = GetMetricType(probe);
+            var writer = new TaggedLongValueWriterV1();
+
             return CreateReporter(
-                w => probe.Register((ref DurationEvent d) => w((long)d.Duration.TotalMilliseconds)),
-                $"{probe.Name.Replace(" ", string.Empty)}",
-                "LongValueOccurrence",
-                (e, w) => LongValueWriter.Write(w, e));
+                writeAction => probe.Register((ref DurationEvent d) =>
+                {
+                    var tag = writer.GetTagId(d.MessageType ?? "");
+                    writeAction((long)d.Duration.TotalMilliseconds, tag);
+                }),
+                metricType,
+                TaggedValueMetricContentType,
+                (entries, binaryWriter) => writer.Write(binaryWriter, entries));
         }
 
         RawDataReporter CreateReporter(ISignalProbe probe)
         {
+            var metricType = GetMetricType(probe);
+            var writer = new TaggedLongValueWriterV1();
+
             return CreateReporter(
-                w => probe.Register((ref SignalEvent e) => w(1)),
-                $"{probe.Name.Replace(" ", string.Empty)}",
-                "Occurrence",
-                (e, w) => OccurrenceWriter.Write(w, e));
+                writeAction => probe.Register((ref SignalEvent e) =>
+                {
+                    var tag = writer.GetTagId(e.MessageType ?? "");
+                    writeAction(1, tag);
+                }),
+                metricType,
+                TaggedValueMetricContentType,
+                (entries, binaryWriter) => writer.Write(binaryWriter, entries));
         }
 
-        RawDataReporter CreateReporter(Action<Action<long>> setupProbe, string metricType, string contentType, WriteOutput outputWriter)
+        static string GetMetricType(IProbe probe) => $"{probe.Name.Replace(" ", string.Empty)}";
+
+        RawDataReporter CreateReporter(Action<Action<long, int>> setupProbe, string metricType, string contentType, WriteOutput outputWriter)
         {
             var buffer = new RingBuffer();
 
-            var reporterHeaders = new Dictionary<string, string>(headers);
+            var reporterHeaders = new Dictionary<string, string>(headers)
+            {
+                {Headers.ContentType, contentType},
+                {MetricHeaders.MetricType, metricType}
+            };
+            
+            var dispatcher = builder.Build<IDispatchMessages>();
+            var address = new UnicastAddressTag(options.ServiceControlMetricsAddress);
 
-            reporterHeaders.Add(Headers.ContentType, contentType);
-            reporterHeaders.Add(MetricHeaders.MetricType, metricType);
+            Func<byte[], Task> sender = async body =>
+            {
+                var message = new OutgoingMessage(Guid.NewGuid().ToString(), reporterHeaders, body);
 
-            var reporter = new RawDataReporter(
-                builder.Build<IDispatchMessages>(),
-                options.ServiceControlMetricsAddress,
-                reporterHeaders,
-                buffer,
-                outputWriter);
+                var operation = new TransportOperation(message, address);
+                try
+                {
+                    await dispatcher.Dispatch(new TransportOperations(operation), new TransportTransaction(), new ContextBag())
+                        .ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    log.Error($"Error while reporting raw data to {options.ServiceControlMetricsAddress}.", ex);
+                }
+            };
 
-            setupProbe(v =>
+            var reporter = new RawDataReporter(sender, buffer, outputWriter);
+
+            setupProbe((value, tag) =>
             {
                 var written = false;
                 var attempts = 0;
 
                 while (!written)
                 {
-                    written = buffer.TryWrite(v);
+                    written = buffer.TryWrite(value, tag);
 
                     attempts++;
 
@@ -307,7 +342,7 @@ class MetricsFeature : Feature
         readonly Dictionary<string, string> headers;
         readonly List<RawDataReporter> reporters;
 
-        static readonly int MaxExpectedWriteAttempts = 10;
+        const int MaxExpectedWriteAttempts = 10;
 
         static readonly ILog log = LogManager.GetLogger<ServiceControlRawDataReporting>();
     }
