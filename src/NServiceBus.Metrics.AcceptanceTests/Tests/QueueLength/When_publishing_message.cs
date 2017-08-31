@@ -6,17 +6,18 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting;
+using NServiceBus.AcceptanceTests;
 using NServiceBus.AcceptanceTests.EndpointTemplates;
 using NServiceBus.Extensibility;
 using NServiceBus.Features;
-using NServiceBus.Metrics.AcceptanceTests;
+using NServiceBus.Metrics;
 using NServiceBus.ObjectBuilder;
 using NServiceBus.Pipeline;
 using NServiceBus.Routing;
 using NUnit.Framework;
 using NServiceBus.Transport;
 
-public class When_publishing_message : QueueLengthAcceptanceTests
+public class When_publishing_message : NServiceBusAcceptanceTest
 {
     static Guid HostId = Guid.NewGuid();
 
@@ -81,18 +82,21 @@ public class When_publishing_message : QueueLengthAcceptanceTests
         var sequence1 = long.Parse(headers[0][valueHeader]);
         var sequence2 = long.Parse(headers[1][valueHeader]);
 
-        Assert.AreEqual(sessionKey1, sessionKey2);
+        Assert.AreEqual(sessionKey1, sessionKey2, "expected sessionKey1 == sessionKey2");
         Assert.AreEqual(1, sequence1);
         Assert.AreEqual(2, sequence2);
 
         return sessionKey1;
     }
 
-    class Context : QueueLengthContext
+    class Context : ScenarioContext
     {
         public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers1 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
         public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers2 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
 
+        public string Data { get; set; }
+
+        public Func<bool> TrackReports;
         public Context()
         {
             TrackReports = () => Headers1.Count == 2 && Headers2.Count == 2;
@@ -111,7 +115,9 @@ public class When_publishing_message : QueueLengthAcceptanceTests
                 c.Pipeline.Register(new PostQueueLengthStep());
 
 #pragma warning disable 618
-                c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(5));
+                var address = NServiceBus.AcceptanceTesting.Customization.Conventions.EndpointNamingConvention(typeof(MonitoringSpy));
+                var metrics = c.EnableMetrics();
+                metrics.SendMetricDataToServiceControl(address, TimeSpan.FromSeconds(5));
 #pragma warning restore 618
             });
         }
@@ -147,6 +153,33 @@ public class When_publishing_message : QueueLengthAcceptanceTests
             public Task Handle(TestEventMessage2 message, IMessageHandlerContext context)
             {
                 TestContext.Headers2.Enqueue(context.MessageHeaders);
+                return Task.FromResult(0);
+            }
+        }
+    }
+
+    protected class MonitoringSpy : EndpointConfigurationBuilder
+    {
+        public MonitoringSpy()
+        {
+            EndpointSetup<DefaultServer>(c =>
+            {
+                c.UseSerialization<NewtonsoftSerializer>();
+                c.LimitMessageProcessingConcurrencyTo(1);
+            }).IncludeType<MetricReport>();
+        }
+
+        class MetricHandler : IHandleMessages<MetricReport>
+        {
+            public Context TestContext { get; set; }
+
+            public Task Handle(MetricReport message, IMessageHandlerContext context)
+            {
+                if (TestContext.TrackReports())
+                {
+                    TestContext.Data = message.Data.ToString();
+                }
+
                 return Task.FromResult(0);
             }
         }

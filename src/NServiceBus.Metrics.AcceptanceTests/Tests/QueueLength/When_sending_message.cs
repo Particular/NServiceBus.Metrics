@@ -6,15 +6,21 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting;
+using NServiceBus.AcceptanceTests;
 using NServiceBus.AcceptanceTests.EndpointTemplates;
-using NServiceBus.Metrics.AcceptanceTests;
+using NServiceBus.Metrics;
 using NUnit.Framework;
 
-public class When_sending_message : QueueLengthAcceptanceTests
+public class When_sending_message : NServiceBusAcceptanceTest
 {
     static string ReceiverAddress1 => NServiceBus.AcceptanceTesting.Customization.Conventions.EndpointNamingConvention(typeof(Receiver1));
     static string ReceiverAddress2 => NServiceBus.AcceptanceTesting.Customization.Conventions.EndpointNamingConvention(typeof(Receiver2));
+    protected class QueueLengthContext : ScenarioContext
+    {
+        public string Data { get; set; }
 
+        public Func<bool> TrackReports = () => true;
+    }
     [Test]
     public async Task Should_enhance_it_with_queue_length_properties()
     {
@@ -107,9 +113,12 @@ public class When_sending_message : QueueLengthAcceptanceTests
         {
             EndpointSetup<DefaultServer>((c, r) =>
             {
-                c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
+                var runningInstance = c.UniquelyIdentifyRunningInstance();
+                runningInstance.UsingCustomIdentifier(HostId);
 #pragma warning disable 618
-                c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(5));
+                var address = NServiceBus.AcceptanceTesting.Customization.Conventions.EndpointNamingConvention(typeof(MonitoringSpy));
+                var metrics = c.EnableMetrics();
+                metrics.SendMetricDataToServiceControl(address, TimeSpan.FromSeconds(5));
 #pragma warning restore 618
             });
         }
@@ -135,6 +144,32 @@ public class When_sending_message : QueueLengthAcceptanceTests
         }
     }
 
+    protected class MonitoringSpy : EndpointConfigurationBuilder
+    {
+        public MonitoringSpy()
+        {
+            EndpointSetup<DefaultServer>(c =>
+            {
+                c.UseSerialization<NewtonsoftSerializer>();
+                c.LimitMessageProcessingConcurrencyTo(1);
+            }).IncludeType<MetricReport>();
+        }
+
+        public class MetricHandler : IHandleMessages<MetricReport>
+        {
+            public QueueLengthContext TestContext { get; set; }
+
+            public Task Handle(MetricReport message, IMessageHandlerContext context)
+            {
+                if (TestContext.TrackReports())
+                {
+                    TestContext.Data = message.Data.ToString();
+                }
+
+                return Task.FromResult(0);
+            }
+        }
+    }
     class Receiver2 : EndpointConfigurationBuilder
     {
         public Receiver2()

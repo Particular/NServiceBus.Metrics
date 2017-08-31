@@ -4,11 +4,12 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting;
+using NServiceBus.AcceptanceTests;
 using NServiceBus.AcceptanceTests.EndpointTemplates;
-using NServiceBus.Metrics.AcceptanceTests;
+using NServiceBus.Metrics;
 using NUnit.Framework;
 
-public class When_receiving_message : QueueLengthAcceptanceTests
+public class When_receiving_message : NServiceBusAcceptanceTest
 {
 
     const string KeyHeader = "NServiceBus.Metrics.QueueLength.Key";
@@ -16,6 +17,12 @@ public class When_receiving_message : QueueLengthAcceptanceTests
     const string SequenceValue = "42";
     static readonly string SequenceKey = Guid.NewGuid().ToString();
 
+    protected class QueueLengthContext : ScenarioContext
+    {
+        public string Data { get; set; }
+
+        public Func<bool> TrackReports = () => true;
+    }
     [Test]
     public async Task Should_report_sequence_for_session()
     {
@@ -45,6 +52,32 @@ public class When_receiving_message : QueueLengthAcceptanceTests
     }
 
 
+    protected class MonitoringSpy : EndpointConfigurationBuilder
+    {
+        public MonitoringSpy()
+        {
+            EndpointSetup<DefaultServer>(c =>
+            {
+                c.UseSerialization<NewtonsoftSerializer>();
+                c.LimitMessageProcessingConcurrencyTo(1);
+            }).IncludeType<MetricReport>();
+        }
+
+        public class MetricHandler : IHandleMessages<MetricReport>
+        {
+            public QueueLengthContext TestContext { get; set; }
+
+            public Task Handle(MetricReport message, IMessageHandlerContext context)
+            {
+                if (TestContext.TrackReports())
+                {
+                    TestContext.Data = message.Data.ToString();
+                }
+
+                return Task.FromResult(0);
+            }
+        }
+    }
     class Receiver : EndpointConfigurationBuilder
     {
         public Receiver()
@@ -53,7 +86,9 @@ public class When_receiving_message : QueueLengthAcceptanceTests
             {
                 c.LimitMessageProcessingConcurrencyTo(1);
 #pragma warning disable 618
-                c.EnableMetrics().SendMetricDataToServiceControl(MonitoringSpyAddress, TimeSpan.FromSeconds(5));
+                var address = NServiceBus.AcceptanceTesting.Customization.Conventions.EndpointNamingConvention(typeof(MonitoringSpy));
+                var metrics = c.EnableMetrics();
+                metrics.SendMetricDataToServiceControl(address, TimeSpan.FromSeconds(5));
 #pragma warning restore 618
 
                 c.Pipeline.Remove("DispatchQueueLengthBehavior");
