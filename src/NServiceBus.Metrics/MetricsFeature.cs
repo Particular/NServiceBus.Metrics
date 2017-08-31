@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Metrics;
 using NServiceBus;
+using NServiceBus.Extensibility;
 using NServiceBus.Features;
 using NServiceBus.Hosting;
 using NServiceBus.Logging;
@@ -11,10 +12,11 @@ using NServiceBus.MessageMutator;
 using NServiceBus.Metrics;
 using NServiceBus.Metrics.ProbeBuilders;
 using NServiceBus.Metrics.QueueLength;
-using NServiceBus.Metrics.RawData;
 using NServiceBus.ObjectBuilder;
+using NServiceBus.Routing;
 using NServiceBus.Support;
 using NServiceBus.Transport;
+using ServiceControl.Monitoring.Data;
 using TaskExtensions = NServiceBus.Metrics.TaskExtensions;
 
 class MetricsFeature : Feature
@@ -240,7 +242,7 @@ class MetricsFeature : Feature
         RawDataReporter CreateReporter(IDurationProbe probe)
         {
             var metricType = GetMetricType(probe);
-            var writer = new TaggedLongValueWriter();
+            var writer = new TaggedLongValueWriterV1();
 
             return CreateReporter(
                 writeAction => probe.Register((ref DurationEvent d) =>
@@ -256,7 +258,7 @@ class MetricsFeature : Feature
         RawDataReporter CreateReporter(ISignalProbe probe)
         {
             var metricType = GetMetricType(probe);
-            var writer = new TaggedLongValueWriter();
+            var writer = new TaggedLongValueWriterV1();
 
             return CreateReporter(
                 writeAction => probe.Register((ref SignalEvent e) =>
@@ -275,17 +277,32 @@ class MetricsFeature : Feature
         {
             var buffer = new RingBuffer();
 
-            var reporterHeaders = new Dictionary<string, string>(headers);
+            var reporterHeaders = new Dictionary<string, string>(headers)
+            {
+                {Headers.ContentType, contentType},
+                {MetricHeaders.MetricType, metricType}
+            };
+            
+            var dispatcher = builder.Build<IDispatchMessages>();
+            var address = new UnicastAddressTag(options.ServiceControlMetricsAddress);
 
-            reporterHeaders.Add(Headers.ContentType, contentType);
-            reporterHeaders.Add(MetricHeaders.MetricType, metricType);
+            Func<byte[], Task> sender = async body =>
+            {
+                var message = new OutgoingMessage(Guid.NewGuid().ToString(), reporterHeaders, body);
 
-            var reporter = new RawDataReporter(
-                builder.Build<IDispatchMessages>(),
-                options.ServiceControlMetricsAddress,
-                reporterHeaders,
-                buffer,
-                outputWriter);
+                var operation = new TransportOperation(message, address);
+                try
+                {
+                    await dispatcher.Dispatch(new TransportOperations(operation), new TransportTransaction(), new ContextBag())
+                        .ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    log.Error($"Error while reporting raw data to {options.ServiceControlMetricsAddress}.", ex);
+                }
+            };
+
+            var reporter = new RawDataReporter(sender, buffer, outputWriter);
 
             setupProbe((value, tag) =>
             {
@@ -325,7 +342,7 @@ class MetricsFeature : Feature
         readonly Dictionary<string, string> headers;
         readonly List<RawDataReporter> reporters;
 
-        static readonly int MaxExpectedWriteAttempts = 10;
+        const int MaxExpectedWriteAttempts = 10;
 
         static readonly ILog log = LogManager.GetLogger<ServiceControlRawDataReporting>();
     }
