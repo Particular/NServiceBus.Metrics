@@ -78,14 +78,13 @@ public class When_publishing_message : NServiceBusAcceptanceTest
 
         var sessionKey1 = headers[0][keyHeader];
         var sessionKey2 = headers[1][keyHeader];
+        Assert.AreEqual(sessionKey1, sessionKey2, "expected sessionKey1 == sessionKey2");
 
         var sequence1 = long.Parse(headers[0][valueHeader]);
         var sequence2 = long.Parse(headers[1][valueHeader]);
-
-        Assert.AreEqual(sessionKey1, sessionKey2, "expected sessionKey1 == sessionKey2");
-        Assert.AreEqual(1, sequence1);
-        Assert.AreEqual(2, sequence2);
-
+        Assert.AreNotEqual(sequence2, sequence1, "expected sequence1 != sequence2");
+        Assert.IsTrue(sequence1 == 1 || sequence2 == 1, "sequence1 == 1 || sequence2 == 1");
+        Assert.IsTrue(sequence1 == 2 || sequence2 == 2, "sequence1 == 2 || sequence2 == 2");
         return sessionKey1;
     }
 
