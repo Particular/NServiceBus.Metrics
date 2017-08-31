@@ -24,17 +24,17 @@ public class When_publishing_message : QueueLengthAcceptanceTests
     public async Task Should_enhance_it_with_queue_length_properties()
     {
         var context = await Scenario.Define<Context>()
-            .WithEndpoint<Publisher>(c => c.When(ctx => ctx.EndpointsStarted, async s =>
-                {
-                    await s.Publish(new TestEventMessage1());
-                    await s.Publish(new TestEventMessage1());
-                    await s.Publish(new TestEventMessage2());
-                    await s.Publish(new TestEventMessage2());
-                }))
-            .WithEndpoint<Subscriber>(b => b.When(async (session, c) =>
+            .WithEndpoint<Subscriber>(b => b.When(ctx => ctx.EndpointsStarted, async (session, c) =>
             {
                 await session.Subscribe<TestEventMessage1>();
                 await session.Subscribe<TestEventMessage2>();
+            }))
+            .WithEndpoint<Publisher>(c => c.When(async s =>
+            {
+                await s.Publish(new TestEventMessage1());
+                await s.Publish(new TestEventMessage1());
+                await s.Publish(new TestEventMessage2());
+                await s.Publish(new TestEventMessage2());
             }))
             .WithEndpoint<MonitoringSpy>()
             .Done(c => c.Headers1.Count == 2 && c.Headers2.Count == 2 && c.Data != null)
