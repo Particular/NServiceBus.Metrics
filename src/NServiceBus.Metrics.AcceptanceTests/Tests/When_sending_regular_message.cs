@@ -63,8 +63,7 @@
 
                 public Task Handle(Message message, IMessageHandlerContext context)
                 {
-                    string header;
-                    context.MessageHeaders.TryGetValue("NServiceBus.Metric.InstanceId", out header);
+                    context.MessageHeaders.TryGetValue("NServiceBus.Metric.InstanceId", out var header);
 
                     TestContext.NServiceBus_Metric_InstanceId_Header_Value = header;
 

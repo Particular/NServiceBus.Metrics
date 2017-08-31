@@ -2,31 +2,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net452</TargetFramework>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(SolutionDir)NServiceBus.snk</AssemblyOriginatorKeyFile>
-    <DebugType>full</DebugType>
-    <DebugSymbols>True</DebugSymbols>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <OutputPath>..\..\binaries\</OutputPath>
     <NoWarn>CS8002</NoWarn>
-    <UpdateAssemblyInfo>true</UpdateAssemblyInfo>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>7</LangVersion>
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>Hooks into the NServiceBus pipeline and computes metrics like Processing Time and reports it.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\..\packaging\nuget\NServiceBus.Metrics.nuspec" Link="NServiceBus.Metrics.nuspec" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="ILRepack" Version="2.0.13" />
-    <PackageReference Include="Metrics.NET" Version="0.4.8" />
-    <PackageReference Include="NServiceBus" Version="6.2.0" />
-    <PackageReference Include="NuGetPackager" Version="0.6.3" />
-    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012" />
-    <PackageReference Include="Obsolete.Fody" Version="4.2.2" />
-    <PackageReference Include="ServiceControl.Monitoring.Data" Version="1.0.2" />
+    <PackageReference Include="ILRepack" Version="2.*" PrivateAssets="All"/>
+    <PackageReference Include="Metrics.NET" Version="0.4.8" PrivateAssets="All" />
+    <PackageReference Include="NServiceBus" Version="[7.0.0-*, 8.0.0)" />
+    <PackageReference Include="Obsolete.Fody" Version="4.*" PrivateAssets="All" />
+    <PackageReference Include="ServiceControl.Monitoring.Data" Version="1.0.2" PrivateAssets="All" />
   </ItemGroup>
   <Target Name="MergeDependencies" AfterTargets="CopyFilesToOutputDirectory">
     <PropertyGroup>

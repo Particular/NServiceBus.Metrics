@@ -15,19 +15,19 @@
 
         protected override void WireUp(SignalProbe probe)
         {
-            notifications.Errors.MessageHasFailedAnImmediateRetryAttempt += (sender, message) => Signal(message.Headers, probe);
-            notifications.Errors.MessageHasBeenSentToDelayedRetries += (sender, message) => Signal(message.Headers, probe);
+            var errors = notifications.Errors;
+            errors.MessageHasFailedAnImmediateRetryAttempt += (sender, message) => Signal(message.Headers, probe);
+            errors.MessageHasBeenSentToDelayedRetries += (sender, message) => Signal(message.Headers, probe);
         }
 
         static void Signal(Dictionary<string, string> messageHeaders, SignalProbe probe)
         {
-            string messageType;
-            messageHeaders.TryGetMessageType(out messageType);
+            messageHeaders.TryGetMessageType(out var messageType);
 
             var @event = new SignalEvent(messageType);
             probe.Signal(ref @event);
         }
 
-        readonly Notifications notifications;
+        Notifications notifications;
     }
 }

@@ -7,8 +7,7 @@ class ReceivePerformanceDiagnosticsBehavior : IBehavior<IIncomingPhysicalMessage
 {
     public async Task Invoke(IIncomingPhysicalMessageContext context, Func<IIncomingPhysicalMessageContext, Task> next)
     {
-        string messageType;
-        context.MessageHeaders.TryGetMessageType(out messageType);
+        context.MessageHeaders.TryGetMessageType(out var messageType);
 
         var @event = new SignalEvent(messageType);
 

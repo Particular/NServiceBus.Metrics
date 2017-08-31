@@ -3,19 +3,15 @@ using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Logging;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static async Task Main()
     {
-        MainAsync("Sample.Endpoint").GetAwaiter().GetResult();
-    }
+        Console.Title = "Sample.Endpoint";
 
-    static async Task MainAsync(string endpointName)
-    {
-        Console.Title = endpointName;
-
-        var endpointConfig = new EndpointConfiguration(endpointName);
+        var endpointConfig = new EndpointConfiguration("Sample.Endpoint");
         endpointConfig.SendFailedMessagesTo("error");
+        endpointConfig.UseTransport<LearningTransport>();
         endpointConfig.UsePersistence<InMemoryPersistence>();
         endpointConfig.UseSerialization<NewtonsoftSerializer>();
 
@@ -31,7 +27,6 @@ class Program
         var endpoint = await Endpoint.Start(endpointConfig)
             .ConfigureAwait(false);
 
-        Console.WriteLine($"{endpointName} started.");
         Console.WriteLine("Press [ESC] to close. Any other key to send a message");
 
         while (Console.ReadKey(true).Key != ConsoleKey.Escape)
@@ -40,11 +35,11 @@ class Program
                 .ConfigureAwait(false);
         }
 
-        Console.WriteLine($"{endpointName} shutting down");
+        Console.WriteLine("shutting down");
 
         await endpoint.Stop()
             .ConfigureAwait(false);
 
-        Console.WriteLine($"{endpointName} stopped");
+        Console.WriteLine("stopped");
     }
 }

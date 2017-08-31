@@ -14,8 +14,7 @@ class ProcessingTimeProbeBuilder : DurationProbeBuilder
     {
         context.Pipeline.OnReceivePipelineCompleted(e =>
         {
-            string messageTypeProcessed;
-            e.TryGetMessageType(out messageTypeProcessed);
+            e.TryGetMessageType(out var messageTypeProcessed);
 
             var processingTime = e.CompletedAt - e.StartedAt;
 
@@ -26,8 +25,8 @@ class ProcessingTimeProbeBuilder : DurationProbeBuilder
             return TaskExtensions.Completed;
         });
     }
-    
-    readonly FeatureConfigurationContext context;
+
+    FeatureConfigurationContext context;
 
     public const string ProcessingTime = "Processing Time";
 }

@@ -9,5 +9,5 @@ class SomeCommandHandler : IHandleMessages<SomeCommand>
         throw new Exception("boom!");
 
         //return Task.Delay(TimeSpan.FromSeconds(2));
-    } 
+    }
 }
