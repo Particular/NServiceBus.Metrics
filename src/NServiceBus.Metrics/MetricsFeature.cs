@@ -74,8 +74,7 @@ class MetricsFeature : Feature
                     {Headers.HostDisplayName, hostInformation.DisplayName },
                 };
 
-                string instanceId;
-                if (metricsOptions.TryGetValidEndpointInstanceIdOverride(out instanceId))
+                if (metricsOptions.TryGetValidEndpointInstanceIdOverride(out var instanceId))
                 {
                     headers.Add(MetricHeaders.MetricInstanceId, instanceId);
                 }
@@ -101,8 +100,7 @@ class MetricsFeature : Feature
 
     void SetUpOutgoingMessageMutator(FeatureConfigurationContext context, MetricsOptions options)
     {
-        string instanceId;
-        if (options.TryGetValidEndpointInstanceIdOverride(out instanceId))
+        if (options.TryGetValidEndpointInstanceIdOverride(out var instanceId))
         {
             context.Container.ConfigureComponent(() => new MetricsIdAttachingMutator(instanceId), DependencyLifecycle.SingleInstance);
         }

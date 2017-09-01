@@ -131,12 +131,9 @@
 
             public Task Invoke(IIncomingLogicalMessageContext context, Func<IIncomingLogicalMessageContext, Task> next)
             {
-                string key, value;
-                if (context.Headers.TryGetValue(KeyHeaderName, out key) && context.Headers.TryGetValue(ValueHeaderName, out value))
+                if (context.Headers.TryGetValue(KeyHeaderName, out var key) && context.Headers.TryGetValue(ValueHeaderName, out var value))
                 {
-                    long sequence;
-
-                    if (long.TryParse(value, out sequence))
+                    if (long.TryParse(value, out var sequence))
                     {
                         queueLengthTracker.RegisterReceive(key, sequence, inputQueue);
                     }

@@ -1,7 +1,5 @@
 ﻿namespace NServiceBus
 {
-    using System;
-
     /// <summary>
     /// Probe that signals event occurrence
     /// </summary>
@@ -11,12 +9,6 @@
         /// Enables registering action called on event occurrence.
         /// </summary>
         void Register(OnEvent<SignalEvent> observer);
-
-        /// <summary>
-        /// Enables registering action called on event occurrence.
-        /// </summary>
-        [ObsoleteEx(Message = "Use Register with a DurationEvent instead", RemoveInVersion = "2.0.0")]
-        void Register(Action observer);
     }
 
     /// <summary>
