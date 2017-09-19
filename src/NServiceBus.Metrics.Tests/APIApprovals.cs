@@ -1,18 +1,23 @@
-﻿using System;
+﻿#if NET452
+using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using ApprovalTests;
 using NUnit.Framework;
 using PublicApiGenerator;
+using System.IO;
+using System.Reflection;
 
 [TestFixture]
 public class APIApprovals
 {
     [Test]
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public void ApproveNServiceBus()
+    public void Approve()
     {
-        var publicApi = Filter(ApiGenerator.GeneratePublicApi(typeof(MetricsFeature).Assembly));
+        var combine = Path.Combine(TestContext.CurrentContext.TestDirectory, "NServiceBus.Metrics.dll");
+        var assembly = Assembly.LoadFile(combine);
+        var publicApi = Filter(ApiGenerator.GeneratePublicApi(assembly));
         Approvals.Verify(publicApi);
     }
 
@@ -27,3 +32,4 @@ public class APIApprovals
         );
     }
 }
+#endif

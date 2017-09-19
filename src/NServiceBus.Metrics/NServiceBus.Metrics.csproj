@@ -6,12 +6,10 @@
     <AssemblyOriginatorKeyFile>$(SolutionDir)NServiceBus.snk</AssemblyOriginatorKeyFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>CS8002</NoWarn>
-    <DebugType>full</DebugType>
-    <DebugSymbols>True</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Description>Hooks into the NServiceBus pipeline and computes metrics like Processing Time and reports it.</Description>
+    <Description>Hooks into the NServiceBus pipeline and computes metrics like Processing Time and reports them.</Description>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ILRepack" Version="2.*" PrivateAssets="All" />

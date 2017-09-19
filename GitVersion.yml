@@ -3,6 +3,6 @@ next-version: 2.0.0
 commit-message-incrementing: Disabled
 branches:
   release:
-    tag: beta
+    tag: rc
   develop:
-    tag: alpha
+    tag: beta
