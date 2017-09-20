@@ -66,7 +66,7 @@
         /// <param name="serviceControlMetricsAddress">The transport address of the ServiceControl instance</param>
         /// <param name="interval">Interval between consecutive reports</param>
         /// <param name="instanceId">Unique, human-readable, stable between restarts, identifier for running endpoint instance.</param>
-        [ObsoleteEx(Message = "Not for public use.")]
+        [ObsoleteEx(RemoveInVersion = "3.0", TreatAsErrorFromVersion = "3.0", Message = "Not for public use.")]
         public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, TimeSpan interval, string instanceId = null)
         {
             Guard.AgainstNullAndEmpty(nameof(serviceControlMetricsAddress), serviceControlMetricsAddress);
