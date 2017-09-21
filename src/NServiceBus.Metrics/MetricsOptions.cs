@@ -1,10 +1,7 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
-    using global::Metrics;
-    using global::Metrics.Reports;
     using Logging;
 
     /// <summary>
@@ -20,11 +17,6 @@
         public void EnableMetricTracing(TimeSpan interval)
         {
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
-
-            legacyReportInstallers.Add(config => config.WithReport(
-                new TraceReport(),
-                interval
-            ));
         }
 
         /// <summary>
@@ -36,11 +28,6 @@
         public void EnableLogTracing(TimeSpan interval, LogLevel logLevel = LogLevel.Debug)
         {
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
-
-            legacyReportInstallers.Add(config => config.WithReport(
-                new MetricsLogReport(logLevel),
-                interval
-            ));
         }
 
         /// <summary>
@@ -53,11 +40,6 @@
         {
             Guard.AgainstNull(nameof(func), func);
             Guard.AgainstNegativeAndZero(nameof(interval), interval);
-
-            legacyReportInstallers.Add(config => config.WithReport(
-                new CustomReport(func),
-                interval
-            ));
         }
 
         /// <summary>
@@ -93,11 +75,6 @@
             registerObservers(probeContext);
         }
 
-        internal void SetUpLegacyReports(MetricsConfig config)
-        {
-            config.WithReporting(reportsConfig => legacyReportInstallers.ForEach(installer => installer(reportsConfig)));
-        }
-
         internal string ServiceControlMetricsAddress;
         internal TimeSpan ServiceControlReportingInterval;
         string endpointInstanceIdOverride;
@@ -115,7 +92,5 @@
         }
 
         Action<ProbeContext> registerObservers = c => {};
-
-        List<Action<MetricsReports>> legacyReportInstallers = new List<Action<MetricsReports>>();
     }
 }
