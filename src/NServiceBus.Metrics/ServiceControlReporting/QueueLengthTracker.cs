@@ -2,11 +2,8 @@
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Threading;
     using System.Threading.Tasks;
     using Features;
-    using global::Metrics;
-    using global::Metrics.Core;
     using Hosting;
     using Pipeline;
     using Routing;
@@ -16,18 +13,17 @@
         const string KeyHeaderName = "NServiceBus.Metrics.QueueLength.Key";
         const string ValueHeaderName = "NServiceBus.Metrics.QueueLength.Value";
 
-        MetricsContext metricsContext;
+        Context metricsContext;
 
-        ConcurrentDictionary<string, CounterImplementation> sendingCounters = new ConcurrentDictionary<string, CounterImplementation>();
-        ConcurrentDictionary<string, SequenceReporter> receivingReporters = new ConcurrentDictionary<string, SequenceReporter>();
-        static readonly Unit Unit = Unit.Custom("Sequence");
+        ConcurrentDictionary<string, Counter> sendingCounters = new ConcurrentDictionary<string, Counter>();
+        ConcurrentDictionary<string, Gauge> receivingReporters = new ConcurrentDictionary<string, Gauge>();
 
-        private QueueLengthTracker(MetricsContext metricsContext)
+        QueueLengthTracker(Context metricsContext)
         {
             this.metricsContext = metricsContext;
         }
 
-        public static void SetUp(MetricsContext metricsContext, FeatureConfigurationContext featureContext)
+        public static void SetUp(Context metricsContext, FeatureConfigurationContext featureContext)
         {
             var queueLengthTracker = new QueueLengthTracker(metricsContext);
 
@@ -42,16 +38,12 @@
         long RegisterSend(string key)
         {
             var counter = sendingCounters.GetOrAdd(key, CreateSendCounter);
-            counter.Increment();
-
-            return counter.Value.Count;
+            return counter.Increment();
         }
 
-        CounterImplementation CreateSendCounter(string key)
+        Counter CreateSendCounter(string key)
         {
-            var tags = new MetricTags($"key:{key}", "type:queue-length.sent");
-            var counter = (CounterImplementation)metricsContext.Counter("Sent sequence for " + key, Unit, tags);
-            return counter;
+            return metricsContext.Counter(key);
         }
 
         void RegisterReceive(string key, long sequence, string inputQueue)
@@ -60,12 +52,9 @@
             reporter.Report(sequence);
         }
 
-        SequenceReporter CreateGauge(string key, string inputQueue)
+        Gauge CreateGauge(string key, string inputQueue)
         {
-            var reporter = new SequenceReporter();
-            var tags = new MetricTags($"key:{key}", $"queue:{inputQueue}", "type:queue-length.received");
-            metricsContext.Gauge("Received sequence for " + key, reporter.GetValue, Unit, tags);
-            return reporter;
+            return metricsContext.Gauge(key, inputQueue);
         }
 
         class DispatchQueueLengthBehavior : IBehavior<IDispatchContext, IDispatchContext>
@@ -139,21 +128,6 @@
                     }
                 }
                 return next(context);
-            }
-        }
-
-        class SequenceReporter
-        {
-            long value;
-
-            public double GetValue()
-            {
-                return Volatile.Read(ref value);
-            }
-
-            public void Report(long v)
-            {
-                Volatile.Write(ref value, v);
             }
         }
     }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Metrics;
 using NServiceBus;
 using NServiceBus.Extensibility;
 using NServiceBus.Features;
@@ -35,32 +35,16 @@ class MetricsFeature : Feature
 
         SetUpServiceControlReporting(context, options, endpointName, probeContext);
 
-        SetUpLegacyReporters(context, options, endpointName, probeContext);
-
         SetUpOutgoingMessageMutator(context, options);
-    }
-
-    void SetUpLegacyReporters(FeatureConfigurationContext featureContext, MetricsOptions options, string endpointName, ProbeContext probeContext)
-    {
-        var metricsContext = new DefaultMetricsContext(endpointName);
-        var metricsConfig = new MetricsConfig(metricsContext);
-
-        SetUpSignalReporting(probeContext, metricsContext);
-
-        SetUpDurationReporting(probeContext, metricsContext);
-
-        options.SetUpLegacyReports(metricsConfig);
     }
 
     static void SetUpServiceControlReporting(FeatureConfigurationContext context, MetricsOptions metricsOptions, string endpointName, ProbeContext probeContext)
     {
         if (!string.IsNullOrEmpty(metricsOptions.ServiceControlMetricsAddress))
         {
-            MetricsContext metricsContext = new DefaultMetricsContext(endpointName);
+            var metricsContext = new Context();
 
             SetUpQueueLengthReporting(context, metricsContext);
-
-            SetUpSignalReporting(probeContext, metricsContext);
 
             Func<IBuilder, Dictionary<string, string>> buildBaseHeaders = b =>
             {
@@ -106,27 +90,7 @@ class MetricsFeature : Feature
         }
     }
 
-    static void SetUpSignalReporting(ProbeContext probeContext, MetricsContext metricsContext)
-    {
-        foreach (var signalProbe in probeContext.Signals)
-        {
-            var meter = metricsContext.Meter(signalProbe.Name, string.Empty);
-
-            signalProbe.Register((ref SignalEvent e) => meter.Mark());
-        }
-    }
-
-    static void SetUpDurationReporting(ProbeContext probeContext, DefaultMetricsContext metricsContext)
-    {
-        foreach (var durationProbe in probeContext.Durations)
-        {
-            var timer = metricsContext.Timer(durationProbe.Name, "Messages", SamplingType.Default, TimeUnit.Seconds, TimeUnit.Milliseconds, default(MetricTags));
-
-            durationProbe.Register((ref DurationEvent e) => timer.Record((long)e.Duration.TotalMilliseconds, TimeUnit.Milliseconds));
-        }
-    }
-
-    static void SetUpQueueLengthReporting(FeatureConfigurationContext context, MetricsContext metricsContext)
+    static void SetUpQueueLengthReporting(FeatureConfigurationContext context, Context metricsContext)
     {
         QueueLengthTracker.SetUp(metricsContext, context);
     }
@@ -163,37 +127,45 @@ class MetricsFeature : Feature
 
     class ServiceControlReporting : FeatureStartupTask
     {
-        public ServiceControlReporting(MetricsContext metricsContext, IBuilder builder, MetricsOptions options, Dictionary<string, string> headers)
+        public ServiceControlReporting(Context metricsContext, IBuilder builder, MetricsOptions options, Dictionary<string, string> headers)
         {
+            this.metricsContext = metricsContext;
             this.builder = builder;
             this.options = options;
             this.headers = headers;
 
             headers.Add(Headers.EnclosedMessageTypes, "NServiceBus.Metrics.MetricReport");
             headers.Add(Headers.ContentType, ContentTypes.Json);
-
-            metricsConfig = new MetricsConfig(metricsContext);
         }
 
         protected override Task OnStart(IMessageSession session)
         {
-            var serviceControlReport = new NServiceBusMetricReport(builder.Build<IDispatchMessages>(), options, headers);
+            var serviceControlReport = new NServiceBusMetricReport(builder.Build<IDispatchMessages>(), options, headers, metricsContext);
 
-            metricsConfig.WithReporting(mr => mr.WithReport(serviceControlReport, options.ServiceControlReportingInterval));
+            task = Task.Run(async () =>
+            {
+                while (cancellationTokenSource.IsCancellationRequested == false)
+                {
+                    await serviceControlReport.RunReportAsync().ConfigureAwait(false);
+                    await Task.Delay(options.ServiceControlReportingInterval).ConfigureAwait(false);
+                }
+            });
 
             return Task.FromResult(0);
         }
 
         protected override Task OnStop(IMessageSession session)
         {
-            metricsConfig.Dispose();
-            return Task.FromResult(0);
+            cancellationTokenSource.Cancel();
+            return task;
         }
 
+        readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        readonly Context metricsContext;
         readonly IBuilder builder;
         readonly MetricsOptions options;
-        readonly MetricsConfig metricsConfig;
         readonly Dictionary<string, string> headers;
+        Task task;
     }
 
     class ServiceControlRawDataReporting : FeatureStartupTask

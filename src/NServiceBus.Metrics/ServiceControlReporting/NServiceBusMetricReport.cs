@@ -1,39 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Metrics;
-using Metrics.Json;
-using Metrics.MetricData;
-using Metrics.Reporters;
 using NServiceBus;
 using NServiceBus.Extensibility;
 using NServiceBus.Logging;
-using NServiceBus.Metrics;
+using NServiceBus.Metrics.QueueLength;
 using NServiceBus.Routing;
 using NServiceBus.Transport;
 
-class NServiceBusMetricReport : MetricsReport
+class NServiceBusMetricReport
 {
-    public NServiceBusMetricReport(IDispatchMessages dispatcher, MetricsOptions options, Dictionary<string, string> headers)
+    public NServiceBusMetricReport(IDispatchMessages dispatcher, MetricsOptions options, Dictionary<string, string> headers, Context context)
     {
         this.dispatcher = dispatcher;
         this.headers = headers;
+        this.context = context;
 
         destination = new UnicastAddressTag(options.ServiceControlMetricsAddress);
-
     }
 
-    public void RunReport(MetricsData metricsData, Func<HealthStatus> healthStatus, CancellationToken token)
+    public async Task RunReportAsync()
     {
-        RunReportAsync(metricsData)
-            .IgnoreContinuation();
-    }
-
-    async Task RunReportAsync(MetricsData metricsData)
-    {
-        var stringBody = $@"{{""Data"" : {JsonBuilderV2.BuildJson(metricsData)}}}";
+        var stringBody = $@"{{""Data"" : {context.ToJson()}}}";
         var body = Encoding.UTF8.GetBytes(stringBody);
 
         var message = new OutgoingMessage(Guid.NewGuid().ToString(), headers, body);
@@ -53,8 +42,8 @@ class NServiceBusMetricReport : MetricsReport
     UnicastAddressTag destination;
     IDispatchMessages dispatcher;
     Dictionary<string, string> headers;
+    readonly Context context;
     TransportTransaction transportTransaction = new TransportTransaction();
-
 
     static ILog log = LogManager.GetLogger<NServiceBusMetricReport>();
 }
