@@ -35,6 +35,7 @@
                 $"queue:{queue}",
                 "type:queue-length.received"
             };
+            Name = $"Received sequence for {key}";
         }
 
         public void Report(long v)
@@ -43,7 +44,7 @@
         }
 
         public double Value => Volatile.Read(ref value);
-
+        public string Name { get; }
         public string[] Tags { get; }
     }
 
@@ -58,6 +59,7 @@
                 "type:queue-length.sent",
                 $"key:{key}"
             };
+            Name = $"Sent sequence for {key}";
         }
 
         public long Increment()
@@ -65,6 +67,7 @@
             return Interlocked.Increment(ref value);
         }
 
+        public string Name { get; }
         public long Count => Volatile.Read(ref value);
         public string[] Tags { get; }
     }
