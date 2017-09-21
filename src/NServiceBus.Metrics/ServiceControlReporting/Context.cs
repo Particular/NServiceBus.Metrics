@@ -19,7 +19,7 @@
 
         public string ToJson()
         {
-            return NServiceBus.Metrics.SimpleJson.SerializeObject(this);
+            return SimpleJson.SerializeObject(this);
         }
     }
 
