@@ -1,6 +1,7 @@
 <Project>
 
   <PropertyGroup>
+    <LangVersion>latest</LangVersion>
     <Authors>NServiceBus Ltd</Authors>
     <Company>NServiceBus Ltd</Company>
     <PackageLicenseUrl>http://particular.net/LicenseAgreement</PackageLicenseUrl>
@@ -10,6 +11,7 @@
     <PackageIconUrl>http://s3.amazonaws.com/nuget.images/NServiceBus_32.png</PackageIconUrl>
     <PackageProjectUrl>https://docs.particular.net/nuget/$(PackageId)</PackageProjectUrl>
     <PackageOutputPath>..\..\nugets</PackageOutputPath>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);IncludePDBsInPackage</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
