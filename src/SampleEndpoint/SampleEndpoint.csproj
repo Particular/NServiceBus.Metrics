@@ -6,9 +6,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.*" />
-    <PackageReference Include="NServiceBus.Newtonsoft.Json" Version="2.0.0-*" />
+    <PackageReference Include="NServiceBus.Newtonsoft.Json" Version="1.1.0" />
     <PackageReference Include="Metrics.NET" Version="0.4.8" />
-    <PackageReference Include="NServiceBus" Version="7.0.0-*" />
+    <PackageReference Include="NServiceBus" Version="6.4.0" />
     <ProjectReference Include="..\NServiceBus.Metrics\NServiceBus.Metrics.csproj" />
   </ItemGroup>
 </Project>
