@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NServiceBus;
@@ -11,6 +12,7 @@ using NServiceBus.AcceptanceTests.EndpointTemplates;
 using NServiceBus.Extensibility;
 using NServiceBus.Features;
 using NServiceBus.Metrics;
+using NServiceBus.Metrics.AcceptanceTests;
 using NServiceBus.ObjectBuilder;
 using NServiceBus.Pipeline;
 using NServiceBus.Routing;
@@ -30,7 +32,7 @@ public class When_publishing_message : NServiceBusAcceptanceTest
                 await session.Subscribe<TestEventMessage1>();
                 await session.Subscribe<TestEventMessage2>();
             }))
-            .WithEndpoint<Publisher>(c => c.When(async s =>
+            .WithEndpoint<Publisher>(c => c.When(ctx => ctx.SubscriptionCount == 2, async s =>
             {
                 await s.Publish(new TestEventMessage1());
                 await s.Publish(new TestEventMessage1());
@@ -90,6 +92,8 @@ public class When_publishing_message : NServiceBusAcceptanceTest
 
     class Context : ScenarioContext
     {
+        public volatile int SubscriptionCount;
+
         public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers1 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
         public ConcurrentQueue<IReadOnlyDictionary<string, string>> Headers2 { get; } = new ConcurrentQueue<IReadOnlyDictionary<string, string>>();
 
@@ -109,6 +113,14 @@ public class When_publishing_message : NServiceBusAcceptanceTest
             EndpointSetup<DefaultServer>((c, r) =>
             {
                 c.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(HostId);
+
+                c.OnEndpointSubscribed<Context>((s, ctx) =>
+                {
+                    if (s.SubscriberReturnAddress.Contains("Subscriber"))
+                    {
+                        Interlocked.Increment(ref ctx.SubscriptionCount);
+                    }
+                });
 
                 c.Pipeline.Register(new PreQueueLengthStep());
                 c.Pipeline.Register(new PostQueueLengthStep());
@@ -130,6 +142,11 @@ public class When_publishing_message : NServiceBusAcceptanceTest
             {
                 c.LimitMessageProcessingConcurrencyTo(1);
                 c.DisableFeature<AutoSubscribe>();
+
+                var routing = c.UseTransport<MsmqTransport>().Routing();
+                var publisher = NServiceBus.AcceptanceTesting.Customization.Conventions.EndpointNamingConvention(typeof(Publisher));
+                routing.RegisterPublisher(typeof(TestEventMessage1), publisher);
+                routing.RegisterPublisher(typeof(TestEventMessage2), publisher);
             });
         }
 
