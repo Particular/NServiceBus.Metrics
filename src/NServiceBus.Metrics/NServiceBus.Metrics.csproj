@@ -16,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="ILRepack" Version="2.*" PrivateAssets="All" />
     <PackageReference Include="Metrics.NET" Version="0.4.8" PrivateAssets="All" />
-    <PackageReference Include="NServiceBus" Version="[6.0.0, 7.0.0)" />
+    <PackageReference Include="NServiceBus" Version="[6.2.0, 7.0.0)" />
     <PackageReference Include="Fody" Version="2.*" PrivateAssets="All" />
     <PackageReference Include="Obsolete.Fody" Version="4.*" PrivateAssets="All" />
     <PackageReference Include="ServiceControl.Monitoring.Data" Version="1.0.2" PrivateAssets="All" />
