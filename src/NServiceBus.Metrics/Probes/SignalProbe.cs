@@ -9,7 +9,10 @@ class SignalProbe : Probe, ISignalProbe
 
     public void Register(OnEvent<SignalEvent> observer)
     {
-        observers += observer;
+        lock (Lock)
+        {
+            observers += observer;
+        }
     }
 
     public void Register(Action observer)
@@ -22,7 +25,8 @@ class SignalProbe : Probe, ISignalProbe
         observers(ref e);
     }
 
-    OnEvent<SignalEvent> observers = Empty;
+    volatile OnEvent<SignalEvent> observers = Empty;
+    readonly object Lock = new object();
 
     static void Empty(ref SignalEvent e) { }
 }

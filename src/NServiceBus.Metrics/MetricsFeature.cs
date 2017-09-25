@@ -31,13 +31,18 @@ class MetricsFeature : Feature
         var options = settings.Get<MetricsOptions>();
         var endpointName = settings.EndpointName();
 
-        options.SetUpObservers(probeContext);
+        SetUpRegisteredObservers(context, options, probeContext);
 
         SetUpServiceControlReporting(context, options, endpointName, probeContext);
 
         SetUpLegacyReporters(context, options, endpointName, probeContext);
 
         SetUpOutgoingMessageMutator(context, options);
+    }
+
+    static void SetUpRegisteredObservers(FeatureConfigurationContext context, MetricsOptions options, ProbeContext probeContext)
+    {
+        context.RegisterStartupTask(new SetupRegisteredObservers(options, probeContext));
     }
 
     void SetUpLegacyReporters(FeatureConfigurationContext featureContext, MetricsOptions options, string endpointName, ProbeContext probeContext)
@@ -161,6 +166,26 @@ class MetricsFeature : Feature
         );
     }
 
+    class SetupRegisteredObservers : FeatureStartupTask
+    {
+        readonly MetricsOptions options;
+        readonly ProbeContext probeContext;
+
+        public SetupRegisteredObservers(MetricsOptions options, ProbeContext probeContext)
+        {
+            this.options = options;
+            this.probeContext = probeContext;
+        }
+
+        protected override Task OnStart(IMessageSession session)
+        {
+            options.SetUpObservers(probeContext);
+            return Task.FromResult(0);
+        }
+
+        protected override Task OnStop(IMessageSession session) => Task.FromResult(0);
+    }
+
     class ServiceControlReporting : FeatureStartupTask
     {
         public ServiceControlReporting(MetricsContext metricsContext, IBuilder builder, MetricsOptions options, Dictionary<string, string> headers)
@@ -280,7 +305,7 @@ class MetricsFeature : Feature
                 {Headers.ContentType, contentType},
                 {MetricHeaders.MetricType, metricType}
             };
-            
+
             var dispatcher = builder.Build<IDispatchMessages>();
             var address = new UnicastAddressTag(options.ServiceControlMetricsAddress);
 

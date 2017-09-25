@@ -9,7 +9,10 @@ class DurationProbe : Probe, IDurationProbe
 
     public void Register(OnEvent<DurationEvent> observer)
     {
-        observers += observer;
+        lock (Lock)
+        {
+            observers += observer;
+        }
     }
 
     public void Register(Action<TimeSpan> observer)
@@ -22,7 +25,8 @@ class DurationProbe : Probe, IDurationProbe
         observers(ref e);
     }
 
-    OnEvent<DurationEvent> observers = Empty;
+    volatile OnEvent<DurationEvent> observers = Empty;
+    readonly object Lock = new object();
 
     static void Empty(ref DurationEvent e) { }
 }
