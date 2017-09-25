@@ -61,23 +61,6 @@
         }
 
         /// <summary>
-        /// Enables sending periodic updates of metric data to ServiceControl
-        /// </summary>
-        /// <param name="serviceControlMetricsAddress">The transport address of the ServiceControl instance</param>
-        /// <param name="interval">Interval between consecutive reports</param>
-        /// <param name="instanceId">Unique, human-readable, stable between restarts, identifier for running endpoint instance.</param>
-        [ObsoleteEx(RemoveInVersion = "3.0", TreatAsErrorFromVersion = "3.0", Message = "Not for public use.")]
-        public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, TimeSpan interval, string instanceId = null)
-        {
-            Guard.AgainstNullAndEmpty(nameof(serviceControlMetricsAddress), serviceControlMetricsAddress);
-            Guard.AgainstNegativeAndZero(nameof(interval), interval);
-
-            ServiceControlMetricsAddress = serviceControlMetricsAddress;
-            ServiceControlReportingInterval = interval;
-            endpointInstanceIdOverride = instanceId;
-        }
-
-        /// <summary>
         /// Enables registering observers to available probes.
         /// </summary>
         /// <param name="register">Action that registers observers to probes</param>
@@ -96,22 +79,6 @@
         internal void SetUpLegacyReports(MetricsConfig config)
         {
             config.WithReporting(reportsConfig => legacyReportInstallers.ForEach(installer => installer(reportsConfig)));
-        }
-
-        internal string ServiceControlMetricsAddress;
-        internal TimeSpan ServiceControlReportingInterval;
-        string endpointInstanceIdOverride;
-
-        internal bool TryGetValidEndpointInstanceIdOverride(out string instanceId)
-        {
-            if (string.IsNullOrEmpty(endpointInstanceIdOverride) == false)
-            {
-                instanceId = endpointInstanceIdOverride;
-                return true;
-            }
-
-            instanceId = null;
-            return false;
         }
 
         Action<ProbeContext> registerObservers = c => {};
