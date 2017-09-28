@@ -14,7 +14,6 @@
     <Description>Hooks into the NServiceBus pipeline and computes metrics like Processing Time and reports them.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ILRepack" Version="2.*" PrivateAssets="All" />
     <PackageReference Include="NServiceBus" Version="[7.0.0-*, 8.0.0)" />
     <PackageReference Include="Fody" Version="2.*" PrivateAssets="All" />
     <PackageReference Include="Obsolete.Fody" Version="4.*" PrivateAssets="All" />

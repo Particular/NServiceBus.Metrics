@@ -15,11 +15,6 @@ class MetricsFeature : Feature
         var settings = context.Settings;
         var options = settings.Get<MetricsOptions>();
 
-        SetUpRegisteredObservers(context, options, probeContext);
-    }
-
-    static void SetUpRegisteredObservers(FeatureConfigurationContext context, MetricsOptions options, ProbeContext probeContext)
-    {
         context.RegisterStartupTask(new SetupRegisteredObservers(options, probeContext));
     }
 
