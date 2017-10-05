@@ -11,7 +11,7 @@ using NUnit.Framework;
 
 public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
 {
-    readonly HashSet<string> positiveProbes = new HashSet<string>
+    HashSet<string> positiveProbes = new HashSet<string>
     {
         "Critical Time",
         "Processing Time",
@@ -20,7 +20,7 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
         "# of msgs successfully processed / sec",
     };
 
-    readonly HashSet<string> errorProbes;
+    HashSet<string> errorProbes;
 
     public When_having_metrics_handlers_registered()
     {
