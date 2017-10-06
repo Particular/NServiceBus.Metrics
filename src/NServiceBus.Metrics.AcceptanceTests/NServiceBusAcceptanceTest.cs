@@ -1,5 +1,7 @@
 namespace NServiceBus.AcceptanceTests
 {
+    using System;
+    using System.IO;
     using System.Linq;
     using System.Threading;
     using AcceptanceTesting.Customization;
@@ -31,6 +33,44 @@ namespace NServiceBus.AcceptanceTests
 
                 return testName + "." + endpointBuilder;
             };
+        }
+
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            if (Directory.Exists(StorageRootDir))
+            {
+                Directory.Delete(StorageRootDir, true);
+            }
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            if (Directory.Exists(StorageRootDir))
+            {
+                Directory.Delete(StorageRootDir, true);
+            }
+        }
+
+        public static string StorageRootDir
+        {
+            get
+            {
+                string tempDir;
+
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                {
+                    //can't use bin dir since that will be too long on the build agents
+                    tempDir = @"c:\temp";
+                }
+                else
+                {
+                    tempDir = Path.GetTempPath();
+                }
+
+                return Path.Combine(tempDir, "nsb.metrics-att");
+            }
         }
     }
 }

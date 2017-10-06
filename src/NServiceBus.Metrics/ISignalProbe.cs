@@ -1,7 +1,5 @@
 ﻿namespace NServiceBus
 {
-    using System;
-
     /// <summary>
     /// Probe that signals event occurrence
     /// </summary>
@@ -10,6 +8,26 @@
         /// <summary>
         /// Enables registering action called on event occurrence.
         /// </summary>
-        void Register(Action observer);
+        void Register(OnEvent<SignalEvent> observer);
+    }
+
+    /// <summary>
+    /// Provides data for a single occurrence of a signal.
+    /// </summary>
+    public struct SignalEvent
+    {
+        /// <summary>
+        /// Creates the signal event.
+        /// </summary>
+        public SignalEvent(string messageType)
+        {
+            MessageType = messageType;
+        }
+
+        /// <summary>
+        /// The message type, the duration was recorded for, if any.
+        /// </summary>
+        // ReSharper disable once NotAccessedField.Global
+        public readonly string MessageType;
     }
 }

@@ -61,23 +61,6 @@
         }
 
         /// <summary>
-        /// Enables sending periodic updates of metric data to ServiceControl
-        /// </summary>
-        /// <param name="serviceControlMetricsAddress">The transport address of the ServiceControl instance</param>
-        /// <param name="interval">Interval between consecutive reports</param>
-        /// <param name="instanceId">Unique, human-readable, stable between restarts, identifier for running endpoint instance.</param>
-        [ObsoleteEx(Message = "Not for public use.")]
-        public void SendMetricDataToServiceControl(string serviceControlMetricsAddress, TimeSpan interval, string instanceId = null)
-        {
-            Guard.AgainstNullAndEmpty(nameof(serviceControlMetricsAddress), serviceControlMetricsAddress);
-            Guard.AgainstNegativeAndZero(nameof(interval), interval);
-
-            ServiceControlMetricsAddress = serviceControlMetricsAddress;
-            ServiceControlReportingInterval = interval;
-            EndpointInstanceIdOverride = instanceId;
-        }
-
-        /// <summary>
         /// Enables registering observers to available probes.
         /// </summary>
         /// <param name="register">Action that registers observers to probes</param>
@@ -97,10 +80,6 @@
         {
             config.WithReporting(reportsConfig => legacyReportInstallers.ForEach(installer => installer(reportsConfig)));
         }
-
-        internal string ServiceControlMetricsAddress;
-        internal TimeSpan ServiceControlReportingInterval;
-        internal string EndpointInstanceIdOverride;
 
         Action<ProbeContext> registerObservers = c => {};
 

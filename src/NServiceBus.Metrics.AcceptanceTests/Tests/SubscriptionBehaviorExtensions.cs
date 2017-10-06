@@ -48,8 +48,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
                 var subscriptionMessageType = GetSubscriptionMessageTypeFrom(context.Message);
                 if (subscriptionMessageType != null)
                 {
-                    string returnAddress;
-                    if (!context.Message.Headers.TryGetValue(Headers.SubscriberTransportAddress, out returnAddress))
+                    if (!context.Message.Headers.TryGetValue(Headers.SubscriberTransportAddress, out var returnAddress))
                     {
                         context.Message.Headers.TryGetValue(Headers.ReplyToAddress, out returnAddress);
                     }

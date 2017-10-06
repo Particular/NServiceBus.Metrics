@@ -7,15 +7,26 @@ class SignalProbe : Probe, ISignalProbe
     {
     }
 
+    public void Register(OnEvent<SignalEvent> observer)
+    {
+        lock (Lock)
+        {
+            observers += observer;
+        }
+    }
+
     public void Register(Action observer)
     {
-        observers += observer;
+        Register((ref SignalEvent e) => observer());
     }
 
-    internal void Signal()
+    internal void Signal(ref SignalEvent e)
     {
-        observers();
+        observers(ref e);
     }
 
-    Action observers = () => { };
+    volatile OnEvent<SignalEvent> observers = Empty;
+    readonly object Lock = new object();
+
+    static void Empty(ref SignalEvent e) { }
 }

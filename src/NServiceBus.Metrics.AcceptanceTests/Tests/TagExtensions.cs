@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Linq;
-
 using System.Collections.Generic;
 
 static class TagExtensions
 {
     public static string GetTagValue(this IEnumerable<string> tags, string key)
     {
-        string result;
-        if (!TryGetTagValue(tags, key, out result))
+        if (!TryGetTagValue(tags, key, out var result))
         {
             throw new Exception($"Tag {key} not found.");
         }

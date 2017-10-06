@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Threading.Tasks;
+using NServiceBus;
 using NServiceBus.Pipeline;
 
 class ReceivePerformanceDiagnosticsBehavior : IBehavior<IIncomingPhysicalMessageContext, IIncomingPhysicalMessageContext>
 {
     public async Task Invoke(IIncomingPhysicalMessageContext context, Func<IIncomingPhysicalMessageContext, Task> next)
     {
-        MessagePulledFromQueue?.Signal();
+        context.MessageHeaders.TryGetMessageType(out var messageType);
+
+        var @event = new SignalEvent(messageType);
+
+        MessagePulledFromQueue?.Signal(ref @event);
 
         try
         {
@@ -14,11 +19,11 @@ class ReceivePerformanceDiagnosticsBehavior : IBehavior<IIncomingPhysicalMessage
         }
         catch (Exception)
         {
-            ProcessingFailure?.Signal();
+            ProcessingFailure?.Signal(ref @event);
             throw;
         }
 
-        ProcessingSuccess?.Signal();
+        ProcessingSuccess?.Signal(ref @event);
     }
 
     public SignalProbe MessagePulledFromQueue;
