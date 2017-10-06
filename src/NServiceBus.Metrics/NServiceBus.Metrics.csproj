@@ -6,32 +6,12 @@
     <AssemblyOriginatorKeyFile>$(SolutionDir)NServiceBus.snk</AssemblyOriginatorKeyFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>CS8002</NoWarn>
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Hooks into the NServiceBus pipeline and computes metrics like Processing Time and reports them.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ILRepack" Version="2.*" PrivateAssets="All" />
-    <PackageReference Include="Metrics.NET" Version="0.4.8" PrivateAssets="All" />
-    <PackageReference Include="NServiceBus" Version="[6.2.0, 7.0.0)" />
-    <PackageReference Include="Fody" Version="2.*" PrivateAssets="All" />
-    <PackageReference Include="Obsolete.Fody" Version="4.*" PrivateAssets="All" />
-    <PackageReference Include="ServiceControl.Monitoring.Data" Version="1.0.2" PrivateAssets="All" />
+    <PackageReference Include="NServiceBus" Version="[7.0.0-*, 8.0.0)" />
   </ItemGroup>
-  <Target Name="MergeDependencies" AfterTargets="CopyFilesToOutputDirectory">
-    <PropertyGroup>
-      <TempFolder>$(TargetDir)temp</TempFolder>
-    </PropertyGroup>
-    <MakeDir Directories="$(TempFolder)" />
-    <Exec Command="&quot;$(ILRepack)&quot; /out:&quot;$(TempFolder)\$(AssemblyName).dll&quot; &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(TargetDir)Metrics.dll&quot; &quot;$(TargetDir)ServiceControl.Monitoring.Data.dll&quot; /targetplatform:v4 /internalize /lib:&quot;$(TargetDir).&quot; /keyfile:$(AssemblyOriginatorKeyFile)" />
-    <ItemGroup>
-      <TempFiles Include="$(TempFolder)\*.*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(TempFiles)" DestinationFolder="$(OutputPath)" OverwriteReadOnlyFiles="true" />
-    <Delete Files="@(TempFiles)" />
-    <RemoveDir Directories="$(TempFolder)" />
-  </Target>
 </Project>
