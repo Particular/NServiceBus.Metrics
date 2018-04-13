@@ -9,7 +9,7 @@ class MetricsFeature : Feature
     {
         context.ThrowIfSendonly();
 
-        var sensorFactory = new MetricsSensorFactory();
+        var sensorFactory = context.Settings.Get<MetricsSensorFactory>();
 
         AddStandardProbes(context, sensorFactory);
 
