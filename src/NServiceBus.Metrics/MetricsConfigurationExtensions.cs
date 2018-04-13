@@ -16,6 +16,7 @@
         /// <returns>An object containing configuration options for the Metrics feature.</returns>
         public static MetricsOptions EnableMetrics(this SettingsHolder settings)
         {
+            settings.GetOrCreate<MetricsSensorFactory>();
             var options = settings.GetOrCreate<MetricsOptions>();
             settings.Set(typeof(MetricsFeature).FullName, FeatureState.Enabled);
             return options;

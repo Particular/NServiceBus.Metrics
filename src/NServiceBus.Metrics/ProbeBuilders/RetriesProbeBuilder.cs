@@ -25,7 +25,7 @@
             messageHeaders.TryGetMessageType(out var messageType);
 
             var @event = new SignalEvent(messageType);
-            probe.Signal(ref @event);
+            probe.Record(ref @event);
         }
 
         Notifications notifications;

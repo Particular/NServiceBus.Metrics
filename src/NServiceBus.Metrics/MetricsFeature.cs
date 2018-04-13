@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Metrics.ProbeBuilders;
@@ -10,21 +9,28 @@ class MetricsFeature : Feature
     {
         context.ThrowIfSendonly();
 
-        var probeContext = BuildProbes(context);
+        var sensorFactory = context.Settings.Get<MetricsSensorFactory>();
+
+        AddStandardProbes(context, sensorFactory);
 
         var settings = context.Settings;
         var options = settings.Get<MetricsOptions>();
 
-        context.RegisterStartupTask(new SetupRegisteredObservers(options, probeContext));
+        context.RegisterStartupTask(new SetupRegisteredObservers(options, sensorFactory));
     }
 
-    static ProbeContext BuildProbes(FeatureConfigurationContext context)
+    static void AddStandardProbes(FeatureConfigurationContext context, MetricsSensorFactory sensorFactory)
     {
         var durationBuilders = new DurationProbeBuilder[]
         {
             new CriticalTimeProbeBuilder(context),
             new ProcessingTimeProbeBuilder(context)
         };
+
+        foreach (var durationProbeBuilder in durationBuilders)
+        {
+            sensorFactory.AddExisting(durationProbeBuilder.Build());
+        }
 
         var performanceDiagnosticsBehavior = new ReceivePerformanceDiagnosticsBehavior();
 
@@ -42,25 +48,26 @@ class MetricsFeature : Feature
             new RetriesProbeBuilder(context)
         };
 
-        return new ProbeContext(
-            durationBuilders.Select(b => b.Build()).ToArray(),
-            signalBuilders.Select(b => b.Build()).ToArray()
-        );
+        foreach (var signalProbeBuilder in signalBuilders)
+        {
+            sensorFactory.AddExisting(signalProbeBuilder.Build());
+        }
     }
 
     class SetupRegisteredObservers : FeatureStartupTask
     {
         readonly MetricsOptions options;
-        readonly ProbeContext probeContext;
+        readonly MetricsSensorFactory sensorFactory;
 
-        public SetupRegisteredObservers(MetricsOptions options, ProbeContext probeContext)
+        public SetupRegisteredObservers(MetricsOptions options, MetricsSensorFactory sensorFactory)
         {
             this.options = options;
-            this.probeContext = probeContext;
+            this.sensorFactory = sensorFactory;
         }
 
         protected override Task OnStart(IMessageSession session)
         {
+            var probeContext = sensorFactory.CreateProbeContext();
             options.SetUpObservers(probeContext);
             return Task.FromResult(0);
         }

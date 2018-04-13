@@ -1,7 +1,7 @@
 ﻿using System;
 using NServiceBus;
 
-class SignalProbe : Probe, ISignalProbe
+class SignalProbe : Probe, ISignalProbe, IEventSensor<SignalEvent>
 {
     public SignalProbe(string name, string description) : base(name, description)
     {
@@ -20,7 +20,7 @@ class SignalProbe : Probe, ISignalProbe
         Register((ref SignalEvent e) => observer());
     }
 
-    internal void Signal(ref SignalEvent e)
+    public void Record(ref SignalEvent e)
     {
         observers(ref e);
     }

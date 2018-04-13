@@ -11,7 +11,7 @@ class ReceivePerformanceDiagnosticsBehavior : IBehavior<IIncomingPhysicalMessage
 
         var @event = new SignalEvent(messageType);
 
-        MessagePulledFromQueue?.Signal(ref @event);
+        MessagePulledFromQueue?.Record(ref @event);
 
         try
         {
@@ -19,11 +19,11 @@ class ReceivePerformanceDiagnosticsBehavior : IBehavior<IIncomingPhysicalMessage
         }
         catch (Exception)
         {
-            ProcessingFailure?.Signal(ref @event);
+            ProcessingFailure?.Record(ref @event);
             throw;
         }
 
-        ProcessingSuccess?.Signal(ref @event);
+        ProcessingSuccess?.Record(ref @event);
     }
 
     public SignalProbe MessagePulledFromQueue;
