@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace NServiceBus
 {
@@ -8,7 +7,7 @@ namespace NServiceBus
     /// </summary>
     public class MetricsSensorFactory
     {
-        IList<Probe> probes = new List<Probe>();
+        ICollection<IProbe> probes = new List<IProbe>();
 
         /// <summary>
         /// Creates a sensor for recording duration events
@@ -30,15 +29,22 @@ namespace NServiceBus
             return probe;
         }
 
-        internal ProbeContext CreateProbeContext()
+        /// <summary>
+        /// Creates a sensor for recording gauge readings
+        /// </summary>
+        public IEventSensor<GaugeEvent> CreateGaugeSensor(string name, string description)
         {
-            return new ProbeContext(
-                probes.OfType<IDurationProbe>().ToList().AsReadOnly(),
-                probes.OfType<ISignalProbe>().ToList().AsReadOnly()
-            );
+            var probe = new GaugeProbe(name, description);
+            probes.Add(probe);
+            return probe;
         }
 
-        internal void AddExisting(Probe probe)
+        internal ProbeContext CreateProbeContext()
+        {
+            return new ProbeContext(probes);
+        }
+
+        internal void AddExisting(IProbe probe)
         {
             probes.Add(probe);
         }

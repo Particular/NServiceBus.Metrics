@@ -9,6 +9,12 @@ namespace NServiceBus
         public readonly string MessageType;
         public DurationEvent(System.TimeSpan duration, string messageType) { }
     }
+    public struct GaugeEvent
+    {
+        public readonly string Tag;
+        public readonly long Value;
+        public GaugeEvent(long value, string tag) { }
+    }
     public interface IDurationProbe : NServiceBus.IProbe
     {
         void Register(NServiceBus.OnEvent<NServiceBus.DurationEvent> observer);
@@ -17,6 +23,10 @@ namespace NServiceBus
         where TEvent :  struct
     {
         void Record(ref TEvent e);
+    }
+    public interface IGaugeProbe : NServiceBus.IProbe
+    {
+        void Register(NServiceBus.OnEvent<NServiceBus.GaugeEvent> observer);
     }
     public interface IProbe
     {
@@ -41,6 +51,7 @@ namespace NServiceBus
     {
         public MetricsSensorFactory() { }
         public NServiceBus.IEventSensor<NServiceBus.DurationEvent> CreateDurationSensor(string name, string description) { }
+        public NServiceBus.IEventSensor<NServiceBus.GaugeEvent> CreateGaugeSensor(string name, string description) { }
         public NServiceBus.IEventSensor<NServiceBus.SignalEvent> CreateSignalSensor(string name, string description) { }
     }
     public delegate void OnEvent<TEventType>(ref TEventType e);
@@ -48,6 +59,7 @@ namespace NServiceBus
     {
         public ProbeContext(System.Collections.Generic.IReadOnlyCollection<NServiceBus.IDurationProbe> durations, System.Collections.Generic.IReadOnlyCollection<NServiceBus.ISignalProbe> signals) { }
         public System.Collections.Generic.IReadOnlyCollection<NServiceBus.IDurationProbe> Durations { get; }
+        public System.Collections.Generic.IReadOnlyCollection<NServiceBus.IGaugeProbe> Gauges { get; }
         public System.Collections.Generic.IReadOnlyCollection<NServiceBus.ISignalProbe> Signals { get; }
     }
     public struct SignalEvent

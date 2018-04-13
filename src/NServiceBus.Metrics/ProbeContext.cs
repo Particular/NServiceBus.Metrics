@@ -1,12 +1,14 @@
 ﻿namespace NServiceBus
 {
     using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// Stores available probes
     /// </summary>
     public class ProbeContext
     {
+        // TODO: Obsolete this constructor
         /// <summary>
         /// Creates <see cref="ProbeContext"/>.
         /// </summary>
@@ -14,6 +16,14 @@
         {
             Durations = durations;
             Signals = signals;
+            Gauges = Enumerable.Empty<IGaugeProbe>().ToArray();
+        }
+
+        internal ProbeContext(ICollection<IProbe> probes)
+        {
+            Durations = probes.OfType<IDurationProbe>().ToArray();
+            Signals = probes.OfType<ISignalProbe>().ToArray();
+            Gauges = probes.OfType<IGaugeProbe>().ToArray();
         }
 
         /// <summary>
@@ -25,5 +35,10 @@
         /// Signal type probes.
         /// </summary>
         public IReadOnlyCollection<ISignalProbe> Signals { get; }
+
+        /// <summary>
+        /// Gauge type probes.
+        /// </summary>
+        public IReadOnlyCollection<IGaugeProbe> Gauges { get; }
     }
 }
