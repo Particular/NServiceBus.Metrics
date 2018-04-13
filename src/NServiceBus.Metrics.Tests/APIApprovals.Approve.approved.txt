@@ -13,6 +13,11 @@ namespace NServiceBus
     {
         void Register(NServiceBus.OnEvent<NServiceBus.DurationEvent> observer);
     }
+    public interface IEventSensor<TEvent>
+        where TEvent :  struct
+    {
+        void Record(ref TEvent e);
+    }
     public interface IProbe
     {
         string Description { get; }
@@ -31,6 +36,12 @@ namespace NServiceBus
     {
         public MetricsOptions() { }
         public void RegisterObservers(System.Action<NServiceBus.ProbeContext> register) { }
+    }
+    public class MetricsSensorFactory
+    {
+        public MetricsSensorFactory() { }
+        public NServiceBus.IEventSensor<NServiceBus.DurationEvent> CreateDurationSensor(string name, string description) { }
+        public NServiceBus.IEventSensor<NServiceBus.SignalEvent> CreateSignalSensor(string name, string description) { }
     }
     public delegate void OnEvent<TEventType>(ref TEventType e);
     public class ProbeContext
