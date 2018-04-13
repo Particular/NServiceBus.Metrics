@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\GitVersion.yml = ..\GitVersion.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Metrics.QueueLength.Msmq", "NServiceBus.Metrics.QueueLength.Msmq\NServiceBus.Metrics.QueueLength.Msmq.csproj", "{1046C91E-E2B7-48CE-8B5F-727D9C0CFC19}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{63A89DF3-7402-44F6-8572-83C94777C334}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63A89DF3-7402-44F6-8572-83C94777C334}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63A89DF3-7402-44F6-8572-83C94777C334}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1046C91E-E2B7-48CE-8B5F-727D9C0CFC19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1046C91E-E2B7-48CE-8B5F-727D9C0CFC19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1046C91E-E2B7-48CE-8B5F-727D9C0CFC19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1046C91E-E2B7-48CE-8B5F-727D9C0CFC19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
