@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Messaging;
 using System.Threading.Tasks;
 using NServiceBus;
-using NServiceBus.Support;
+using NServiceBus.Logging;
 using NServiceBus.Transport;
 
 
 class MsmqQueueLengthUpdater
 {
+    static readonly ILog Log = LogManager.GetLogger<MsmqQueueLengthUpdater>();
     readonly IEventSensor<GaugeEvent> queueLength;
     readonly QueueBindings bindings;
-    readonly List<Tuple<string, PerformanceCounter>> counters = new List<Tuple<string, PerformanceCounter>>();
+    readonly List<Tuple<string, MessageQueue>> counters = new List<Tuple<string, MessageQueue>>();
 
 
     public MsmqQueueLengthUpdater(IEventSensor<GaugeEvent> queueLength, QueueBindings bindings)
@@ -23,18 +24,14 @@ class MsmqQueueLengthUpdater
 
     public void Warmup()
     {
-        const string categoryName = "MSMQ Queue";
-        const string counterName = "Messages in Queue";
-        var machineName = RuntimeEnvironment.MachineName;
-
         counters.AddRange(
             from q in bindings.ReceivingAddresses
             let split = q.Split('@')
-            let queueName = split.First()
-            let instanceName = $@"{machineName}\private$\{queueName}".ToLowerInvariant()
+            let queueName = split[0]
+            let path = $@".\private$\{queueName}"
             select Tuple.Create(
-                q, 
-                new PerformanceCounter(categoryName, counterName, instanceName, machineName)
+                q,
+                new MessageQueue(path, QueueAccessMode.Peek)
             )
         );
     }
@@ -50,15 +47,15 @@ class MsmqQueueLengthUpdater
         return Task.FromResult(0);
     }
 
-    static long TryGet(PerformanceCounter counter, long defaultValue)
+    static long TryGet(MessageQueue counter, long defaultValue)
     {
         try
         {
-            return counter.RawValue;
+            return counter.GetCount();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            Console.Error.WriteLine(ex.Message);
+            Log.Info("TryGet", ex);
             return defaultValue;
         }
     }
