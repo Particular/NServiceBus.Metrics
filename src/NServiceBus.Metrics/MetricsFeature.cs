@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Metrics;
 using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Metrics.ProbeBuilders;
@@ -15,48 +14,8 @@ class MetricsFeature : Feature
 
         var settings = context.Settings;
         var options = settings.Get<MetricsOptions>();
-        var endpointName = settings.EndpointName();
 
-        SetUpRegisteredObservers(context, options, probeContext);
-
-        SetUpLegacyReporters(context, options, endpointName, probeContext);
-    }
-
-    static void SetUpRegisteredObservers(FeatureConfigurationContext context, MetricsOptions options, ProbeContext probeContext)
-    {
         context.RegisterStartupTask(new SetupRegisteredObservers(options, probeContext));
-    }
-
-    void SetUpLegacyReporters(FeatureConfigurationContext featureContext, MetricsOptions options, string endpointName, ProbeContext probeContext)
-    {
-        var metricsContext = new DefaultMetricsContext(endpointName);
-        var metricsConfig = new MetricsConfig(metricsContext);
-
-        SetUpSignalReporting(probeContext, metricsContext);
-
-        SetUpDurationReporting(probeContext, metricsContext);
-
-        options.SetUpLegacyReports(metricsConfig);
-    }
-
-    static void SetUpSignalReporting(ProbeContext probeContext, MetricsContext metricsContext)
-    {
-        foreach (var signalProbe in probeContext.Signals)
-        {
-            var meter = metricsContext.Meter(signalProbe.Name, string.Empty);
-
-            signalProbe.Register((ref SignalEvent e) => meter.Mark());
-        }
-    }
-
-    static void SetUpDurationReporting(ProbeContext probeContext, DefaultMetricsContext metricsContext)
-    {
-        foreach (var durationProbe in probeContext.Durations)
-        {
-            var timer = metricsContext.Timer(durationProbe.Name, "Messages", SamplingType.Default, TimeUnit.Seconds, TimeUnit.Milliseconds, default(MetricTags));
-
-            durationProbe.Register((ref DurationEvent e) => timer.Record((long)e.Duration.TotalMilliseconds, TimeUnit.Milliseconds));
-        }
     }
 
     static ProbeContext BuildProbes(FeatureConfigurationContext context)

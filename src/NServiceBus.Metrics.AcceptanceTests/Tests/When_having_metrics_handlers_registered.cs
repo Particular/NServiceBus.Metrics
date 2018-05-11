@@ -62,10 +62,10 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
     }
 
     [Test]
-    public async Task Should_call_fail_probes_on_failures()
+    public async Task Should_call_fail_probes_on_success()
     {
         var context = await Scenario.Define<Context>()
-            .WithEndpoint<ThrowingReporter>(b => b.When(s => s.SendLocal(new MyMessage())).DoNotFailOnErrorMessages())
+            .WithEndpoint<ThrowingReporter>(b => b.When(s => s.SendLocal(new MyMessage())))
             .Done(c => c.Values.Count >= errorProbes.Count)
             .Run()
             .ConfigureAwait(false);
@@ -91,6 +91,7 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
             EndpointSetup<DefaultServer>((c, r) =>
             {
                 var context = (Context)r.ScenarioContext;
+
                 c.EnableMetrics().RegisterObservers(
                     ctx => { RegisterWritesToTestContext(ctx, context); });
             });
