@@ -10,12 +10,12 @@
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" Version="0.10.0-*" />
     <PackageReference Include="NServiceBus" Version="6.4.0" />
-    <PackageReference Include="NUnit" Version="3.7.1" />
+    <PackageReference Include="NUnit" Version="3.11.0" />
     <PackageReference Include="ApprovalTests" Version="3.0.13" NoWarn="NU1701" />
     <PackageReference Include="ApprovalUtilities" Version="3.0.13" NoWarn="NU1701" />
     <ProjectReference Include="..\NServiceBus.Metrics\NServiceBus.Metrics.csproj" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.8.0-alpha1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.11.2" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
     <PackageReference Include="NUnit.ApplicationDomain" Version="11.0.0" />
