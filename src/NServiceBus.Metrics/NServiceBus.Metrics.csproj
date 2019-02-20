@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Fody" Version="3.2.9" PrivateAssets="All" />
-    <PackageReference Include="ILRepack" Version="2.*" PrivateAssets="All" />
+    <PackageReference Include="ILRepack" Version="2.0.16" PrivateAssets="All" />
     <PackageReference Include="Metrics.NET" Version="0.4.8" PrivateAssets="All" />
     <PackageReference Include="NServiceBus" Version="[6.2.0, 7.0.0)" />
     <PackageReference Include="Obsolete.Fody" Version="4.4.1" PrivateAssets="All" />
