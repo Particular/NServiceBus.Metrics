@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>net452</TargetFramework>
     <SignAssembly>true</SignAssembly>
@@ -9,10 +9,12 @@
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Hooks into the NServiceBus pipeline and computes metrics like Processing Time and reports them.</Description>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="ILRepack" Version="2.*" PrivateAssets="All" />
     <PackageReference Include="Metrics.NET" Version="0.4.8" PrivateAssets="All" />
@@ -21,6 +23,7 @@
     <PackageReference Include="Obsolete.Fody" Version="4.4.1" PrivateAssets="All" />
     <PackageReference Include="ServiceControl.Monitoring.Data" Version="1.0.2" PrivateAssets="All" />
   </ItemGroup>
+
   <Target Name="MergeDependencies" AfterTargets="CopyFilesToOutputDirectory">
     <PropertyGroup>
       <TempFolder>$(TargetDir)temp</TempFolder>
@@ -34,4 +37,5 @@
     <Delete Files="@(TempFiles)" />
     <RemoveDir Directories="$(TempFolder)" />
   </Target>
+
 </Project>
