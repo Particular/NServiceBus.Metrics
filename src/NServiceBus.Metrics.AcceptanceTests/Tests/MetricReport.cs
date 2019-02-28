@@ -1,6 +1,6 @@
 ﻿namespace NServiceBus.Metrics
 {
-    using global::Newtonsoft.Json.Linq;
+    using Newtonsoft.Json.Linq;
 
     public class MetricReport : IMessage
     {
