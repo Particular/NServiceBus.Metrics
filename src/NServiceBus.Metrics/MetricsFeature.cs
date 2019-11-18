@@ -57,6 +57,11 @@ class MetricsFeature : Feature
         {
             this.options = options;
             this.probeContext = probeContext;
+
+            this.options.ObserversRegistered(() =>
+            {
+                this.options.SetUpObservers(this.probeContext);
+            });
         }
 
         protected override Task OnStart(IMessageSession session)

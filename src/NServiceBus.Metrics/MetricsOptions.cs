@@ -16,6 +16,11 @@
             Guard.AgainstNull(nameof(register), register);
 
             registerObservers += register;
+
+            if (whenObserversRegistered != null)
+            {
+                whenObserversRegistered();
+            }
         }
 
         internal void SetUpObservers(ProbeContext probeContext)
@@ -23,6 +28,12 @@
             registerObservers(probeContext);
         }
 
+        internal void ObserversRegistered(Action action)
+        {
+            whenObserversRegistered = action;
+        }
+
         Action<ProbeContext> registerObservers = c => {};
+        Action whenObserversRegistered;
     }
 }
