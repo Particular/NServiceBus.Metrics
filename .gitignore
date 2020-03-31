@@ -1,4 +1,3 @@
-.learningtransport
 nugets
 deploy
 build32
@@ -18,6 +17,7 @@ Samples/DataBus/storage
 packages
 PrecompiledWeb
 tempstorage
+.learningtransport
 core-only
 Release
 Artifacts
