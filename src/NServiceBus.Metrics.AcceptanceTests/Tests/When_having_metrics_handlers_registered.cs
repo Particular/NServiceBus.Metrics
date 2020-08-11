@@ -65,7 +65,7 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
     public async Task Should_call_fail_probes_on_success()
     {
         var context = await Scenario.Define<Context>()
-            .WithEndpoint<ThrowingReporter>(b => b.When(s => s.SendLocal(new MyMessage())))
+            .WithEndpoint<ThrowingReporter>(b => b.When(s => s.SendLocal(new MyMessage())).DoNotFailOnErrorMessages())
             .Done(c => c.Values.Count >= errorProbes.Count)
             .Run()
             .ConfigureAwait(false);
