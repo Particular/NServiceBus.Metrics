@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Metrics.ProbeBuilders
 {
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Features;
 
     [ProbeProperties(Retries, "A message has been scheduled for retry (FLR or SLR)")]
@@ -10,24 +11,24 @@
 
         public RetriesProbeBuilder(FeatureConfigurationContext context)
         {
-            notifications = context.Settings.Get<Notifications>();
+            recoverability = context.Settings.Get<RecoverabilitySettings>();
         }
 
         protected override void WireUp(SignalProbe probe)
         {
-            var errors = notifications.Errors;
-            errors.MessageHasFailedAnImmediateRetryAttempt += (sender, message) => Signal(message.Headers, probe);
-            errors.MessageHasBeenSentToDelayedRetries += (sender, message) => Signal(message.Headers, probe);
+            recoverability.Immediate(s => s.OnMessageBeingRetried(retry => Signal(retry.Headers, probe)));
+            recoverability.Delayed(s => s.OnMessageBeingRetried(retry => Signal(retry.Headers, probe)));
         }
 
-        static void Signal(Dictionary<string, string> messageHeaders, SignalProbe probe)
+        static Task Signal(Dictionary<string, string> messageHeaders, SignalProbe probe)
         {
             messageHeaders.TryGetMessageType(out var messageType);
 
             var @event = new SignalEvent(messageType);
             probe.Signal(ref @event);
+            return Task.CompletedTask;
         }
 
-        Notifications notifications;
+        RecoverabilitySettings recoverability;
     }
 }
