@@ -2,7 +2,6 @@
 {
     using Configuration.AdvancedExtensibility;
     using Features;
-    using Settings;
 
     /// <summary>
     /// Extends Endpoint Configuration to provide Metric options
@@ -12,25 +11,21 @@
         /// <summary>
         /// Enables the Metrics feature.
         /// </summary>
-        /// <param name="settings">The settings to enable the metrics feature on.</param>
-        /// <returns>An object containing configuration options for the Metrics feature.</returns>
-        public static MetricsOptions EnableMetrics(this SettingsHolder settings)
-        {
-            var options = settings.GetOrCreate<MetricsOptions>();
-            settings.Set(typeof(MetricsFeature).FullName, FeatureState.Enabled);
-            return options;
-        }
-
-        /// <summary>
-        /// Enables the Metrics feature.
-        /// </summary>
         /// <param name="endpointConfiguration">The endpoint configuration to enable the metrics feature on.</param>
         /// <returns>An object containing configuration options for the Metrics feature.</returns>
         public static MetricsOptions EnableMetrics(this EndpointConfiguration endpointConfiguration)
         {
             Guard.AgainstNull(nameof(endpointConfiguration), endpointConfiguration);
 
-            return EnableMetrics(endpointConfiguration.GetSettings());
+            var settings = endpointConfiguration.GetSettings();
+            var options = settings.GetOrCreate<MetricsOptions>();
+            settings.Set(typeof(MetricsFeature).FullName, FeatureState.Enabled);
+
+            // any ideas how to get rid of the closure?
+            endpointConfiguration.Recoverability().Immediate(c => c.OnMessageBeingRetried(m => options.Immediate(m)));
+            endpointConfiguration.Recoverability().Delayed(c => c.OnMessageBeingRetried(m => options.Delayed(m)));
+
+            return options;
         }
     }
 }
