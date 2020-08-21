@@ -1,8 +1,12 @@
 ﻿namespace NServiceBus.Metrics.ProbeBuilders
 {
+    using System;
     using System.Collections.Generic;
+    using System.Globalization;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Features;
+    using Settings;
 
     [ProbeProperties(Retries, "A message has been scheduled for retry (FLR or SLR)")]
     class RetriesProbeBuilder : SignalProbeBuilder
@@ -11,13 +15,29 @@
 
         public RetriesProbeBuilder(FeatureConfigurationContext context)
         {
-            recoverability = context.Settings.Get<RecoverabilitySettings>();
+            immediateRetriesSettings = (ImmediateRetriesSettings) Activator.CreateInstance(
+                typeof(ImmediateRetriesSettings),
+                flags,
+                null,
+                new object[]
+                {
+                    (SettingsHolder) context.Settings
+                },
+                CultureInfo.InvariantCulture);
+            delayedRetriesSettings = (DelayedRetriesSettings) Activator.CreateInstance(typeof(DelayedRetriesSettings),
+                flags,
+                null,
+                new object[]
+                {
+                    (SettingsHolder) context.Settings
+                },
+                CultureInfo.InvariantCulture);
         }
 
         protected override void WireUp(SignalProbe probe)
         {
-            recoverability.Immediate(s => s.OnMessageBeingRetried(retry => Signal(retry.Headers, probe)));
-            recoverability.Delayed(s => s.OnMessageBeingRetried(retry => Signal(retry.Headers, probe)));
+            immediateRetriesSettings.OnMessageBeingRetried(retry => Signal(retry.Headers, probe));
+            delayedRetriesSettings.OnMessageBeingRetried(retry => Signal(retry.Headers, probe));
         }
 
         static Task Signal(Dictionary<string, string> messageHeaders, SignalProbe probe)
@@ -29,6 +49,9 @@
             return Task.CompletedTask;
         }
 
-        RecoverabilitySettings recoverability;
+        ImmediateRetriesSettings immediateRetriesSettings;
+        DelayedRetriesSettings delayedRetriesSettings;
+
+        const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
     }
 }
