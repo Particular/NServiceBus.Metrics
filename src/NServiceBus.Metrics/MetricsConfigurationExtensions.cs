@@ -21,7 +21,6 @@
             var options = settings.GetOrCreate<MetricsOptions>();
             settings.Set(typeof(MetricsFeature).FullName, FeatureState.Enabled);
 
-            // any ideas how to get rid of the closure?
             endpointConfiguration.Recoverability().Immediate(c => c.OnMessageBeingRetried(m => options.Immediate(m)));
             endpointConfiguration.Recoverability().Delayed(c => c.OnMessageBeingRetried(m => options.Delayed(m)));
 
