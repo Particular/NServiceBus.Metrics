@@ -1,12 +1,17 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using System.Threading.Tasks;
+    using Faults;
 
     /// <summary>
     /// Provides configuration options for Metrics feature
     /// </summary>
     public class MetricsOptions
     {
+        internal Func<ImmediateRetryMessage, Task> Immediate { get; set; } = m => Task.CompletedTask;
+        internal Func<DelayedRetryMessage, Task> Delayed { get; set; } = m => Task.CompletedTask;
+
         /// <summary>
         /// Enables registering observers to available probes.
         /// </summary>
@@ -23,6 +28,6 @@
             registerObservers(probeContext);
         }
 
-        Action<ProbeContext> registerObservers = c => {};
+        Action<ProbeContext> registerObservers = c => { };
     }
 }
