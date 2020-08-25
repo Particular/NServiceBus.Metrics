@@ -5,6 +5,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
     using System.Threading.Tasks;
     using AcceptanceTesting;
     using Pipeline;
+    using Microsoft.Extensions.DependencyInjection;
     using Transport;
 
     static class SubscriptionBehaviorExtensions
@@ -26,7 +27,7 @@ namespace NServiceBus.Metrics.AcceptanceTests
         {
             b.Pipeline.Register(builder =>
             {
-                var context = builder.Build<TContext>();
+                var context = builder.GetRequiredService<TContext>();
                 return new SubscriptionBehavior<TContext>(action, context);
             }, "Provides notifications when endpoints subscribe");
         }

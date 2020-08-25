@@ -10,15 +10,15 @@ class MetricsFeature : Feature
     {
         context.ThrowIfSendonly();
 
-        var probeContext = BuildProbes(context);
-
         var settings = context.Settings;
         var options = settings.Get<MetricsOptions>();
+
+        var probeContext = BuildProbes(context, options);
 
         context.RegisterStartupTask(new SetupRegisteredObservers(options, probeContext));
     }
 
-    static ProbeContext BuildProbes(FeatureConfigurationContext context)
+    static ProbeContext BuildProbes(FeatureConfigurationContext context, MetricsOptions options)
     {
         var durationBuilders = new DurationProbeBuilder[]
         {
@@ -39,7 +39,7 @@ class MetricsFeature : Feature
             new MessagePulledFromQueueProbeBuilder(performanceDiagnosticsBehavior),
             new MessageProcessingFailureProbeBuilder(performanceDiagnosticsBehavior),
             new MessageProcessingSuccessProbeBuilder(performanceDiagnosticsBehavior),
-            new RetriesProbeBuilder(context)
+            new RetriesProbeBuilder(options)
         };
 
         return new ProbeContext(
