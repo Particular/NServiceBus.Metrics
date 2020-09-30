@@ -27,7 +27,6 @@
         /// <summary>
         /// The message type, the duration was recorded for, if any.
         /// </summary>
-        // ReSharper disable once NotAccessedField.Global
         public readonly string MessageType;
     }
 }
