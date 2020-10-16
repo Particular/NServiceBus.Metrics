@@ -34,7 +34,7 @@
 
             configuration.DisableFeature<TimeoutManager>();
 
-            configuration.UsePersistence<InMemoryPersistence>();
+            configuration.UsePersistence<AcceptanceTestingPersistence>();
             var storageDir = Path.Combine(NServiceBusAcceptanceTest.StorageRootDir, NUnit.Framework.TestContext.CurrentContext.Test.ID);
             configuration.UseTransport<LearningTransport>()
                 .StorageDirectory(storageDir);
