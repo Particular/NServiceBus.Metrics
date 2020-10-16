@@ -5,12 +5,12 @@ using NServiceBus.Features;
 
 static class Extensions
 {
-    public static bool TryGetTimeSent(this ReceivePipelineCompleted completed, out DateTime timeSent)
+    public static bool TryGetTimeSent(this ReceivePipelineCompleted completed, out DateTimeOffset timeSent)
     {
         var headers = completed.ProcessedMessage.Headers;
         if (headers.TryGetValue(Headers.TimeSent, out var timeSentString))
         {
-            timeSent = DateTimeExtensions.ToUtcDateTime(timeSentString);
+            timeSent = DateTimeOffsetHelper.ToDateTimeOffset(timeSentString);
             return true;
         }
         timeSent = DateTime.MinValue;
