@@ -10,7 +10,7 @@ public class APIApprovals
     {
         var publicApi = typeof(MetricsFeature).Assembly.GeneratePublicApi(new ApiGeneratorOptions
         {
-            ExcludeAttributes = new[] {"System.Runtime.Versioning.TargetFrameworkAttribute"}
+            ExcludeAttributes = new[] { "System.Runtime.Versioning.TargetFrameworkAttribute", "System.Reflection.AssemblyMetadataAttribute" }
         });
         Approver.Verify(publicApi);
     }
