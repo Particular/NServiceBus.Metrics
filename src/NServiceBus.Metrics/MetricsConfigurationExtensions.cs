@@ -2,6 +2,7 @@
 {
     using Configuration.AdvancedExtensibility;
     using Features;
+    using Metrics;
 
     /// <summary>
     /// Extends Endpoint Configuration to provide Metric options

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using NServiceBus.Metrics;
+using NUnit.Framework;
 using Particular.Approvals;
 using PublicApiGenerator;
 
