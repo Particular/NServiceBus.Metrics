@@ -43,3 +43,11 @@ namespace NServiceBus
         public SignalEvent(string messageType) { }
     }
 }
+namespace NServiceBus.Metrics
+{
+    public class MetricsFeature : NServiceBus.Features.Feature
+    {
+        public MetricsFeature() { }
+        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
+    }
+}
