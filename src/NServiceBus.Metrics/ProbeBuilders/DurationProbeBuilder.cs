@@ -20,7 +20,7 @@ abstract class DurationProbeBuilder
 
         if (attribute == null)
         {
-            var exceptionMessage = $"The type '{GetType()}' is not annotated with required '{typeof(ProbePropertiesAttribute).Name}'. Add this attribute to provide necessary metadata for the probe.";
+            var exceptionMessage = $"The type '{GetType()}' is not annotated with required '{nameof(ProbePropertiesAttribute)}'. Add this attribute to provide necessary metadata for the probe.";
 
             throw new Exception(exceptionMessage);
         }
