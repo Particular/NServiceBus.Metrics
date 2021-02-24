@@ -14,7 +14,7 @@ class CriticalTimeProbeBuilder : DurationProbeBuilder
 
     protected override void WireUp(DurationProbe probe)
     {
-        context.Pipeline.OnReceivePipelineCompleted(e =>
+        context.Pipeline.OnReceivePipelineCompleted((e, _) =>
         {
             if (e.TryGetTimeSent(out var timeSent))
             {

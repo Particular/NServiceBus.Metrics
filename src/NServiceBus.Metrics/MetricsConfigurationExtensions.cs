@@ -22,8 +22,8 @@
             var options = settings.GetOrCreate<MetricsOptions>();
             settings.Set(typeof(MetricsFeature).FullName, FeatureState.Enabled);
 
-            endpointConfiguration.Recoverability().Immediate(c => c.OnMessageBeingRetried(m => options.Immediate(m)));
-            endpointConfiguration.Recoverability().Delayed(c => c.OnMessageBeingRetried(m => options.Delayed(m)));
+            endpointConfiguration.Recoverability().Immediate(c => c.OnMessageBeingRetried((m, _) => options.Immediate(m)));
+            endpointConfiguration.Recoverability().Delayed(c => c.OnMessageBeingRetried((m, _) => options.Delayed(m)));
 
             return options;
         }
