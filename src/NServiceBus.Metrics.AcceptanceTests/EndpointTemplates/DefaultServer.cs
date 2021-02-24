@@ -32,21 +32,16 @@
             configuration.TypesToIncludeInScan(typesToInclude);
             configuration.EnableInstallers();
 
-            configuration.DisableFeature<TimeoutManager>();
-
             configuration.UsePersistence<AcceptanceTestingPersistence>();
             var storageDir = Path.Combine(NServiceBusAcceptanceTest.StorageRootDir, NUnit.Framework.TestContext.CurrentContext.Test.ID);
-            configuration.UseTransport<LearningTransport>()
-                .StorageDirectory(storageDir);
+            configuration.UseTransport(new LearningTransport { StorageDirectory = storageDir });
 
             var recoverability = configuration.Recoverability();
             recoverability.Delayed(delayed => delayed.NumberOfRetries(0));
             recoverability.Immediate(immediate => immediate.NumberOfRetries(0));
-            configuration.SendFailedMessagesTo("error");
 
             configuration.RegisterComponentsAndInheritanceHierarchy(runDescriptor);
 
-            configuration.GetSettings().SetDefault("ScaleOut.UseSingleBrokerQueue", true);
             configurationBuilderCustomization(configuration);
 
             return Task.FromResult(configuration);

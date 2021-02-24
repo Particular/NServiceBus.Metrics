@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Metrics
 {
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus;
     using NServiceBus.Features;
@@ -65,13 +66,13 @@
                 this.probeContext = probeContext;
             }
 
-            protected override Task OnStart(IMessageSession session)
+            protected override Task OnStart(IMessageSession session, CancellationToken cancellationToken)
             {
                 options.SetUpObservers(probeContext);
                 return Task.FromResult(0);
             }
 
-            protected override Task OnStop(IMessageSession session) => Task.FromResult(0);
+            protected override Task OnStop(IMessageSession session, CancellationToken cancellationToken) => Task.FromResult(0);
         }
     }
 }
