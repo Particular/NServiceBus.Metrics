@@ -5,9 +5,9 @@ using NServiceBus.Features;
 
 static class Extensions
 {
-    public static bool TryGetTimeSent(this ReceivePipelineCompleted completed, out DateTimeOffset timeSent)
+    public static bool TryGetTimeSent(this ReceiveCompleted completed, out DateTimeOffset timeSent)
     {
-        var headers = completed.ProcessedMessage.Headers;
+        var headers = completed.Headers;
         if (headers.TryGetValue(Headers.TimeSent, out var timeSentString))
         {
             timeSent = DateTimeOffsetHelper.ToDateTimeOffset(timeSentString);
@@ -17,9 +17,9 @@ static class Extensions
         return false;
     }
 
-    public static bool TryGetMessageType(this ReceivePipelineCompleted completed, out string processedMessageType)
+    public static bool TryGetMessageType(this ReceiveCompleted completed, out string processedMessageType)
     {
-        return completed.ProcessedMessage.Headers.TryGetMessageType(out processedMessageType);
+        return completed.Headers.TryGetMessageType(out processedMessageType);
     }
 
     internal static bool TryGetMessageType(this IReadOnlyDictionary<string, string> headers, out string processedMessageType)

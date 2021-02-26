@@ -12,8 +12,13 @@ class ProcessingTimeProbeBuilder : DurationProbeBuilder
 
     protected override void WireUp(DurationProbe probe)
     {
-        context.Pipeline.OnReceivePipelineCompleted((e, _) =>
+        context.OnReceiveCompleted((e, _) =>
         {
+            if (!e.WasAcknowledged || e.OnMessageFailed)
+            {
+                return TaskExtensions.Completed;
+            }
+
             e.TryGetMessageType(out var messageTypeProcessed);
 
             var processingTime = e.CompletedAt - e.StartedAt;
