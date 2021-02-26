@@ -5,7 +5,7 @@ using NServiceBus.Pipeline;
 
 class ReceivePerformanceDiagnosticsBehavior : IBehavior<IIncomingPhysicalMessageContext, IIncomingPhysicalMessageContext>
 {
-    public async Task Invoke(IIncomingPhysicalMessageContext context, Func<IIncomingPhysicalMessageContext, Task> next)
+    public Task Invoke(IIncomingPhysicalMessageContext context, Func<IIncomingPhysicalMessageContext, Task> next)
     {
         context.MessageHeaders.TryGetMessageType(out var messageType);
 
@@ -13,20 +13,8 @@ class ReceivePerformanceDiagnosticsBehavior : IBehavior<IIncomingPhysicalMessage
 
         MessagePulledFromQueue?.Signal(ref @event);
 
-        try
-        {
-            await next(context).ConfigureAwait(false);
-        }
-        catch (Exception)
-        {
-            ProcessingFailure?.Signal(ref @event);
-            throw;
-        }
-
-        ProcessingSuccess?.Signal(ref @event);
+        return next(context);
     }
 
     public SignalProbe MessagePulledFromQueue;
-    public SignalProbe ProcessingFailure;
-    public SignalProbe ProcessingSuccess;
 }

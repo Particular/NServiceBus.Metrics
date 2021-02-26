@@ -44,8 +44,8 @@
             var signalBuilders = new SignalProbeBuilder[]
             {
             new MessagePulledFromQueueProbeBuilder(performanceDiagnosticsBehavior),
-            new MessageProcessingFailureProbeBuilder(performanceDiagnosticsBehavior),
-            new MessageProcessingSuccessProbeBuilder(performanceDiagnosticsBehavior),
+            new MessageProcessingFailureProbeBuilder(context),
+            new MessageProcessingSuccessProbeBuilder(context),
             new RetriesProbeBuilder(options)
             };
 
