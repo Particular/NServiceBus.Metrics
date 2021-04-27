@@ -6,8 +6,6 @@
     using System.Threading.Tasks;
     using AcceptanceTesting.Customization;
     using AcceptanceTesting.Support;
-    using Configuration.AdvancedExtensibility;
-    using Features;
 
     public class DefaultServer : IEndpointSetupTemplate
     {
