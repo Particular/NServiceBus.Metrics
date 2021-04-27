@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Faults;
 
@@ -9,8 +10,8 @@
     /// </summary>
     public class MetricsOptions
     {
-        internal Func<ImmediateRetryMessage, Task> Immediate { get; set; } = m => Task.CompletedTask;
-        internal Func<DelayedRetryMessage, Task> Delayed { get; set; } = m => Task.CompletedTask;
+        internal Func<ImmediateRetryMessage, CancellationToken, Task> Immediate { get; set; } = (m, _) => Task.CompletedTask;
+        internal Func<DelayedRetryMessage, CancellationToken, Task> Delayed { get; set; } = (m, _) => Task.CompletedTask;
 
         /// <summary>
         /// Enables registering observers to available probes.
