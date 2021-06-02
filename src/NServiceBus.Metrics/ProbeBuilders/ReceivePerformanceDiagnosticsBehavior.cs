@@ -17,7 +17,7 @@ class ReceivePerformanceDiagnosticsBehavior : IBehavior<IIncomingPhysicalMessage
         {
             await next(context).ConfigureAwait(false);
         }
-        catch (Exception)
+        catch (Exception ex) when (!ex.IsCausedBy(context.CancellationToken))
         {
             ProcessingFailure?.Signal(ref @event);
             throw;
