@@ -7,7 +7,7 @@
     /// <summary>
     /// Extends Endpoint Configuration to provide Metric options
     /// </summary>
-    public static class MetricsConfigurationExtensions
+    public static partial class MetricsConfigurationExtensions
     {
         /// <summary>
         /// Enables the Metrics feature.
