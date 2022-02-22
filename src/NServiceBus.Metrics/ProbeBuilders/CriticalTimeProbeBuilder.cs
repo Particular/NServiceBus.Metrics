@@ -1,3 +1,4 @@
+using System;
 using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Metrics;
@@ -16,9 +17,9 @@ class CriticalTimeProbeBuilder : DurationProbeBuilder
     {
         context.Pipeline.OnReceivePipelineCompleted((e, _) =>
         {
-            if (e.TryGetTimeSent(out var timeSent))
+            if (e.TryGetDeliverAt(out DateTimeOffset startTime) || e.TryGetTimeSent(out startTime))
             {
-                var endToEndTime = e.CompletedAt - timeSent;
+                var endToEndTime = e.CompletedAt - startTime;
                 e.TryGetMessageType(out var messageType);
 
                 var @event = new DurationEvent(endToEndTime, messageType);

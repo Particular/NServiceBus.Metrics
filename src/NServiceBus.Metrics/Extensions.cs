@@ -17,6 +17,18 @@ static class Extensions
         return false;
     }
 
+    public static bool TryGetDeliverAt(this ReceivePipelineCompleted completed, out DateTimeOffset deliverAt)
+    {
+        var headers = completed.ProcessedMessage.Headers;
+        if (headers.TryGetValue(Headers.DeliverAt, out var deliverAtString))
+        {
+            deliverAt = DateTimeOffsetHelper.ToDateTimeOffset(deliverAtString);
+            return true;
+        }
+        deliverAt = DateTimeOffset.MinValue;
+        return false;
+    }
+
     public static bool TryGetMessageType(this ReceivePipelineCompleted completed, out string processedMessageType)
     {
         return completed.ProcessedMessage.Headers.TryGetMessageType(out processedMessageType);
