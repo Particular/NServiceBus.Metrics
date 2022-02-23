@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NServiceBus" Version="[7.0.0, 8.0.0)" />
+    <PackageReference Include="NServiceBus" Version="[7.7.0, 8.0.0)" />
     <PackageReference Include="Particular.Packaging" Version="1.2.1" PrivateAssets="All" />
   </ItemGroup>
 
