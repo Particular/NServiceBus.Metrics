@@ -16,8 +16,10 @@
         protected override void WireUp(SignalProbe probe)
         {
             var errors = notifications.Errors;
+#pragma warning disable CS0618 // Type or member is obsolete
             errors.MessageHasFailedAnImmediateRetryAttempt += (sender, message) => Signal(message.Headers, probe);
             errors.MessageHasBeenSentToDelayedRetries += (sender, message) => Signal(message.Headers, probe);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         static void Signal(Dictionary<string, string> messageHeaders, SignalProbe probe)
