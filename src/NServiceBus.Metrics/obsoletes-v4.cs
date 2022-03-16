@@ -6,7 +6,7 @@ namespace NServiceBus
     public static partial class MetricsConfigurationExtensions
     {
         [ObsoleteEx(
-            ReplacementTypeOrMember = "EnableOptions(this EndpointConfiguration endpointConfiguration)",
+            ReplacementTypeOrMember = "EndpointConfiguration.EnableMetrics()",
             TreatAsErrorFromVersion = "4",
             RemoveInVersion = "5"
             )]
