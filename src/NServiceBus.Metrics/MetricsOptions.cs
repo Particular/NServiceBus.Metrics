@@ -23,6 +23,6 @@
             registerObservers(probeContext);
         }
 
-        Action<ProbeContext> registerObservers = c => {};
+        Action<ProbeContext> registerObservers = c => { };
     }
 }
