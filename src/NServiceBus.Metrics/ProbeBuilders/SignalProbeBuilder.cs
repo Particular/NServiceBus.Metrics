@@ -20,7 +20,7 @@ abstract class SignalProbeBuilder
 
         if (attribute == null)
         {
-            var exceptionMessage = $"The type '{GetType()}' is not annotated with required '{typeof(ProbePropertiesAttribute).Name}'. This attribute has to be added to provide necessary metadata for the probe.";
+            var exceptionMessage = $"The type '{GetType()}' is not annotated with required '{nameof(ProbePropertiesAttribute)}'. This attribute has to be added to provide necessary metadata for the probe.";
 
             throw new Exception(exceptionMessage);
         }
