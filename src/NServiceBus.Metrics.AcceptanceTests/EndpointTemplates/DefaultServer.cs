@@ -19,7 +19,7 @@
             this.typesToInclude = typesToInclude;
         }
 
-        public Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointCustomizationConfiguration endpointConfiguration, Action<EndpointConfiguration> configurationBuilderCustomization)
+        public async Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointCustomizationConfiguration endpointConfiguration, Func<EndpointConfiguration, Task> configurationBuilderCustomization)
         {
             var types = endpointConfiguration.GetTypesScopedByTestClass();
 
@@ -40,9 +40,9 @@
 
             configuration.RegisterComponentsAndInheritanceHierarchy(runDescriptor);
 
-            configurationBuilderCustomization(configuration);
+            await configurationBuilderCustomization(configuration);
 
-            return Task.FromResult(configuration);
+            return configuration;
         }
 
         List<Type> typesToInclude;
