@@ -10,7 +10,7 @@ env:
   DOTNET_NOLOGO: true
 jobs:
   build:
-    name: ${{ matrix.name }} # can this be simplified? Why does this need windows and linux?
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
