@@ -32,7 +32,7 @@ jobs:
       - name: Build
         run: dotnet build src --configuration Release
       - name: Upload packages
-        if: matrix.name == 'Windows' # Same here, see above
+        if: matrix.name == 'Windows'
         uses: actions/upload-artifact@v3.1.0
         with:
           name: NuGet packages
