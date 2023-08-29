@@ -24,9 +24,6 @@ namespace NServiceBus
     public static class MetricsConfigurationExtensions
     {
         public static NServiceBus.MetricsOptions EnableMetrics(this NServiceBus.EndpointConfiguration endpointConfiguration) { }
-        [System.Obsolete("Use `EndpointConfiguration.EnableMetrics()` instead. The member currently throws " +
-            "a NotImplementedException. Will be removed in version 5.0.0.", true)]
-        public static NServiceBus.MetricsOptions EnableMetrics(this NServiceBus.Settings.SettingsHolder settings) { }
     }
     public class MetricsOptions
     {
