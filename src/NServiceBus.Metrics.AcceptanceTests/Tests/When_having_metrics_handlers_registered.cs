@@ -29,10 +29,10 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
             .Select(t => t.GetCustomAttribute<ProbePropertiesAttribute>().Name)
             .ToArray();
 
-        errorProbes = new HashSet<string>
-        {
+        errorProbes =
+        [
             "# of msgs pulled from the input queue /sec" // added explicitly as the message is pulled from the queue even in an error scenario
-        };
+        ];
 
         foreach (var name in probesNames)
         {
