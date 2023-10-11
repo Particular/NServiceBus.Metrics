@@ -11,14 +11,14 @@ using NUnit.Framework;
 
 public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
 {
-    HashSet<string> positiveProbes = new HashSet<string>
-    {
+    HashSet<string> positiveProbes =
+    [
         "Critical Time",
         "Processing Time",
 
         "# of msgs pulled from the input queue /sec",
         "# of msgs successfully processed / sec",
-    };
+    ];
 
     HashSet<string> errorProbes;
 
@@ -81,7 +81,7 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
 
     class Context : ScenarioContext
     {
-        public Dictionary<string, string> Values = new Dictionary<string, string>();
+        public Dictionary<string, string> Values = [];
     }
 
     class ConsumingReporter : EndpointConfigurationBuilder
