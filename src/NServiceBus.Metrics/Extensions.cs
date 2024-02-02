@@ -30,9 +30,7 @@ static class Extensions
     }
 
     public static bool TryGetMessageType(this ReceivePipelineCompleted completed, out string processedMessageType)
-    {
-        return completed.ProcessedMessage.Headers.TryGetMessageType(out processedMessageType);
-    }
+        => completed.ProcessedMessage.Headers.TryGetMessageType(out processedMessageType);
 
     internal static bool TryGetMessageType(this IReadOnlyDictionary<string, string> headers, out string processedMessageType)
     {

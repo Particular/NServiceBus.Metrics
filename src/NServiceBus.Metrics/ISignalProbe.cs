@@ -14,15 +14,12 @@
     /// <summary>
     /// Provides data for a single occurrence of a signal.
     /// </summary>
-    public struct SignalEvent
+    public readonly struct SignalEvent
     {
         /// <summary>
         /// Creates the signal event.
         /// </summary>
-        public SignalEvent(string messageType)
-        {
-            MessageType = messageType;
-        }
+        public SignalEvent(string messageType) => MessageType = messageType;
 
         /// <summary>
         /// The message type, the duration was recorded for, if any.

@@ -37,7 +37,7 @@ namespace NServiceBus
         public System.Collections.Generic.IReadOnlyCollection<NServiceBus.IDurationProbe> Durations { get; }
         public System.Collections.Generic.IReadOnlyCollection<NServiceBus.ISignalProbe> Signals { get; }
     }
-    public struct SignalEvent
+    public readonly struct SignalEvent
     {
         public readonly string MessageType;
         public SignalEvent(string messageType) { }
