@@ -20,7 +20,6 @@
 
             var settings = endpointConfiguration.GetSettings();
             var options = settings.GetOrCreate<MetricsOptions>();
-            // Is there a subtle difference to settings.Set(typeof(MetricsFeature).FullName, FeatureState.Enabled); ?
             settings.EnableFeatureByDefault<MetricsFeature>();
             return options;
         }
