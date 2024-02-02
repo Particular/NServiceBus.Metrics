@@ -5,13 +5,8 @@
     using System.Threading.Tasks;
 
     [ProbeProperties(Retries, "A message has been scheduled for retry (FLR or SLR)")]
-    class RetriesProbeBuilder : SignalProbeBuilder
+    class RetriesProbeBuilder(MetricsOptions options) : SignalProbeBuilder
     {
-        public RetriesProbeBuilder(MetricsOptions options)
-        {
-            this.options = options;
-        }
-
         protected override void WireUp(SignalProbe probe)
         {
             options.Immediate = (retry, token) => Signal(retry.Headers, probe, token);
@@ -27,7 +22,6 @@
             return Task.CompletedTask;
         }
 
-        MetricsOptions options;
         public const string Retries = "Retries";
     }
 }
