@@ -19,9 +19,8 @@
             Guard.AgainstNull(nameof(endpointConfiguration), endpointConfiguration);
 
             var settings = endpointConfiguration.GetSettings();
-            var options = settings.GetOrCreate<MetricsOptions>();
             settings.EnableFeatureByDefault<MetricsFeature>();
-            return options;
+            return settings.GetOrCreate<MetricsOptions>();
         }
     }
 }
