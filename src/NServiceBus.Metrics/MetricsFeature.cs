@@ -1,6 +1,8 @@
 ﻿namespace NServiceBus.Metrics
 {
+    using System;
     using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus;
@@ -12,11 +14,26 @@
     /// </summary>
     public class MetricsFeature : Feature
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        public MetricsFeature()
+        {
+            Prerequisite(c => !c.Settings.Get<bool>("Endpoint.SendOnly"), "Processing metrics are not supported on send-only endpoints");
+            Defaults(settings =>
+            {
+                var bindingFlags = BindingFlags.NonPublic | BindingFlags.Instance;
+                // Unfortunately the constructor is internal, so we have to use reflection to create an instance of RecoverabilitySettings
+                var recoverability = (RecoverabilitySettings)Activator.CreateInstance(typeof(RecoverabilitySettings), bindingFlags, null, [settings], null);
+                var options = settings.GetOrCreate<MetricsOptions>();
+                recoverability.Immediate(c => c.OnMessageBeingRetried((m, ct) => options.Immediate(m, ct)));
+                recoverability.Delayed(c => c.OnMessageBeingRetried((m, ct) => options.Delayed(m, ct)));
+            });
+        }
+
         /// <inheritdoc />
         protected override void Setup(FeatureConfigurationContext context)
         {
-            context.ThrowIfSendonly();
-
             var settings = context.Settings;
             var options = settings.Get<MetricsOptions>();
 
@@ -29,8 +46,7 @@
         {
             var durationBuilders = new DurationProbeBuilder[]
             {
-            new CriticalTimeProbeBuilder(context),
-            new ProcessingTimeProbeBuilder(context)
+                new CriticalTimeProbeBuilder(context), new ProcessingTimeProbeBuilder(context)
             };
 
             var performanceDiagnosticsBehavior = new ReceivePerformanceDiagnosticsBehavior();
@@ -43,10 +59,10 @@
 
             var signalBuilders = new SignalProbeBuilder[]
             {
-            new MessagePulledFromQueueProbeBuilder(performanceDiagnosticsBehavior),
-            new MessageProcessingFailureProbeBuilder(performanceDiagnosticsBehavior),
-            new MessageProcessingSuccessProbeBuilder(performanceDiagnosticsBehavior),
-            new RetriesProbeBuilder(options)
+                new MessagePulledFromQueueProbeBuilder(performanceDiagnosticsBehavior),
+                new MessageProcessingFailureProbeBuilder(performanceDiagnosticsBehavior),
+                new MessageProcessingSuccessProbeBuilder(performanceDiagnosticsBehavior),
+                new RetriesProbeBuilder(options)
             };
 
             return new ProbeContext(
@@ -55,21 +71,12 @@
             );
         }
 
-        class SetupRegisteredObservers : FeatureStartupTask
+        class SetupRegisteredObservers(MetricsOptions options, ProbeContext probeContext) : FeatureStartupTask
         {
-            readonly MetricsOptions options;
-            readonly ProbeContext probeContext;
-
-            public SetupRegisteredObservers(MetricsOptions options, ProbeContext probeContext)
-            {
-                this.options = options;
-                this.probeContext = probeContext;
-            }
-
             protected override Task OnStart(IMessageSession session, CancellationToken cancellationToken = default)
             {
                 options.SetUpObservers(probeContext);
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
 
             protected override Task OnStop(IMessageSession session, CancellationToken cancellationToken = default) => Task.FromResult(0);

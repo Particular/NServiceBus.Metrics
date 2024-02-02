@@ -20,11 +20,8 @@
 
             var settings = endpointConfiguration.GetSettings();
             var options = settings.GetOrCreate<MetricsOptions>();
-            settings.Set(typeof(MetricsFeature).FullName, FeatureState.Enabled);
-
-            endpointConfiguration.Recoverability().Immediate(c => c.OnMessageBeingRetried((m, ct) => options.Immediate(m, ct)));
-            endpointConfiguration.Recoverability().Delayed(c => c.OnMessageBeingRetried((m, ct) => options.Delayed(m, ct)));
-
+            // Is there a subtle difference to settings.Set(typeof(MetricsFeature).FullName, FeatureState.Enabled); ?
+            settings.EnableFeatureByDefault<MetricsFeature>();
             return options;
         }
     }
