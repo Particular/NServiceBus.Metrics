@@ -19,7 +19,7 @@
         /// <param name="register">Action that registers observers to probes</param>
         public void RegisterObservers(Action<ProbeContext> register)
         {
-            Guard.AgainstNull(nameof(register), register);
+            ArgumentNullException.ThrowIfNull(register);
 
             registerObservers += register;
         }
