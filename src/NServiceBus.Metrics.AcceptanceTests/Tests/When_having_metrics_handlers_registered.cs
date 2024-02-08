@@ -26,7 +26,7 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
     {
         var probesNames = typeof(IProbe).Assembly.GetTypes()
             .Where(t => t.GetCustomAttribute<ProbePropertiesAttribute>() != null)
-            .Select(t => t.GetCustomAttribute<ProbePropertiesAttribute>().Name)
+            .Select(t => t.GetCustomAttribute<ProbePropertiesAttribute>()!.Name)
             .ToArray();
 
         errorProbes =
@@ -67,8 +67,7 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
         var context = await Scenario.Define<Context>()
             .WithEndpoint<ThrowingReporter>(b => b.When(s => s.SendLocal(new MyMessage())).DoNotFailOnErrorMessages())
             .Done(c => c.Values.Count >= errorProbes.Count)
-            .Run()
-            .ConfigureAwait(false);
+            .Run();
 
         foreach (var kvp in context.Values)
         {
