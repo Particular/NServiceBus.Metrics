@@ -14,7 +14,10 @@
     /// </summary>
     public class MetricsFeature : Feature
     {
-        internal MetricsFeature() =>
+        /// <summary>
+        /// Creates a new instance of the metrics feature.
+        /// </summary>
+        public MetricsFeature() =>
             Defaults(settings =>
             {
                 var bindingFlags = BindingFlags.NonPublic | BindingFlags.Instance;
