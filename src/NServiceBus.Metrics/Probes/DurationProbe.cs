@@ -1,12 +1,8 @@
 ﻿using System;
 using NServiceBus;
 
-class DurationProbe : Probe, IDurationProbe
+class DurationProbe(string name, string description) : Probe(name, description), IDurationProbe
 {
-    public DurationProbe(string name, string description) : base(name, description)
-    {
-    }
-
     public void Register(OnEvent<DurationEvent> observer)
     {
         lock (Lock)
@@ -15,18 +11,12 @@ class DurationProbe : Probe, IDurationProbe
         }
     }
 
-    public void Register(Action<TimeSpan> observer)
-    {
-        Register((ref DurationEvent e) => observer(e.Duration));
-    }
+    public void Register(Action<TimeSpan> observer) => Register((ref DurationEvent e) => observer(e.Duration));
 
-    internal void Record(ref DurationEvent e)
-    {
-        observers(ref e);
-    }
+    internal void Record(ref DurationEvent e) => observers(ref e);
 
     volatile OnEvent<DurationEvent> observers = Empty;
-    readonly object Lock = new object();
+    readonly object Lock = new();
 
     static void Empty(ref DurationEvent e) { }
 }

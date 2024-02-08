@@ -5,25 +5,16 @@
     /// <summary>
     /// Stores available probes
     /// </summary>
-    public class ProbeContext
+    public class ProbeContext(IReadOnlyCollection<IDurationProbe> durations, IReadOnlyCollection<ISignalProbe> signals)
     {
-        /// <summary>
-        /// Creates <see cref="ProbeContext"/>.
-        /// </summary>
-        public ProbeContext(IReadOnlyCollection<IDurationProbe> durations, IReadOnlyCollection<ISignalProbe> signals)
-        {
-            Durations = durations;
-            Signals = signals;
-        }
-
         /// <summary>
         /// Duration type probes.
         /// </summary>
-        public IReadOnlyCollection<IDurationProbe> Durations { get; }
+        public IReadOnlyCollection<IDurationProbe> Durations { get; } = durations;
 
         /// <summary>
         /// Signal type probes.
         /// </summary>
-        public IReadOnlyCollection<ISignalProbe> Signals { get; }
+        public IReadOnlyCollection<ISignalProbe> Signals { get; } = signals;
     }
 }

@@ -1,17 +1,11 @@
+using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Features;
-using NServiceBus.Metrics;
 
 [ProbeProperties(ProcessingTime, "The time it took to successfully process a message.")]
-class ProcessingTimeProbeBuilder : DurationProbeBuilder
+class ProcessingTimeProbeBuilder(FeatureConfigurationContext context) : DurationProbeBuilder
 {
-    public ProcessingTimeProbeBuilder(FeatureConfigurationContext context)
-    {
-        this.context = context;
-    }
-
-    protected override void WireUp(DurationProbe probe)
-    {
+    protected override void WireUp(DurationProbe probe) =>
         context.Pipeline.OnReceivePipelineCompleted((e, _) =>
         {
             e.TryGetMessageType(out var messageTypeProcessed);
@@ -22,11 +16,8 @@ class ProcessingTimeProbeBuilder : DurationProbeBuilder
 
             probe.Record(ref @event);
 
-            return TaskExtensions.Completed;
+            return Task.CompletedTask;
         });
-    }
-
-    FeatureConfigurationContext context;
 
     public const string ProcessingTime = "Processing Time";
 }

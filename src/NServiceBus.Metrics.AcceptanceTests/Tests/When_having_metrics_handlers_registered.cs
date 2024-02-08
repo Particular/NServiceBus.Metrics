@@ -26,7 +26,7 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
     {
         var probesNames = typeof(IProbe).Assembly.GetTypes()
             .Where(t => t.GetCustomAttribute<ProbePropertiesAttribute>() != null)
-            .Select(t => t.GetCustomAttribute<ProbePropertiesAttribute>().Name)
+            .Select(t => t.GetCustomAttribute<ProbePropertiesAttribute>()!.Name)
             .ToArray();
 
         errorProbes =
@@ -67,8 +67,7 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
         var context = await Scenario.Define<Context>()
             .WithEndpoint<ThrowingReporter>(b => b.When(s => s.SendLocal(new MyMessage())).DoNotFailOnErrorMessages())
             .Done(c => c.Values.Count >= errorProbes.Count)
-            .Run()
-            .ConfigureAwait(false);
+            .Run();
 
         foreach (var kvp in context.Values)
         {
@@ -86,8 +85,7 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
 
     class ConsumingReporter : EndpointConfigurationBuilder
     {
-        public ConsumingReporter()
-        {
+        public ConsumingReporter() =>
             EndpointSetup<DefaultServer>((c, r) =>
             {
                 var context = (Context)r.ScenarioContext;
@@ -95,21 +93,16 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
                 c.EnableMetrics().RegisterObservers(
                     ctx => { RegisterWritesToTestContext(ctx, context); });
             });
-        }
 
         public class MyHandler : IHandleMessages<MyMessage>
         {
-            public Task Handle(MyMessage message, IMessageHandlerContext context)
-            {
-                return Task.Delay(100);
-            }
+            public Task Handle(MyMessage message, IMessageHandlerContext context) => Task.Delay(100);
         }
     }
 
     class ThrowingReporter : EndpointConfigurationBuilder
     {
-        public ThrowingReporter()
-        {
+        public ThrowingReporter() =>
             EndpointSetup<DefaultServer>((c, r) =>
             {
                 c.Recoverability().Immediate(immediate => immediate.NumberOfRetries(1));
@@ -118,17 +111,12 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
                 c.EnableMetrics().RegisterObservers(
                     ctx => { RegisterWritesToTestContext(ctx, context); });
             });
-        }
 
 
         public class MyHandler : IHandleMessages<MyMessage>
         {
             public Task Handle(MyMessage message, IMessageHandlerContext context)
-            {
-                var tcs = new TaskCompletionSource<object>();
-                tcs.SetException(new Exception());
-                return tcs.Task;
-            }
+                => Task.FromException<Exception>(new Exception());
         }
     }
 

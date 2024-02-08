@@ -16,25 +16,17 @@ namespace NServiceBus
     /// <summary>
     /// Provides data for a single recorded duration.
     /// </summary>
-    public struct DurationEvent
+    public readonly struct DurationEvent(TimeSpan duration, string messageType)
     {
-        /// <summary>
-        /// Creates the duration event.
-        /// </summary>
-        public DurationEvent(TimeSpan duration, string messageType)
-        {
-            Duration = duration;
-            MessageType = messageType;
-        }
 
         /// <summary>
         /// The duration value.
         /// </summary>
-        public readonly TimeSpan Duration;
+        public readonly TimeSpan Duration = duration;
 
         /// <summary>
         /// The message type, the duration was recorded for, if any.
         /// </summary>
-        public readonly string MessageType;
+        public readonly string MessageType = messageType;
     }
 }

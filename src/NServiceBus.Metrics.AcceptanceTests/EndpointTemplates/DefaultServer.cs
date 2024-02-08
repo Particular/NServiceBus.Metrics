@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.AcceptanceTests.EndpointTemplates
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
     using AcceptanceTesting.Customization;
@@ -9,30 +8,16 @@
 
     public class DefaultServer : IEndpointSetupTemplate
     {
-        public DefaultServer()
-        {
-            typesToInclude = [];
-        }
-
-        public DefaultServer(List<Type> typesToInclude)
-        {
-            this.typesToInclude = typesToInclude;
-        }
-
         public async Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointCustomizationConfiguration endpointConfiguration, Func<EndpointConfiguration, Task> configurationBuilderCustomization)
         {
-            var types = endpointConfiguration.GetTypesScopedByTestClass();
-
-            typesToInclude.AddRange(types);
-
             var configuration = new EndpointConfiguration(endpointConfiguration.EndpointName);
 
-            configuration.TypesToIncludeInScan(typesToInclude);
             configuration.EnableInstallers();
 
             configuration.UsePersistence<AcceptanceTestingPersistence>();
             var storageDir = Path.Combine(NServiceBusAcceptanceTest.StorageRootDir, NUnit.Framework.TestContext.CurrentContext.Test.ID);
             configuration.UseTransport(new LearningTransport { StorageDirectory = storageDir });
+            configuration.UseSerialization<SystemJsonSerializer>();
 
             var recoverability = configuration.Recoverability();
             recoverability.Delayed(delayed => delayed.NumberOfRetries(0));
@@ -42,9 +27,10 @@
 
             await configurationBuilderCustomization(configuration);
 
+            // scan types at the end so that all types used by the configuration have been loaded into the AppDomain
+            configuration.ScanTypesForTest(endpointConfiguration);
+
             return configuration;
         }
-
-        List<Type> typesToInclude;
     }
 }

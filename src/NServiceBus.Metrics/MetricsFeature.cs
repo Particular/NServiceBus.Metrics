@@ -15,9 +15,9 @@
         /// <inheritdoc />
         protected override void Setup(FeatureConfigurationContext context)
         {
-            context.ThrowIfSendonly();
-
             var settings = context.Settings;
+            settings.ThrowIfSendOnly();
+
             var options = settings.Get<MetricsOptions>();
 
             var probeContext = BuildProbes(context, options);
@@ -29,8 +29,7 @@
         {
             var durationBuilders = new DurationProbeBuilder[]
             {
-            new CriticalTimeProbeBuilder(context),
-            new ProcessingTimeProbeBuilder(context)
+                new CriticalTimeProbeBuilder(context), new ProcessingTimeProbeBuilder(context)
             };
 
             var performanceDiagnosticsBehavior = new ReceivePerformanceDiagnosticsBehavior();
@@ -43,10 +42,10 @@
 
             var signalBuilders = new SignalProbeBuilder[]
             {
-            new MessagePulledFromQueueProbeBuilder(performanceDiagnosticsBehavior),
-            new MessageProcessingFailureProbeBuilder(performanceDiagnosticsBehavior),
-            new MessageProcessingSuccessProbeBuilder(performanceDiagnosticsBehavior),
-            new RetriesProbeBuilder(options)
+                new MessagePulledFromQueueProbeBuilder(performanceDiagnosticsBehavior),
+                new MessageProcessingFailureProbeBuilder(performanceDiagnosticsBehavior),
+                new MessageProcessingSuccessProbeBuilder(performanceDiagnosticsBehavior),
+                new RetriesProbeBuilder(options)
             };
 
             return new ProbeContext(
@@ -55,21 +54,12 @@
             );
         }
 
-        class SetupRegisteredObservers : FeatureStartupTask
+        class SetupRegisteredObservers(MetricsOptions options, ProbeContext probeContext) : FeatureStartupTask
         {
-            readonly MetricsOptions options;
-            readonly ProbeContext probeContext;
-
-            public SetupRegisteredObservers(MetricsOptions options, ProbeContext probeContext)
-            {
-                this.options = options;
-                this.probeContext = probeContext;
-            }
-
             protected override Task OnStart(IMessageSession session, CancellationToken cancellationToken = default)
             {
                 options.SetUpObservers(probeContext);
-                return Task.FromResult(0);
+                return Task.CompletedTask;
             }
 
             protected override Task OnStop(IMessageSession session, CancellationToken cancellationToken = default) => Task.FromResult(0);

@@ -10,8 +10,8 @@
     /// </summary>
     public class MetricsOptions
     {
-        internal Func<ImmediateRetryMessage, CancellationToken, Task> Immediate { get; set; } = (m, _) => Task.CompletedTask;
-        internal Func<DelayedRetryMessage, CancellationToken, Task> Delayed { get; set; } = (m, _) => Task.CompletedTask;
+        internal Func<ImmediateRetryMessage, CancellationToken, Task> Immediate { get; set; } = (_, _) => Task.CompletedTask;
+        internal Func<DelayedRetryMessage, CancellationToken, Task> Delayed { get; set; } = (_, _) => Task.CompletedTask;
 
         /// <summary>
         /// Enables registering observers to available probes.
@@ -19,16 +19,13 @@
         /// <param name="register">Action that registers observers to probes</param>
         public void RegisterObservers(Action<ProbeContext> register)
         {
-            Guard.AgainstNull(nameof(register), register);
+            ArgumentNullException.ThrowIfNull(register);
 
             registerObservers += register;
         }
 
-        internal void SetUpObservers(ProbeContext probeContext)
-        {
-            registerObservers(probeContext);
-        }
+        internal void SetUpObservers(ProbeContext probeContext) => registerObservers(probeContext);
 
-        Action<ProbeContext> registerObservers = c => { };
+        Action<ProbeContext> registerObservers = _ => { };
     }
 }
