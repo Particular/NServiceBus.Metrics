@@ -19,8 +19,14 @@
             Guard.AgainstNull(nameof(endpointConfiguration), endpointConfiguration);
 
             var settings = endpointConfiguration.GetSettings();
+            var options = settings.GetOrCreate<MetricsOptions>();
+
             settings.EnableFeatureByDefault<MetricsFeature>();
-            return settings.GetOrCreate<MetricsOptions>();
+
+            endpointConfiguration.Recoverability().Immediate(c => c.OnMessageBeingRetried((m, ct) => options.Immediate(m, ct)));
+            endpointConfiguration.Recoverability().Delayed(c => c.OnMessageBeingRetried((m, ct) => options.Delayed(m, ct)));
+
+            return options;
         }
     }
 }

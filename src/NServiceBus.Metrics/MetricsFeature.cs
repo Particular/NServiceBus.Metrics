@@ -1,8 +1,6 @@
 ﻿namespace NServiceBus.Metrics
 {
-    using System;
     using System.Linq;
-    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus;
@@ -14,20 +12,6 @@
     /// </summary>
     public class MetricsFeature : Feature
     {
-        /// <summary>
-        /// Creates a new instance of the metrics feature.
-        /// </summary>
-        public MetricsFeature() =>
-            Defaults(settings =>
-            {
-                var bindingFlags = BindingFlags.NonPublic | BindingFlags.Instance;
-                // Unfortunately the constructor is internal, so we have to use reflection to create an instance of RecoverabilitySettings
-                var recoverability = (RecoverabilitySettings)Activator.CreateInstance(typeof(RecoverabilitySettings), bindingFlags, null, [settings], null)!;
-                var options = settings.GetOrCreate<MetricsOptions>();
-                recoverability.Immediate(c => c.OnMessageBeingRetried((m, ct) => options.Immediate(m, ct)));
-                recoverability.Delayed(c => c.OnMessageBeingRetried((m, ct) => options.Delayed(m, ct)));
-            });
-
         /// <inheritdoc />
         protected override void Setup(FeatureConfigurationContext context)
         {
