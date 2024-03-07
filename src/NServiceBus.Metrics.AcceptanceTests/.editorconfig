@@ -11,3 +11,6 @@ dotnet_diagnostic.NSB0002.severity = suggestion
 
 # Not a public API
 dotnet_diagnostic.PS0013.severity = suggestion
+
+# IDE0028: Simplify collection initialization
+dotnet_diagnostic.IDE0028.severity = suggestion
