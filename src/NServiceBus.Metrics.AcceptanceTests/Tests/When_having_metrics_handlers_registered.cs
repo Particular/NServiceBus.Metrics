@@ -56,7 +56,7 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
         {
             Console.WriteLine($"{kvp.Key}");
 
-            Assert.True(positiveProbes.Contains(kvp.Key), $"Missing key {kvp.Key}");
+            Assert.That(positiveProbes.Contains(kvp.Key), Is.True, $"Missing key {kvp.Key}");
             Assert.AreEqual(typeof(MyMessage).AssemblyQualifiedName, kvp.Value);
         }
     }
@@ -73,7 +73,7 @@ public class When_having_metrics_handlers_registered : NServiceBusAcceptanceTest
         {
             Console.WriteLine($"{kvp.Key}");
 
-            Assert.True(errorProbes.Contains(kvp.Key), $"Missing key {kvp.Key}");
+            Assert.That(errorProbes.Contains(kvp.Key), Is.True, $"Missing key {kvp.Key}");
             Assert.AreEqual(typeof(MyMessage).AssemblyQualifiedName, kvp.Value);
         }
     }
