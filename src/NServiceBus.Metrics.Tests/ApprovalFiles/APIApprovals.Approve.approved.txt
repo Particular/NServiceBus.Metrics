@@ -27,7 +27,6 @@ namespace NServiceBus
     }
     public class MetricsOptions : NServiceBus.Configuration.AdvancedExtensibility.ExposeSettings
     {
-        public MetricsOptions(NServiceBus.Settings.SettingsHolder settings) { }
         public void RegisterObservers(System.Action<NServiceBus.ProbeContext> register) { }
     }
     public delegate void OnEvent<TEventType>(ref TEventType e);

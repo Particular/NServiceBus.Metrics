@@ -12,11 +12,8 @@
     /// </summary>
     public class MetricsOptions : ExposeSettings
     {
-        /// <summary>
-        /// Creates the MetricsOptions
-        /// </summary>
         /// <remarks>Provides access to settings so that downstream metrics components can enable features.</remarks>
-        public MetricsOptions(SettingsHolder settings)
+        internal MetricsOptions(SettingsHolder settings)
             : base(settings)
         {
         }
