@@ -20,9 +20,14 @@
             ArgumentNullException.ThrowIfNull(endpointConfiguration);
 
             var settings = endpointConfiguration.GetSettings();
-            var options = settings.GetOrCreate<MetricsOptions>();
 
-            settings.EnableFeatureByDefault<MetricsFeature>();
+            if (!settings.TryGet<MetricsOptions>(out var options))
+            {
+                options = new MetricsOptions(settings);
+                settings.Set(options);
+            }
+
+            settings.EnableFeature<MetricsFeature>();
 
             endpointConfiguration.Recoverability().Immediate(c => c.OnMessageBeingRetried((m, ct) => options.Immediate(m, ct)));
             endpointConfiguration.Recoverability().Delayed(c => c.OnMessageBeingRetried((m, ct) => options.Delayed(m, ct)));

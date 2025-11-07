@@ -3,13 +3,21 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration.AdvancedExtensibility;
     using Faults;
+    using Settings;
 
     /// <summary>
     /// Provides configuration options for Metrics feature
     /// </summary>
-    public class MetricsOptions
+    public class MetricsOptions : ExposeSettings
     {
+        /// <remarks>Provides access to settings so that downstream metrics components can enable features.</remarks>
+        internal MetricsOptions(SettingsHolder settings)
+            : base(settings)
+        {
+        }
+
         internal Func<ImmediateRetryMessage, CancellationToken, Task> Immediate { get; set; } = (_, _) => Task.CompletedTask;
         internal Func<DelayedRetryMessage, CancellationToken, Task> Delayed { get; set; } = (_, _) => Task.CompletedTask;
 
