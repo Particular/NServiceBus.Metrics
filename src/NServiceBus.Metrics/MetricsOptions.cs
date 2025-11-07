@@ -13,7 +13,7 @@
     public class MetricsOptions : ExposeSettings
     {
         /// <remarks>Provides access to settings so that downstream metrics components can enable features.</remarks>
-        internal MetricsOptions(SettingsHolder settings)
+        public MetricsOptions(SettingsHolder settings)
             : base(settings)
         {
         }
