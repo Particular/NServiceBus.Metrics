@@ -23,8 +23,6 @@
             recoverability.Delayed(delayed => delayed.NumberOfRetries(0));
             recoverability.Immediate(immediate => immediate.NumberOfRetries(0));
 
-            configuration.RegisterComponentsAndInheritanceHierarchy(runDescriptor);
-
             await configurationBuilderCustomization(configuration);
 
             // scan types at the end so that all types used by the configuration have been loaded into the AppDomain
