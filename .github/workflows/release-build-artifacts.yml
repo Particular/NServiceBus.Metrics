@@ -31,7 +31,7 @@ jobs:
          tenant-id: ${{ secrets.AZURE_KEY_VAULT_TENANT_ID }}
          client-secret: ${{ secrets.AZURE_KEY_VAULT_CLIENT_SECRET }}
          certificate-name: ${{ secrets.AZURE_KEY_VAULT_CERTIFICATE_NAME }}
-      - name: PPublish NuGet packages to the workflow
+      - name: Publish NuGet packages to the workflow
         uses: actions/upload-artifact@v7.0.2
         with:
           name: nugets
