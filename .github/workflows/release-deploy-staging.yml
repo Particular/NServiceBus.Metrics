@@ -5,6 +5,8 @@ on:
       version:
         required: true
         type: string
+env:
+  DOTNET_NOLOGO: true
 jobs:
   check-authorized-user:
     uses: Particular/deployment-workflows/.github/workflows/verify-authorized-user.yml@1.0.0
